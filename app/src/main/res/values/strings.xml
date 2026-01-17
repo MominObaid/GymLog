@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GymLog</string>
+    <string name="hint_exercise_name">Exercise Name (e.g, Squat)</string>
+    <string name="hint_sets">Sets</string>
+    <string name="hint_reps">Reps</string>
+    <string name="button_log_exercise">Log Exercise</string>
+    <string name="hint_weight_kg">Weight (kg)</string>
+</resources>
