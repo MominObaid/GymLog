@@ -2,11 +2,9 @@ package com.example.gymlog
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.ActivityMainBinding
@@ -35,14 +33,15 @@ class MainActivity : AppCompatActivity() {
             addWorkout()
         }
     }
-    private fun addWorkout(){
+
+    private fun addWorkout() {
         val name = binding.editTextExerciseName.text.toString()
         val setsText = binding.editTextSets.text.toString()
         val repsText = binding.editTextReps.text.toString()
         val weightText = binding.editTextWeight.text.toString()
 
-        if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()){
-            Toast.makeText(this,"Please fill all fields ", Toast.LENGTH_SHORT).show()
+        if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
+            Toast.makeText(this, "Please fill all fields ", Toast.LENGTH_SHORT).show()
             return
         }
         val currentDate = SimpleDateFormat("yyyy-MM-DD", Locale.getDefault()).format(Date())
@@ -55,10 +54,11 @@ class MainActivity : AppCompatActivity() {
             date = currentDate
         )
         workoutViewModel.insert(workout)
-        Toast.makeText(this,"Exercise Logged!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Exercise Logged!", Toast.LENGTH_SHORT).show()
         clearInputFields()
     }
-    private fun clearInputFields(){
+
+    private fun clearInputFields() {
         binding.editTextExerciseName.text.clear()
         binding.editTextSets.text.clear()
         binding.editTextReps.text.clear()
