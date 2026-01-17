@@ -1,7 +1,7 @@
 package com.example.gymlog
 
 import androidx.room.PrimaryKey
-import androidx.room.vo.Entity
+import androidx.room.Entity
 @Entity(tableName = "workout_table")
 data class Workout(
     @PrimaryKey(autoGenerate = true)

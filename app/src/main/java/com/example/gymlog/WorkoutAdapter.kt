@@ -33,6 +33,9 @@ class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() 
         this.workoutList = workouts
         notifyDataSetChanged()
     }
+    fun getWorkoutAt(position: Int): Workout{
+        return workoutList[position]
+    }
 }
 
 

@@ -5,4 +5,5 @@
     <string name="hint_reps">Reps</string>
     <string name="button_log_exercise">Log Exercise</string>
     <string name="hint_weight_kg">Weight (kg)</string>
+    <string name="delete_all_workouts">Delete All Workouts</string>
 </resources>
