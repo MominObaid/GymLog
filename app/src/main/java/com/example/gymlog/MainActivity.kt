@@ -76,12 +76,6 @@ class MainActivity : AppCompatActivity() {
             }else -> super.onOptionsItemSelected(item)
         }
     }
-
-//        binding.editTextExerciseName.setOnLongClickListener {
-//            workoutViewModel.delete(workout = Workout)
-//            true
-//        }
-
     private fun addWorkout() {
         val name = binding.editTextExerciseName.text.toString()
         val setsText = binding.editTextSets.text.toString()
