@@ -54,7 +54,10 @@ dependencies {
 
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.10.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.9.6")
+    implementation(libs.androidx.navigation.ui.ktx)
+
 }
 
