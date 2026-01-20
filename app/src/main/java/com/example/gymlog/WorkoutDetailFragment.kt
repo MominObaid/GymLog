@@ -1,59 +1,110 @@
 package com.example.gymlog
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+//import androidx.lifecycle.observe
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.example.gymlog.databinding.FragmentWorkoutDetailBinding
+import kotlin.getValue
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [WorkoutDetailFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class WorkoutDetailFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    // 1. Set up View Binding for safe access to views
+    private var _binding: FragmentWorkoutDetailBinding? = null
+    private val binding get() = _binding!!
+
+    // 2. Get the same ViewModel instance used by the Activity and other Fragments
+    private val workoutViewModel: WorkoutViewModel by activityViewModels()
+
+    // 3. Get the navigation arguments (the workoutId) safely
+//    private val args: WorkoutDetailFragmentArgs by navArgs()
+
+    // Variable to hold the workout being edited
+    private var currentWorkout: Workout? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_workout_detail, container, false)
+    ): View {
+        // Inflate the layout using View Binding
+        _binding = FragmentWorkoutDetailBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment WorkoutDetailFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            WorkoutDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 4. Use the workoutId from the arguments to get the specific workout
+        //    The ViewModel returns LiveData, so we observe it for changes.
+        workoutViewModel.getWorkoutById(this.id).observe(viewLifecycleOwner, Observer { workout ->
+            // When the workout data is loaded, populate the UI
+            workout?.let {
+                currentWorkout = it
+                populateUI(it)
             }
+        })
+
+        // 5. Set up the click listener for the "Save Changes" button
+        binding.buttonSaveChanges.setOnClickListener {
+            saveChanges()
+        }
+    }
+
+    /**
+     * Fills the EditText fields with the data from the loaded workout.
+     */
+    private fun populateUI(workout: Workout) {
+        binding.editTextExerciseName.setText(workout.name)
+        binding.editTextSets.setText(workout.sets.toString())
+        binding.editTextReps.setText(workout.reps.toString())
+        binding.editTextWeight.setText(workout.weight.toString())
+    }
+
+    /**
+     * Reads data from UI, validates it, updates the database, and navigates back.
+     */
+    private fun saveChanges() {
+        // Read the new values from the EditText fields
+        val name = binding.editTextExerciseName.text.toString()
+        val setsText = binding.editTextSets.text.toString()
+        val repsText = binding.editTextReps.text.toString()
+        val weightText = binding.editTextWeight.text.toString()
+
+        // Basic validation
+        if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
+            Toast.makeText(requireContext(), "Fields cannot be empty", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Update the 'currentWorkout' object with the new data
+        currentWorkout?.let {
+            it.name = name
+            it.sets = setsText.toInt()
+            it.reps = repsText.toInt()
+            it.weight = weightText.toDouble()
+
+            // Tell the ViewModel to update the workout in the database
+            workoutViewModel.update(it)
+
+            Toast.makeText(requireContext(), "Workout Updated", Toast.LENGTH_SHORT).show()
+
+            // Navigate back to the previous screen (the workout list)
+            findNavController().navigateUp()
+        }
+    }
+
+    /**
+     * Clean up the binding object when the view is destroyed to prevent memory leaks.
+     */
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

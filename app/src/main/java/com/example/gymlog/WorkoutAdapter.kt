@@ -7,7 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
-    private var workoutList = emptyList<Workout>()
+    private var workouts = emptyList<Workout>()
+    private var onItemClickListner: ((Workout) -> Unit)? = null
 
     class WorkoutViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
         val nameTextView: TextView = itemView.findViewById(R.id.textViewExerciseName)
@@ -20,21 +21,30 @@ class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() 
             .inflate(R.layout.item_workout,parent,false)
         return WorkoutViewHolder(view)
     }
-    override fun getItemCount(): Int{
-        return workoutList.size
+
+    override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
+        val current = workouts[position]
+        holder.nameTextView.text = current.name
+        holder.detailTextView.text =
+            "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
+        holder.dateTextView.text = current.date
+
+        holder.itemView.setOnClickListener {
+            onItemClickListner?.let { it(current) }
+        }
     }
-    override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int){
-        val currentWorkout = workoutList[position]
-        holder.nameTextView.text = currentWorkout.name
-        holder.detailTextView.text = "${currentWorkout.sets} sets x ${currentWorkout.reps} reps @ ${currentWorkout.weight}kg"
-        holder.dateTextView.text = currentWorkout.date
+    override fun getItemCount(): Int {
+        return workouts.size
     }
     fun setData(workouts : List<Workout>){
-        this.workoutList = workouts
+        this.workouts = workouts
         notifyDataSetChanged()
     }
     fun getWorkoutAt(position: Int): Workout{
-        return workoutList[position]
+        return workouts[position]
+    }
+    fun setOnItemClickListener(listener: (Workout) -> Unit){
+        onItemClickListner = listener
     }
 }
 
