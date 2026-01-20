@@ -15,3 +15,4 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
         workoutDao.deleteAll()
     }
 }
+//knowledge of data visualisation techniques using Power BI, as well as organise data and creative dashboards.

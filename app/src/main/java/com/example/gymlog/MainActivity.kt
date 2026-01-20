@@ -7,23 +7,18 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.size
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.ActivityMainBinding
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val workoutViewModel: WorkoutViewModel by viewModels()
+    private val workoutViewModel: WorkoutViewModel by viewModels{
+        val database = WorkoutDatabase.getDatabase(this.application)
+        val repository = WorkoutRepository(database.workoutDao())
+        WorkoutViewModelFactory(repository)
+    }
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,8 +45,8 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_delete_all -> {
-                workoutViewModel.deleteAll()
-                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT).show()
+                showDeleteAllConfirmationDialog()
+//                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT).show()
                 true
             }
 

@@ -1,4 +1,6 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -6,19 +8,69 @@
     android:orientation="vertical"
     tools:context=".WorkoutListFragment">
 
-    <!-- Input fields moved from activity_main.xml -->
+    <!-- VIEWS ARE NOW CORRECTLY PLACED HERE -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_add_workout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         app:cardElevation="4dp">
 
-        <!-- ... (Your EditTexts and Button for adding a workout go here) ... -->
-        <!-- For brevity, I'll skip pasting the full card content, but you should move it from activity_main.xml -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
+            <EditText
+                android:id="@+id/editTextExerciseName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_exercise_name"
+                android:inputType="textCapWords" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editTextSets"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_sets"
+                    android:inputType="number" />
+
+                <EditText
+                    android:id="@+id/editTextReps"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_reps"
+                    android:inputType="number" />
+
+                <EditText
+                    android:id="@+id/editTextWeight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:hint="@string/hint_weight_kg"
+                    android:inputType="numberDecimal" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/buttonAddExercise"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/button_log_exercise" />
+        </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- The RecyclerView is below the input card -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewWorkouts"
         android:layout_width="match_parent"
@@ -29,5 +81,3 @@
         tools:listitem="@layout/item_workout" />
 
 </LinearLayout>
-
-    
