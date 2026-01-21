@@ -12,7 +12,8 @@ import androidx.room.*
 interface WorkoutDao {  //WorkoutDao is the Data Access Object
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(workout: Workout)
-
+    @Update
+    suspend fun update(workout: Workout)
     @Delete
     suspend fun delete(workout : Workout)
 
@@ -21,5 +22,8 @@ interface WorkoutDao {  //WorkoutDao is the Data Access Object
 
     @Query("DELETE FROM workout_table")
     suspend fun deleteAll()
+
+    @Query("SELECT * FROM workout_table WHERE id = :id")
+    fun getWorkoutById(id: Int): LiveData<Workout>
 
 }

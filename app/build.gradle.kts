@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.gymlog"
-    compileSdk = 34
+    compileSdk = 36
 
     buildFeatures {
         viewBinding = true
