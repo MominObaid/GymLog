@@ -1,5 +1,6 @@
 package com.example.gymlog
 
+//import androidx.lifecycle.observe
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,10 +9,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-//import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.example.gymlog.databinding.FragmentWorkoutDetailBinding
+import androidx.navigation.fragment.navArgs
 import kotlin.getValue
 
 class WorkoutDetailFragment : Fragment() {
@@ -24,7 +24,7 @@ class WorkoutDetailFragment : Fragment() {
     private val workoutViewModel: WorkoutViewModel by activityViewModels()
 
     // 3. Get the navigation arguments (the workoutId) safely
-//    private val args: WorkoutDetailFragmentArgs by navArgs()
+     private val args : WorkoutDetailFragment by navArgs()
 
     // Variable to hold the workout being edited
     private var currentWorkout: Workout? = null
@@ -43,7 +43,7 @@ class WorkoutDetailFragment : Fragment() {
 
         // 4. Use the workoutId from the arguments to get the specific workout
         //    The ViewModel returns LiveData, so we observe it for changes.
-        workoutViewModel.getWorkoutById(this.id).observe(viewLifecycleOwner, Observer { workout ->
+        workoutViewModel.getWorkoutById(args.id).observe(viewLifecycleOwner, Observer { workout ->
             // When the workout data is loaded, populate the UI
             workout?.let {
                 currentWorkout = it
@@ -86,9 +86,9 @@ class WorkoutDetailFragment : Fragment() {
         // Update the 'currentWorkout' object with the new data
         currentWorkout?.let {
             it.name = name
-            it.sets = setsText.toInt()
-            it.reps = repsText.toInt()
-            it.weight = weightText.toDouble()
+            it.sets = setsText.toIntOrNull() ?:0
+            it.reps = repsText.toIntOrNull() ?:0
+            it.weight = weightText.toDoubleOrNull() ?:0.0
 
             // Tell the ViewModel to update the workout in the database
             workoutViewModel.update(it)
