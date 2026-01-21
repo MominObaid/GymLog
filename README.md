@@ -33,3 +33,19 @@ the following technologies:
 •LiveData: To build data objects that notify views of any database changes, ensuring the UI is always up-to-date.
 
 •Coroutines: For managing background threads and performing database operations asynchronously without blocking the main UI thread.
+
+
+
+
+
+🚀 Features
+
+•View All Workouts: A clear, scrollable list of all past workout entries.
+
+•Add New Workouts: A simple form to quickly add a new exercise with its name, sets, reps, and weight.
+
+•Edit Existing Workouts: Click on any workout in the list to open a detail screen where you can modify its details.
+
+•Delete Workouts: Swipe to delete individual workouts or use the menu to delete all entries at once.
+
+•Persistent Storage: All workout data is saved locally on the device using a Room database, so your data is safe even when the app is closed.
