@@ -24,7 +24,7 @@ class WorkoutDetailFragment : Fragment() {
     private val workoutViewModel: WorkoutViewModel by activityViewModels()
 
     // 3. Get the navigation arguments (the workoutId) safely
-     private val args : WorkoutDetailFragment by navArgs()
+     private val args : WorkoutDetailFragmentArgs by navArgs()
 
     // Variable to hold the workout being edited
     private var currentWorkout: Workout? = null
@@ -43,7 +43,7 @@ class WorkoutDetailFragment : Fragment() {
 
         // 4. Use the workoutId from the arguments to get the specific workout
         //    The ViewModel returns LiveData, so we observe it for changes.
-        workoutViewModel.getWorkoutById(args.id).observe(viewLifecycleOwner, Observer { workout ->
+        workoutViewModel.getWorkoutById(args.workoutId).observe(viewLifecycleOwner, Observer { workout ->
             // When the workout data is loaded, populate the UI
             workout?.let {
                 currentWorkout = it
