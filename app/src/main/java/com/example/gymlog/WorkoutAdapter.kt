@@ -9,12 +9,21 @@ import androidx.recyclerview.widget.RecyclerView
 class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
     private var workoutList = emptyList<Workout>()
 
-    class WorkoutViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+    class WorkoutViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.textViewExerciseName)
-        val detailTextView : TextView = itemView.findViewById(R.id.textViewDetails)
+        val detailTextView: TextView = itemView.findViewById(R.id.textViewDetails)
         val dateTextView: TextView = itemView.findViewById(R.id.textViewDate)
-    }
 
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val workout = workoutList[position]
+                    listener.onItemClick(workout)
+                }
+            }
+        }
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkoutViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_workout,parent,false)
@@ -35,6 +44,9 @@ class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() 
     }
     fun getWorkoutAt(position: Int): Workout{
         return workoutList[position]
+    }
+    interface OnItemClickListener{
+        fun onItemClick(workout: Workout)
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.gymlog
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -35,6 +36,10 @@ class MainActivity : AppCompatActivity() {
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
             workouts?.let { adapter.setData(it) }
         })
+
+        var intent = Intent(this, WorkoutDetailActivity::class.java)
+        startActivity(intent)
+
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             0,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
@@ -62,18 +67,21 @@ class MainActivity : AppCompatActivity() {
             addWorkout()
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu,menu)
+        menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            R.id.action_delete_all ->{
+        return when (item.itemId) {
+            R.id.action_delete_all -> {
                 workoutViewModel.deleteAll()
-                Toast.makeText(this,"All workouts have been deleted",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT).show()
                 true
-            }else -> super.onOptionsItemSelected(item)
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -112,6 +120,16 @@ class MainActivity : AppCompatActivity() {
         binding.editTextReps.text.clear()
         binding.editTextWeight.text.clear()
         binding.editTextExerciseName.requestFocus()
+    }
+
+    private fun onItemClicked(workout: Workout) {
+        val intent = Intent(this, WorkoutDetailActivity::class.java)
+        intent.putExtra("WORKOUT_ID", workout.id)
+        intent.putExtra("WORKOUT_NAME", workout.name)
+        intent.putExtra("REPS", workout.reps)
+        intent.putExtra("SETS", workout.sets)
+        intent.putExtra("WEIGHT", workout.weight)
+        startActivity(intent)
     }
 }
 //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 github login Token Expires on Sun, Feb 15 2026.
