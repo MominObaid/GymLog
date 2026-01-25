@@ -6,9 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.size
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,7 +17,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private val workoutViewModel: WorkoutViewModel by viewModels()
 
@@ -29,17 +27,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        val adapter = WorkoutAdapter()
+        val adapter = WorkoutAdapter(this)
         binding.recyclerViewWorkouts.adapter = adapter
         binding.recyclerViewWorkouts.layoutManager = LinearLayoutManager(this)
 
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
             workouts?.let { adapter.setData(it) }
         })
-
-        var intent = Intent(this, WorkoutDetailActivity::class.java)
-        startActivity(intent)
-
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             0,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
@@ -66,6 +60,11 @@ class MainActivity : AppCompatActivity() {
         binding.buttonAddExercise.setOnClickListener {
             addWorkout()
         }
+    }
+    override fun onItemClick(workout: Workout){
+        val intent = Intent(this, WorkoutDetailActivity::class.java)
+        intent.putExtra("WORKOUT_ID",workout.id)
+        startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -122,14 +121,14 @@ class MainActivity : AppCompatActivity() {
         binding.editTextExerciseName.requestFocus()
     }
 
-    private fun onItemClicked(workout: Workout) {
-        val intent = Intent(this, WorkoutDetailActivity::class.java)
-        intent.putExtra("WORKOUT_ID", workout.id)
-        intent.putExtra("WORKOUT_NAME", workout.name)
-        intent.putExtra("REPS", workout.reps)
-        intent.putExtra("SETS", workout.sets)
-        intent.putExtra("WEIGHT", workout.weight)
-        startActivity(intent)
-    }
+//    override fun onItemClick(workout: Workout) {
+//        val intent = Intent(this, WorkoutDetailActivity::class.java)
+//        intent.putExtra("WORKOUT_ID", workout.id)
+//        intent.putExtra("WORKOUT_NAME", workout.name)
+//        intent.putExtra("REPS", workout.reps)
+//        intent.putExtra("SETS", workout.sets)
+//        intent.putExtra("WEIGHT", workout.weight)
+//        startActivity(intent)
+//    }
 }
 //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 github login Token Expires on Sun, Feb 15 2026.

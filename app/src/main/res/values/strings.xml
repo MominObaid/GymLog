@@ -6,4 +6,6 @@
     <string name="button_log_exercise">Log Exercise</string>
     <string name="hint_weight_kg">Weight (kg)</string>
     <string name="delete_all_workouts">Delete All Workouts</string>
+    <string name="title_workout_details">Workout Details</string>
+    <string name="button_update_workout">Update Workout</string>
 </resources>

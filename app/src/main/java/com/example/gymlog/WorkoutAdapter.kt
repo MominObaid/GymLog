@@ -6,10 +6,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
+class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
     private var workoutList = emptyList<Workout>()
-
-    class WorkoutViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    inner class WorkoutViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.textViewExerciseName)
         val detailTextView: TextView = itemView.findViewById(R.id.textViewDetails)
         val dateTextView: TextView = itemView.findViewById(R.id.textViewDate)
@@ -18,7 +17,7 @@ class WorkoutAdapter : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() 
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    val workout = workoutList[position]
+                    val workout = getWorkoutAt(position)
                     listener.onItemClick(workout)
                 }
             }

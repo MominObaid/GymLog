@@ -14,4 +14,11 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
     suspend fun deleteAll(){
         workoutDao.deleteAll()
     }
+    suspend fun update(workout: Workout){
+        workoutDao.update(workout)
+    }
+    fun getWorkoutById(id: Int): LiveData<Workout> {
+        return workoutDao.getWorkoutById(id)
+    }
+
 }

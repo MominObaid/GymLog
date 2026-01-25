@@ -29,4 +29,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         repository.deleteAll()
 
     }
+    fun update (workout: Workout)= viewModelScope.launch(Dispatchers.IO) {
+        repository.update(workout)
+    }
+    fun getWorkoutById(id: Int): LiveData<Workout> {
+        return repository.getWorkoutById(id)
+    }
+
 }
