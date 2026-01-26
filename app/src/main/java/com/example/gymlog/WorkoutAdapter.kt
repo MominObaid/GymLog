@@ -28,21 +28,30 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
             .inflate(R.layout.item_workout,parent,false)
         return WorkoutViewHolder(view)
     }
-    override fun getItemCount(): Int{
-        return workoutList.size
+
+    override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
+        val current = workouts[position]
+        holder.nameTextView.text = current.name
+        holder.detailTextView.text =
+            "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
+        holder.dateTextView.text = current.date
+
+        holder.itemView.setOnClickListener {
+            onItemClickListner?.let { it(current) }
+        }
     }
-    override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int){
-        val currentWorkout = workoutList[position]
-        holder.nameTextView.text = currentWorkout.name
-        holder.detailTextView.text = "${currentWorkout.sets} sets x ${currentWorkout.reps} reps @ ${currentWorkout.weight}kg"
-        holder.dateTextView.text = currentWorkout.date
+    override fun getItemCount(): Int {
+        return workouts.size
     }
     fun setData(workouts : List<Workout>){
-        this.workoutList = workouts
+        this.workouts = workouts
         notifyDataSetChanged()
     }
     fun getWorkoutAt(position: Int): Workout{
-        return workoutList[position]
+        return workouts[position]
+    }
+    fun setOnItemClickListener(listener: (Workout) -> Unit){
+        onItemClickListner = listener
     }
     interface OnItemClickListener{
         fun onItemClick(workout: Workout)
