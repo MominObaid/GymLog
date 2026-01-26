@@ -61,9 +61,9 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             addWorkout()
         }
     }
-    override fun onItemClick(workout: Workout){
+    override fun onItemClick(workout: Workout) {
         val intent = Intent(this, WorkoutDetailActivity::class.java)
-        intent.putExtra("WORKOUT_ID",workout.id)
+        intent.putExtra("WORKOUT_ID", workout.id)
         startActivity(intent)
     }
 
@@ -83,12 +83,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-//        binding.editTextExerciseName.setOnLongClickListener {
-//            workoutViewModel.delete(workout = Workout)
-//            true
-//        }
-
     private fun addWorkout() {
         val name = binding.editTextExerciseName.text.toString()
         val setsText = binding.editTextSets.text.toString()
@@ -112,7 +106,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         Toast.makeText(this, "Exercise Logged!", Toast.LENGTH_SHORT).show()
         clearInputFields()
     }
-
     private fun clearInputFields() {
         binding.editTextExerciseName.text.clear()
         binding.editTextSets.text.clear()
@@ -120,15 +113,5 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         binding.editTextWeight.text.clear()
         binding.editTextExerciseName.requestFocus()
     }
-
-//    override fun onItemClick(workout: Workout) {
-//        val intent = Intent(this, WorkoutDetailActivity::class.java)
-//        intent.putExtra("WORKOUT_ID", workout.id)
-//        intent.putExtra("WORKOUT_NAME", workout.name)
-//        intent.putExtra("REPS", workout.reps)
-//        intent.putExtra("SETS", workout.sets)
-//        intent.putExtra("WEIGHT", workout.weight)
-//        startActivity(intent)
-//    }
 }
 //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 github login Token Expires on Sun, Feb 15 2026.
