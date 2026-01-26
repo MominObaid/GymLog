@@ -17,8 +17,8 @@ class WorkoutRepository(private val workoutDao: WorkoutDao) {
     suspend fun update(workout: Workout){
         workoutDao.update(workout)
     }
-    fun getWorkoutById(id: Int) : LiveData<Workout>{
+    fun getWorkoutById(id: Int): LiveData<Workout> {
         return workoutDao.getWorkoutById(id)
     }
+
 }
-//knowledge of data visualisation techniques using Power BI, as well as organise data and creative dashboards.

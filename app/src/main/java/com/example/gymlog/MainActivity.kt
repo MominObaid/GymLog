@@ -1,18 +1,19 @@
 package com.example.gymlog
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.NavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private val workoutViewModel: WorkoutViewModel by viewModels{
         val database = WorkoutDatabase.getDatabase(this.application)
@@ -27,14 +28,43 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHostFragment.navController
-        setupActionBarWithNavController(navController)
-    }
+        val adapter = WorkoutAdapter(this)
+        binding.recyclerViewWorkouts.adapter = adapter
+        binding.recyclerViewWorkouts.layoutManager = LinearLayoutManager(this)
+
+        workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
+            workouts?.let { adapter.setData(it) }
+        })
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            0,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val workoutToDelete =
+                    (binding.recyclerViewWorkouts.adapter as WorkoutAdapter).getWorkoutAt(position)
+                workoutViewModel.delete(workoutToDelete)
+                Toast.makeText(this@MainActivity, "Exercise Deleted!", Toast.LENGTH_SHORT).show()
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewWorkouts)
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+    override fun onItemClick(workout: Workout){
+        val intent = Intent(this, WorkoutDetailActivity::class.java)
+        intent.putExtra("WORKOUT_ID",workout.id)
+        startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -45,10 +75,25 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_delete_all -> {
-                showDeleteAllConfirmationDialog()
-//                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT).show()
+                workoutViewModel.deleteAll()
+                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT).show()
                 true
             }
+
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+//        binding.editTextExerciseName.setOnLongClickListener {
+//            workoutViewModel.delete(workout = Workout)
+//            true
+//        }
+
+    private fun addWorkout() {
+        val name = binding.editTextExerciseName.text.toString()
+        val setsText = binding.editTextSets.text.toString()
+        val repsText = binding.editTextReps.text.toString()
+        val weightText = binding.editTextWeight.text.toString()
 
             else -> super.onOptionsItemSelected(item)
         }
@@ -64,6 +109,16 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("No",null)
             .show()
     }
+
+//    override fun onItemClick(workout: Workout) {
+//        val intent = Intent(this, WorkoutDetailActivity::class.java)
+//        intent.putExtra("WORKOUT_ID", workout.id)
+//        intent.putExtra("WORKOUT_NAME", workout.name)
+//        intent.putExtra("REPS", workout.reps)
+//        intent.putExtra("SETS", workout.sets)
+//        intent.putExtra("WEIGHT", workout.weight)
+//        startActivity(intent)
+//    }
 }
 //        val adapter = WorkoutAdapter()
 //       binding.recyclerViewWorkouts.adapter = adapter
