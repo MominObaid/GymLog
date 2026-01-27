@@ -2,8 +2,10 @@ package com.example.gymlog
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +14,13 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.ActivityMainBinding
+import com.example.gymlog.databinding.DialogAddWorkoutBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.util.Date
+import java.util.Locale
+
 
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
@@ -29,8 +38,10 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         setSupportActionBar(binding.toolbar)
 
         val adapter = WorkoutAdapter(this)
-        binding.recyclerViewWorkouts.adapter = adapter
-        binding.recyclerViewWorkouts.layoutManager = LinearLayoutManager(this)
+        binding.recyclerViewWorkout.adapter = adapter
+        binding.recyclerViewWorkout.layoutManager = LinearLayoutManager(this)
+
+        workoutViewModel.fetchExercisesFromApi()
 
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
             workouts?.let { adapter.setData(it) }
@@ -50,20 +61,26 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val workoutToDelete =
-                    (binding.recyclerViewWorkouts.adapter as WorkoutAdapter).getWorkoutAt(position)
+                    (binding.recyclerViewWorkout.adapter as WorkoutAdapter).getWorkoutAt(position)
                 workoutViewModel.delete(workoutToDelete)
                 Toast.makeText(this@MainActivity, "Exercise Deleted!", Toast.LENGTH_SHORT).show()
             }
         }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
-        itemTouchHelper.attachToRecyclerView(binding.recyclerViewWorkouts)
+        itemTouchHelper.attachToRecyclerView(binding.recyclerViewWorkout)
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        binding.fabAddWorkout.setOnClickListener {
+            showAddWorkoutDialog()
+        }
+        workoutViewModel.apiError.observe(this, Observer { error ->
+            error?.let {
+                Toast.makeText(this,it,Toast.LENGTH_SHORT).show()
+            }
+        })
     }
-    override fun onItemClick(workout: Workout){
+    override fun onItemClick(workout: Workout) {
         val intent = Intent(this, WorkoutDetailActivity::class.java)
-        intent.putExtra("WORKOUT_ID",workout.id)
+        intent.putExtra("WORKOUT_ID", workout.id)
         startActivity(intent)
     }
 
@@ -83,41 +100,81 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             else -> super.onOptionsItemSelected(item)
         }
     }
+    private fun showAddWorkoutDialog(){
+        val dialogBinding = DialogAddWorkoutBinding.inflate(LayoutInflater.from(this))
 
-//        binding.editTextExerciseName.setOnLongClickListener {
-//            workoutViewModel.delete(workout = Workout)
-//            true
-//        }
+        //Create an empty adapter for now, We will update it when the data arrives.
+        val exerciseNameAdapter = ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, mutableListOf())
+        dialogBinding.autoCompleteExerciseName.setAdapter(exerciseNameAdapter)
 
-    private fun addWorkout() {
-        val name = binding.editTextExerciseName.text.toString()
-        val setsText = binding.editTextSets.text.toString()
-        val repsText = binding.editTextReps.text.toString()
-        val weightText = binding.editTextWeight.text.toString()
-
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-    private fun showDeleteAllConfirmationDialog(){
-        AlertDialog.Builder(this)
-            .setTitle("Delete All Workouts")
-            .setMessage("Are you sure you want to delete everything? This cannot be undone.")
-            .setPositiveButton("Yes, Delete All"){_,_ ->
-                workoutViewModel.deleteAll()
-                Toast.makeText(this,"All workouts deleted",Toast.LENGTH_SHORT).show()
+        //Observe the API exercise LiveData
+        workoutViewModel.apiExercises.observe(this, Observer { exercises ->
+            exercises?.let {
+                //When data is Fetched update the adapter
+                val exerciseName = it.map { exercises -> exercises.exerciseName }
+                exerciseNameAdapter.clear()
+                exerciseNameAdapter.addAll(exerciseName)
+                exerciseNameAdapter.notifyDataSetChanged()
             }
-            .setNegativeButton("No",null)
+        })
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Add New Workout")
+            .setView(dialogBinding.root)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Add"){_,_ ->
+                val name = dialogBinding.autoCompleteExerciseName.text.toString().trim()
+                val setsText = dialogBinding.editTextSetsDialog.text.toString()
+                val repsText = dialogBinding.editTextRepsDialog.text.toString()
+                val weightText = dialogBinding.editTextWeightDialog.text.toString()
+
+                if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()){
+                    Toast.makeText(this,"Please fill all fields", Toast.LENGTH_SHORT).show()
+                }else{
+                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
+                        Date())
+                    val workout =Workout(
+                        name = name,
+                        sets = setsText.toInt(),
+                        reps = repsText.toInt(),
+                        weight = weightText.toDouble(),
+                        date = currentDate
+                    )
+                    workoutViewModel.insert(workout)
+                    Toast.makeText(this,"Exercise Logged!", Toast.LENGTH_SHORT).show()
+                }
+            }
             .show()
     }
-
-//    override fun onItemClick(workout: Workout) {
-//        val intent = Intent(this, WorkoutDetailActivity::class.java)
-//        intent.putExtra("WORKOUT_ID", workout.id)
-//        intent.putExtra("WORKOUT_NAME", workout.name)
-//        intent.putExtra("REPS", workout.reps)
-//        intent.putExtra("SETS", workout.sets)
-//        intent.putExtra("WEIGHT", workout.weight)
-//        startActivity(intent)
+//    private fun addWorkout() {
+//        val name = binding.editTextExerciseName.text.toString()
+//        val setsText = binding.editTextSets.text.toString()
+//        val repsText = binding.editTextReps.text.toString()
+//        val weightText = binding.editTextWeight.text.toString()
+//
+//        if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
+//            Toast.makeText(this, "Please fill all fields ", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//        val currentDate = SimpleDateFormat("yyyy-MM-DD", Locale.getDefault()).format(Date())
+//
+//        val workout = Workout(
+//            name = name,
+//            sets = setsText.toInt(),
+//            reps = repsText.toInt(),
+//            weight = weightText.toDouble(),
+//            date = currentDate
+//        )
+//        workoutViewModel.insert(workout)
+//        Toast.makeText(this, "Exercise Logged!", Toast.LENGTH_SHORT).show()
+////        clearInputFields()
+//    }
+//    private fun clearInputFields() {
+//        binding.editTextExerciseName.clear()
+//        binding.editTextSets.text.clear()
+//        binding.editTextReps.text.clear()
+//        binding.editTextWeight.text.clear()
+//        binding.editTextExerciseName.requestFocus()
 //    }
 }
 //        val adapter = WorkoutAdapter()

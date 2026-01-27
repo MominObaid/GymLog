@@ -1,7 +1,7 @@
 package com.example.gymlog
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -10,11 +10,35 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     //    private val repository: WorkoutRepository
     val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
 
-//    init {
-//        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
-//        repository = WorkoutRepository(workoutDao)
-//        allWorkouts = repository.allWorkouts
-//    }
+      //LiveData to hold the list of Exercise from the API
+    val apiExercises: MutableLiveData<List<ApiExercise>> = MutableLiveData()
+
+    //LiveData for error handling
+    val apiError: MutableLiveData<String> = MutableLiveData()
+
+    fun fetchExercisesFromApi(){
+        viewModelScope.launch(Dispatchers.IO) { //Runs on the Background thread.
+            try {
+                val response = RetrofitInstance.api.getExercises()
+                if (response.isSuccessful && response.body() != null){
+                    //Post the successful result to the LiveData
+                    apiExercises.postValue(response.body()!!.results)
+                }else{
+                    //Post an Error message
+                    apiError.postValue("API Error: ${response.message()}")
+                }
+            } catch (e: Exception){
+                //Post an error message for network exception
+                apiError.postValue("Network Error: ${e.message}")
+            }
+        }
+    }
+
+    init {
+        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
+        repository = WorkoutRepository(workoutDao)
+        allWorkouts = repository.allWorkouts
+    }
 
     fun insert(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
         repository.insert(workout)

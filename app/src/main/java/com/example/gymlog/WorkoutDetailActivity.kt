@@ -1,16 +1,4 @@
 package com.example.gymlog
-
-//class WorkoutDetailActivity : AppCompatActivity() {
-//
-//    private lateinit var binding: ActivityWorkoutDetailBinding
-//
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        binding = ActivityWorkoutDetailBinding.inflate(layoutInflater)
-//        setContentView(binding.root)
-//    }
-//}
-
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -104,10 +92,12 @@ class WorkoutDetailActivity : AppCompatActivity() {
                 showDeleteConfirmationDialog()
                 true
             }
+
             android.R.id.home -> { // Handle back button press
                 onBackPressedDispatcher.onBackPressed()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

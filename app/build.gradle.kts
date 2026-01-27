@@ -53,9 +53,15 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx.v2100)
+    implementation(libs.androidx.lifecycle.livedata.ktx.v2100)
+
+    // For API calling
+    implementation(libs.retrofit)
+
+// For JSON parsing (Moshi is a modern choice from Square)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
+
 }
 
