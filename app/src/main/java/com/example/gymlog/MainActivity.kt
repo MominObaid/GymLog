@@ -24,7 +24,12 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
-    private val workoutViewModel: WorkoutViewModel by viewModels()
+    private val workoutViewModel: WorkoutViewModel by viewModels{
+        val database = WorkoutDatabase.getDatabase(this.application)
+        val repository = WorkoutRepository(database.workoutDao())
+        WorkoutViewModelFactory(repository)
+    }
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,4 +177,69 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
 //        binding.editTextExerciseName.requestFocus()
 //    }
 }
+//        val adapter = WorkoutAdapter()
+//       binding.recyclerViewWorkouts.adapter = adapter
+//        binding.recyclerViewWorkouts.layoutManager = LinearLayoutManager(this)
+//
+//        workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
+//            workouts?.let { adapter.setData(it) }
+//        })
+//        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+//            0,
+//            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+//        ) {
+//            override fun onMove(
+//                recyclerView: RecyclerView,
+//                viewHolder: RecyclerView.ViewHolder,
+//                target: RecyclerView.ViewHolder
+//            ): Boolean {
+//                return false
+//            }
+//
+//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+//                val position = viewHolder.adapterPosition
+//                val workoutToDelete =
+//                    (binding.recyclerViewWorkouts.adapter as WorkoutAdapter).getWorkoutAt(position)
+//                workoutViewModel.delete(workoutToDelete)
+//                Toast.makeText(this@MainActivity, "Exercise Deleted!", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//        val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
+//        itemTouchHelper.attachToRecyclerView(binding.recyclerViewWorkouts)
+//
+//        binding.buttonAddExercise.setOnClickListener {
+//            addWorkout()
+//        }
+//    }
+//    private fun addWorkout() {
+//        val name = binding.editTextExerciseName.text.toString()
+//        val setsText = binding.editTextSets.text.toString()
+//        val repsText = binding.editTextReps.text.toString()
+//        val weightText = binding.editTextWeight.text.toString()
+//
+//        if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
+//            Toast.makeText(this, "Please fill all fields ", Toast.LENGTH_SHORT).show()
+//            return
+//        }
+//        val currentDate = SimpleDateFormat("yyyy-MM-DD", Locale.getDefault()).format(Date())
+//
+//        val workout = Workout(
+//            name = name,
+//            sets = setsText.toInt(),
+//            reps = repsText.toInt(),
+//            weight = weightText.toDouble(),
+//            date = currentDate
+//        )
+//        workoutViewModel.insert(workout)
+//        Toast.makeText(this, "Exercise Logged!", Toast.LENGTH_SHORT).show()
+//        clearInputFields()
+//    }
+//
+//    private fun clearInputFields() {
+//        binding.editTextExerciseName.text.clear()
+//        binding.editTextSets.text.clear()
+//        binding.editTextReps.text.clear()
+//        binding.editTextWeight.text.clear()
+//        binding.editTextExerciseName.requestFocus()
+//    }
 //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 github login Token Expires on Sun, Feb 15 2026.
