@@ -54,7 +54,15 @@ dependencies {
 
     implementation(libs.androidx.room.ktx)
     kapt(libs.androidx.room.compiler)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    implementation(libs.androidx.lifecycle.viewmodel.ktx.v2100)
+    implementation(libs.androidx.lifecycle.livedata.ktx.v2100)
+
+    // For API calling
+    implementation(libs.retrofit)
+
+// For JSON parsing (Moshi is a modern choice from Square)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
+
 }
 
