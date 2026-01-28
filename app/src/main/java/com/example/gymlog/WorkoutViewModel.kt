@@ -2,13 +2,14 @@ package com.example.gymlog
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() {
-    //    private val repository: WorkoutRepository
-    val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
+class WorkoutViewModel (application: Application) : AndroidViewModel(application) {
+    private val repository: WorkoutRepository
+    val allWorkouts: LiveData<List<Workout>>
 
       //LiveData to hold the list of Exercise from the API
     val apiExercises: MutableLiveData<List<ApiExercise>> = MutableLiveData()

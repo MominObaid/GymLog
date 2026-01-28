@@ -1,9 +1,14 @@
 package com.example.gymlog
 
+import org.intellij.lang.annotations.Language
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface ApiService {
-    @GET("exerciseinfo/?language=2&limit=100")
-    suspend fun getExercises(): Response<ExerciseApiResponse>
+    @GET("exerciseinfo/")
+    suspend fun getExercises(
+        @Query("language") language: Int = 2,
+        @Query("limit") limit : Int = 500
+    ): Response<ExerciseApiResponse>
 }
