@@ -1,7 +1,5 @@
 package com.example.gymlog
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -47,13 +45,23 @@ class WorkoutViewModel (application: Application) : AndroidViewModel(application
         repository.insert(workout)
     }
 
+    // Functions to interact with the repository, wrapped in Coroutines.
     fun delete(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
         repository.delete(workout)
     }
 
+    fun update(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
+        repository.update(workout)
+    }
+
+        fun getWorkoutById(id: Int): LiveData<Workout>{
+        return repository.getWorkoutById(id)
+    }
+//    fun getWorkoutById(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
+//        repository.getWorkoutById(id = workout.id)
+//    }
     fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAll()
-
     }
     fun update (workout: Workout)= viewModelScope.launch(Dispatchers.IO) {
         repository.update(workout)
