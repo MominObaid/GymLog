@@ -25,6 +25,7 @@ import java.util.Locale
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private val workoutViewModel: WorkoutViewModel by viewModels()
+//        WorkoutViewModelFactory(application)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,7 +100,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         val dialogBinding = DialogAddWorkoutBinding.inflate(LayoutInflater.from(this))
 
         //Create an empty adapter for now, We will update it when the data arrives.
-        val exerciseNameAdapter = ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, mutableListOf())
+        val exerciseNameAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
         dialogBinding.autoCompleteExerciseName.setAdapter(exerciseNameAdapter)
 
         //Observe the API exercise LiveData
