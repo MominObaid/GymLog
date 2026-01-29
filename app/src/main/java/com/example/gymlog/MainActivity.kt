@@ -24,9 +24,9 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
-    private val workoutViewModel: WorkoutViewModel by viewModels()
-//        WorkoutViewModelFactory(application)
-
+    private val workoutViewModel: WorkoutViewModel by viewModels {
+        WorkoutViewModelFactory(application)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
