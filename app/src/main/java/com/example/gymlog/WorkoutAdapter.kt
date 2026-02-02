@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
-    private var workoutList = emptyList<Workout>()
+    private var workouts = emptyList<Workout>()
     inner class WorkoutViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.textViewExerciseName)
         val detailTextView: TextView = itemView.findViewById(R.id.textViewDetails)
@@ -36,9 +36,9 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
             "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
         holder.dateTextView.text = current.date
 
-        holder.itemView.setOnClickListener {
-            onItemClickListner?.let { it(current) }
-        }
+//        holder.itemView.setOnClickListener {
+//            onItemClickListener?.let { it(current) }
+//        }
     }
     override fun getItemCount(): Int {
         return workouts.size
@@ -49,9 +49,6 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
     }
     fun getWorkoutAt(position: Int): Workout{
         return workouts[position]
-    }
-    fun setOnItemClickListener(listener: (Workout) -> Unit){
-        onItemClickListner = listener
     }
     interface OnItemClickListener{
         fun onItemClick(workout: Workout)

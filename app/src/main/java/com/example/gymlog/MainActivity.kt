@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         binding.recyclerViewWorkout.adapter = adapter
         binding.recyclerViewWorkout.layoutManager = LinearLayoutManager(this)
 
-        workoutViewModel.fetchExercisesFromApi()
+//        workoutViewModel.fetchExercisesFromApi()
 
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
             workouts?.let { adapter.setData(it) }
