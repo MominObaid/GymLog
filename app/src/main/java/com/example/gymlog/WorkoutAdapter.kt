@@ -36,9 +36,6 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
             "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
         holder.dateTextView.text = current.date
 
-//        holder.itemView.setOnClickListener {
-//            onItemClickListener?.let { it(current) }
-//        }
     }
     override fun getItemCount(): Int {
         return workouts.size
