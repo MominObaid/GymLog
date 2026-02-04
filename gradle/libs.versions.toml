@@ -18,6 +18,8 @@ moshiKotlinCodegen = "1.15.1"
 retrofit = "2.9.0"
 roomCompiler = "2.6.1"
 lifecycleViewmodelKtx = "2.10.0"
+roomRuntime = "2.8.4"
+roomKtx = "2.8.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -41,6 +43,8 @@ moshi-kotlin-codegen = { module = "com.squareup.moshi:moshi-kotlin-codegen",vers
 moshi-kotlin-codegen-ksp = { module = "com.squareup.moshi:moshi-kotlin-codegen-ksp", version.ref = "moshi" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
