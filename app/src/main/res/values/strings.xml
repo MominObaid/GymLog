@@ -9,4 +9,5 @@
     <string name="title_workout_details">Workout Details</string>
     <string name="button_update_workout">Update Workout</string>
     <string name="desc_add_workout">Add new Workout</string>
+    <string name="click_to_select_date">Click to select date</string>
 </resources>

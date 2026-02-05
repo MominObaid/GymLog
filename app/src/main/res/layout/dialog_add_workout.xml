@@ -65,6 +65,17 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:id="@+id/textViewDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/click_to_select_date"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:background="?attr/editTextBackground"
+            android:layout_marginTop="8dp"
+
+            />
     </LinearLayout>
 
 </LinearLayout>
