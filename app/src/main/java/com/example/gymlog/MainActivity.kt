@@ -1,5 +1,6 @@
 package com.example.gymlog
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -106,6 +108,28 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         val exerciseNameAdapter =
             ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
         dialogBinding.autoCompleteExerciseName.setAdapter(exerciseNameAdapter)
+        var selectedDate = ""
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        selectedDate = dateFormat.format(calendar.time)
+        dialogBinding.textViewDate.text = selectedDate
+
+        dialogBinding.textViewDate.setOnClickListener {
+            val datePickerDialog = DatePickerDialog(
+                this,
+                {_, year, month, dayOfMonth ->
+                    calendar.set(year,month,dayOfMonth)
+                    selectedDate = dateFormat.format(calendar.time)
+                    dialogBinding.textViewDate.text = selectedDate
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_YEAR)
+            )
+            datePickerDialog.show()
+        }
+
 
         //Observe the API exercise LiveData
         workoutViewModel.apiExercises.observe(this, Observer { exercises ->
@@ -139,7 +163,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                         sets = setsText.toInt(),
                         reps = repsText.toInt(),
                         weight = weightText.toDouble(),
-                        date = currentDate
+                        date = selectedDate
                     )
                     workoutViewModel.insert(workout)
                     Toast.makeText(this, "Exercise Logged!", Toast.LENGTH_SHORT).show()
