@@ -28,14 +28,21 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch(Dispatchers.IO) { //Runs on the Background thread.
             try {
                 val response = RetrofitInstance.api.getExercises()
-                if (response.isSuccessful && response.body() != null) {
+                if (response.isSuccessful){
+                    val body = response.body()
+                    if(body != null)
+                    {
                     //Post the successful result to the LiveData
-                    apiExercises.postValue(response.body()!!.results)
+                    apiExercises.postValue(response.body()?.results)
                 } else {
                     //Post an Error message
-                    apiError.postValue("API Error: ${response.message()}")
+                    apiError.postValue("API Error: Response body is empty)}")
                 }
-            } catch (e: Exception) {
+            } else{
+                apiError.postValue("API Error ${response.code()} - ${response.message()}")
+                }
+            }
+                catch (e: Exception) {
                 //Post an error message for network exception
                 apiError.postValue("Network Error: ${e.message}")
             }
