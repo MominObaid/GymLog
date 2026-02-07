@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    id("kotlin-kapt")
 }
 
 android {
@@ -81,6 +82,7 @@ dependencies {
 
     // Room Database dependencies (These are consistent and correct)
     implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
     // If you're using kapt, you'll also have: kapt("androidx.room:room-compiler:2.6.1")
 
     // --- CORRECTED LIFECYCLE DEPENDENCIES ---
@@ -93,6 +95,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1") 
+
     // If you're using Moshi codegen, you'll also have: kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 
     // Coroutines dependencies (These are consistent and correct)
