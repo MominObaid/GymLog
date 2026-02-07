@@ -33,7 +33,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     if(body != null)
                     {
                     //Post the successful result to the LiveData
-                    apiExercises.postValue(response.body()?.results)
+                    apiExercises.postValue(body.results)
                 } else {
                     //Post an Error message
                     apiError.postValue("API Error: Response body is empty)}")
