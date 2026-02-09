@@ -22,7 +22,9 @@ the following technologies:
 
 •RecyclerView: To efficiently display a long list of workouts.
 
-•Android Jetpack Components:
+
+**•Android Jetpack Components:**
+
 
 •Navigation Component: To handle all in-app navigation and pass data between screens in a type-safe manner using Safe Args.
 
@@ -38,7 +40,7 @@ the following technologies:
 
 
 
-🚀 Features
+**🚀 Features**
 
 •View All Workouts: A clear, scrollable list of all past workout entries.
 
