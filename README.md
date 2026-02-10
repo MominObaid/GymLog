@@ -1,4 +1,7 @@
-GymLog - Simple Android Workout Logger
+**GymLog** -
+
+_Simple Android Workout Logger_
+
 
 GymLog is a lightweight and straightforward Android application designed to help users log their daily workout sessions. 
 
@@ -6,7 +9,7 @@ It provides a clean interface to add, view, update, and delete workout entries, 
 
 This project is built using modern Android development practices and serves as a great example of a database-driven mobile application.
 
-🛠️ Tech Stack & Architecture
+_🛠️ Tech Stack & Architecture_
 
 This project follows the official Android recommended architecture and utilizes 
 
