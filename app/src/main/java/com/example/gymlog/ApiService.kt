@@ -5,9 +5,9 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface ApiService {
-    @GET("exerciseinfo/")
+    @GET("/exerciseinfo")
     suspend fun getExercises(
-        @Query("language") language: Int = 2,
-        @Query("limit") limit : Int = 500
+        @Query("/?limit") limit : Int = 500,
+        @Query("&language") language: Int = 2
     ): Response<ExerciseApiResponse>
 }
