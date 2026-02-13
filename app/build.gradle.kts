@@ -86,7 +86,7 @@ dependencies {
 
 
     ksp("androidx.room:room-compiler:2.6.1")
-    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
+//    ksp("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
     // If you're using kapt, you'll also have: kapt("androidx.room:room-compiler:2.6.1")
 
     // --- CORRECTED LIFECYCLE DEPENDENCIES ---
@@ -101,9 +101,9 @@ dependencies {
     // Retrofit and Moshi dependencies (These are consistent and correct)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
-    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
+//    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+//    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+//    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 
     // If you're using Moshi codegen, you'll also have: kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 
