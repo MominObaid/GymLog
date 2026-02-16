@@ -10,7 +10,7 @@ data class ExerciseApiResponse(
 )
 @JsonClass(generateAdapter = true)
 data class ApiExercise(
-//    val id : Int,
+    val id : Int,
     @Json(name = "name")
     val exerciseName: String,
     val description: String,

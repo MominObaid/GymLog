@@ -11,12 +11,14 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.ActivityMainBinding
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import retrofit2.Retrofit
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Calendar
@@ -26,9 +28,9 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
-    private val workoutViewModel: WorkoutViewModel by viewModels {
-        WorkoutViewModelFactory(application)
-    }
+    private val workoutViewModel: WorkoutViewModel by viewModels()
+//        WorkoutViewModelFactory(WorkoutRepository())
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -172,4 +174,3 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             .show()
     }
 }
-//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 github login Token Expires on Sun, Feb 15 2026.
