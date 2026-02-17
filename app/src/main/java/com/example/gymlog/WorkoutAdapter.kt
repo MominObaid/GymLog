@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.gymlog.model.Workout
 
 class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
     private var workouts = emptyList<Workout>()
@@ -44,7 +45,7 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
         this.workouts = workouts
         notifyDataSetChanged()
     }
-    fun getWorkoutAt(position: Int): Workout{
+    fun getWorkoutAt(position: Int): Workout {
         return workouts[position]
     }
     interface OnItemClickListener{
