@@ -18,9 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.ActivityMainBinding
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import retrofit2.Retrofit
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -28,7 +26,7 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
-    private val workoutViewModel: WorkoutViewModel by viewModels()
+    private lateinit var workoutViewModel: WorkoutViewModel //by viewModels()
 //        WorkoutViewModelFactory(WorkoutRepository())
 
 
@@ -37,6 +35,12 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+
+        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
+        val apiService = RetrofitInstance.api
+        val repository = WorkoutRepository(workoutDao,apiService)
+        val factory = WorkoutViewModelFactory(repository)
+        workoutViewModel = ViewModelProvider(this,factory).get(WorkoutViewModel::class.java)
 
         val adapter = WorkoutAdapter(this)
         binding.recyclerViewWorkout.adapter = adapter
