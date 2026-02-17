@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import com.example.gymlog.databinding.ActivityWorkoutDetailBinding
+import com.example.gymlog.model.Workout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class WorkoutDetailActivity : AppCompatActivity() {
