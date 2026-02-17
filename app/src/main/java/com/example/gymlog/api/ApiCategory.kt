@@ -1,4 +1,4 @@
-package com.example.gymlog
+package com.example.gymlog.api
 
 import com.squareup.moshi.JsonClass
 
