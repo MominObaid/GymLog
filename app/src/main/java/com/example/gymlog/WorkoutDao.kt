@@ -10,7 +10,7 @@ import androidx.room.*
 
 @Dao
 interface WorkoutDao {  //WorkoutDao is the Data Access Object
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert
     suspend fun insert(workout: Workout)
     @Update
     suspend fun update(workout: Workout)
