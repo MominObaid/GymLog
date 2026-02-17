@@ -1,4 +1,4 @@
-package com.example.gymlog
+package com.example.gymlog.model
 
 import android.content.Context
 import androidx.room.Database

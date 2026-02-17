@@ -1,5 +1,6 @@
-package com.example.gymlog
+package com.example.gymlog.api
 
+import com.example.gymlog.api.ApiCategory
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 

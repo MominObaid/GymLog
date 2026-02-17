@@ -4,13 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymlog.api.ApiExercise
+import com.example.gymlog.model.Workout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() {
-//    private val repository: WorkoutRepository
-    val allWorkouts: LiveData<List<Workout>>
-    get() = repository.allWorkouts
+    //    private val repository: WorkoutRepository
+    val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
 
     //LiveData to hold the list of Exercise from the API
     val apiExercises: MutableLiveData<List<ApiExercise>> = MutableLiveData()
@@ -20,20 +21,18 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
 
     init {
         viewModelScope.launch {
-        repository.fetchFromApi()
-
-//        val workoutDao = WorkoutDatabase.getDatabase()
-//        repository = WorkoutRepository(workoutDao, ApiService)
-//        allWorkouts = repository.allWorkouts
-    }
+            repository.fetchFromApi()
+            fetchExercisesFromApi()
+        }
     }
 
     fun fetchExercisesFromApi() {
         viewModelScope.launch { //Runs on the Background thread.
-            when(val result = repository.fetchFromApi()){
-                is WorkoutRepository.ApiResult.Success<List<ApiExercise>> -> {
+            when (val result = repository.fetchFromApi()) {
+                is WorkoutRepository.ApiResult.Success -> {
                     apiExercises.postValue(result.data)
                 }
+
                 is WorkoutRepository.ApiResult.Error -> {
                     apiError.postValue(result.message)
                 }
