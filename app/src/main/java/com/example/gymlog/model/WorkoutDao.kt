@@ -1,12 +1,11 @@
-package com.example.gymlog
+package com.example.gymlog.model
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.*
+import androidx.room.Update
 
 @Dao
 interface WorkoutDao {  //WorkoutDao is the Data Access Object
@@ -27,3 +26,4 @@ interface WorkoutDao {  //WorkoutDao is the Data Access Object
     fun getWorkoutById(id: Int): LiveData<Workout>
 
 }
+//https://www.udemy.com/course/the-complete-android-10-developer-course-mastering-android/learn/lecture/38817828#overview
