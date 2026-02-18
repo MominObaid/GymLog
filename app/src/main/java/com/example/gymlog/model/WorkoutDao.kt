@@ -26,4 +26,3 @@ interface WorkoutDao {  //WorkoutDao is the Data Access Object
     fun getWorkoutById(id: Int): LiveData<Workout>
 
 }
-//https://www.udemy.com/course/the-complete-android-10-developer-course-mastering-android/learn/lecture/38817828#overview
