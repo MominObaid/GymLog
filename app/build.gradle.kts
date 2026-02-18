@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
-    id("kotlin-kapt")
+//    id("kotlin-kapt")
 }
 
 android {
@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.example.gymlog"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -97,18 +97,20 @@ dependencies {
 //    kapt("androidx.lifecycle:lifecycle-compiler: $lifecycle_version")
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
     // Retrofit and Moshi dependencies (These are consistent and correct)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.converter.moshi)
+    ksp(libs.moshi.kotlin.codegen)
 //    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
 //    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 
     // If you're using Moshi codegen, you'll also have: kapt("com.squareup.moshi:moshi-kotlin-codegen:1.15.1")
 
     // Coroutines dependencies (These are consistent and correct)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 
 }
