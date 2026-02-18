@@ -8,27 +8,25 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.gymlog.api.RetrofitInstance
 import com.example.gymlog.databinding.ActivityMainBinding
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
+import com.example.gymlog.model.Workout
+import com.example.gymlog.model.WorkoutDatabase
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
-
 
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var workoutViewModel: WorkoutViewModel //by viewModels()
-//        WorkoutViewModelFactory(WorkoutRepository())
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,17 +34,18 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
-        val apiService = RetrofitInstance.api
-        val repository = WorkoutRepository(workoutDao,apiService)
-        val factory = WorkoutViewModelFactory(repository)
-        workoutViewModel = ViewModelProvider(this,factory).get(WorkoutViewModel::class.java)
-
         val adapter = WorkoutAdapter(this)
         binding.recyclerViewWorkout.adapter = adapter
         binding.recyclerViewWorkout.layoutManager = LinearLayoutManager(this)
 
+        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
+        val apiService = RetrofitInstance.api
+        val repository = WorkoutRepository(workoutDao,apiService)
+        val factory = WorkoutViewModelFactory(repository)
+        workoutViewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
+
         workoutViewModel.fetchExercisesFromApi()
+        //Observe the LiveData from the ViewModel.
 
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
             workouts?.let { adapter.setData(it) }
@@ -114,6 +113,8 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         val exerciseNameAdapter =
             ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
         dialogBinding.autoCompleteExerciseName.setAdapter(exerciseNameAdapter)
+//        dialogBinding.autoCompleteExerciseName.setOnItemClickListener { _, _, position, _ ->
+
         var selectedDate = ""
         val calendar = Calendar.getInstance()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -131,7 +132,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_YEAR)
+                calendar.get(Calendar.DAY_OF_MONTH)
             )
             datePickerDialog.show()
         }
@@ -161,9 +162,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                 if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
                     Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 } else {
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(
-                        Date()
-                    )
+
                     val workout = Workout(
                         name = name,
                         sets = setsText.toInt(),
