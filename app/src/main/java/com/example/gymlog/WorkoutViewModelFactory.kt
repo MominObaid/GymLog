@@ -9,9 +9,3 @@ class WorkoutViewModelFactory (private val repository: WorkoutRepository) : View
         return WorkoutViewModel(repository) as T
     }
 }
-//        if (modelClass.isAssignableFrom(WorkoutViewModel::class.java)){
-//            @Suppress("UNCHECKED_CAST")
-//       }
-//        throw IllegalArgumentException("Unknown ViewModel class")
-//    }
-//}
