@@ -6,14 +6,17 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.gymlog.api.RetrofitInstance
 import com.example.gymlog.databinding.ActivityWorkoutDetailBinding
 import com.example.gymlog.model.Workout
+import com.example.gymlog.model.WorkoutDatabase
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class WorkoutDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWorkoutDetailBinding
-    private val workoutViewModel: WorkoutViewModel by viewModels()
+    private lateinit var workoutViewModel: WorkoutViewModel
     private var currentWorkout: Workout? = null
     private var workoutId: Int = -1
 
@@ -21,6 +24,14 @@ class WorkoutDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityWorkoutDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
+        val apiService = RetrofitInstance.api
+        val repository = WorkoutRepository(workoutDao,apiService)
+        val factory = WorkoutViewModelFactory(repository)
+        workoutViewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
+
+
 
         // Set up the toolbar for Second Activity(WorkoutDetailActivity)
 //        setSupportActionBar(binding.toolbarDetail)
