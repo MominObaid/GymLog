@@ -25,3 +25,18 @@ object RetrofitInstance {
             .create(ApiService::class.java)
     }
 }
+
+
+
+
+
+
+
+
+//object RetrofitInstance {
+//
+//    //The base URL of the API
+//    private const val BASE_URL = "https://wger.de/api/v2"
+
+////"https://wger.de/api/v2/exerciseinfo/?limit=500&language=2"
+//https://wger.de/api/v2/exerciseinfo/?language=2&limit=500
