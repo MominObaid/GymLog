@@ -40,3 +40,17 @@ object RetrofitInstance {
 
 ////"https://wger.de/api/v2/exerciseinfo/?limit=500&language=2"
 //https://wger.de/api/v2/exerciseinfo/?language=2&limit=500
+
+////    //Create a Moshi instance with a Kotlin adapter
+//    private val moshi = Moshi.Builder()
+//        .add(KotlinJsonAdapterFactory())
+//        .build()
+//
+//    val api : ApiService by lazy {
+//        Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(MoshiConverterFactory.create(moshi))
+//            .build()
+//            .create(ApiService::class.java)
+//    }
+//}
