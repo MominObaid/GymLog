@@ -54,3 +54,9 @@ the following technologies:
 •Delete Workouts: Swipe to delete individual workouts or use the menu to delete all entries at once.
 
 •Persistent Storage: All workout data is saved locally on the device using a Room database, so your data is safe even when the app is closed.
+
+
+
+
+
+![IMG_20260223_040503](https://github.com/user-attachments/assets/70070129-cb0f-4d8c-81e8-91aa9389555e)
