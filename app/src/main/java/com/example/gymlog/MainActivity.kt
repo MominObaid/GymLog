@@ -176,4 +176,4 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             }
             .show()
     }
-}
+} pires on Sun, Feb 15 2026.
