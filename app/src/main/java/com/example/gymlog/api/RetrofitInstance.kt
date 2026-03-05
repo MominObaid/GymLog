@@ -1,9 +1,11 @@
 package com.example.gymlog.api
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 object RetrofitInstance {
     private const val BASE_URL = "https://wger.de/api/v2/"
@@ -16,10 +18,14 @@ object RetrofitInstance {
         .addInterceptor(logging)
         .build()
 
+     val moshi = Moshi.Builder()
+         .add (KotlinJsonAdapterFactory())
+         .build()
 
-    Retrofit.Builder()
+
+        Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .client(client)
             .build()
             .create(ApiService::class.java)
