@@ -7,6 +7,14 @@
     android:orientation="vertical"
     tools:context=".WorkoutDetailActivity">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/detailToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        />
+
     <!-- Card containing the editable workout details -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
@@ -84,6 +92,18 @@
                         android:inputType="numberDecimal" />
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textViewDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:drawableStart="@drawable/baseline_calendar_today_24"
+                android:drawablePadding="8dp"
+                android:text="Select Date"
+                android:textSize="16sp" />
 
             <!-- Update Button -->
             <Button
