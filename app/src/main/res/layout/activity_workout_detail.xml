@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
+        android:layout_marginBottom="80dp"
         />
 
     <!-- Card containing the editable workout details -->
@@ -21,7 +22,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         app:cardElevation="4dp"
-
         >
 
         <LinearLayout
