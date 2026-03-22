@@ -1,9 +1,10 @@
 package com.example.gymlog
+
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -12,6 +13,9 @@ import com.example.gymlog.databinding.ActivityWorkoutDetailBinding
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDatabase
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class WorkoutDetailActivity : AppCompatActivity() {
 
@@ -19,23 +23,21 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private lateinit var workoutViewModel: WorkoutViewModel
     private var currentWorkout: Workout? = null
     private var workoutId: Int = -1
+    private var selectedDate: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityWorkoutDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        setSupportActionBar(binding.detailToolbar)
+
 
         val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
         val apiService = RetrofitInstance.api
-        val repository = WorkoutRepository(workoutDao,apiService)
+        val repository = WorkoutRepository(workoutDao, apiService)
         val factory = WorkoutViewModelFactory(repository)
         workoutViewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
 
-
-
-        // Set up the toolbar for Second Activity(WorkoutDetailActivity)
-//        setSupportActionBar(binding.toolbarDetail)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Show back button
 
         // Get the workout ID from the intent
         workoutId = intent.getIntExtra("WORKOUT_ID", -1)
@@ -64,6 +66,36 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.editTextSetsDetail.setText(workout.sets.toString())
         binding.editTextRepsDetail.setText(workout.reps.toString())
         binding.editTextWeightDetail.setText(workout.weight.toString())
+        selectedDate = workout.date
+        binding.textViewDate.text = selectedDate
+
+        binding.textViewDate.setOnClickListener {
+            showDatePicker()
+        }
+    }
+
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        // If we already have a date, try to set the picker to that date
+        val dateFormat =
+            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        try {
+            val date = dateFormat.parse(selectedDate)
+            if (date != null) calendar.time = date
+        } catch (e: Exception) {
+        }
+
+        DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                calendar.set(year, month, dayOfMonth)
+                selectedDate = dateFormat.format(calendar.time)
+                binding.textViewDate.text = selectedDate
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
     private fun updateWorkout() {
@@ -83,7 +115,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             sets = sets,
             reps = reps,
             weight = weight,
-            date = ""     //you can set the date here or use the current date
+            date = selectedDate     //you can set the date here or use the current date
         )
 
         workoutViewModel.update(updatedWorkout)
@@ -94,13 +126,13 @@ class WorkoutDetailActivity : AppCompatActivity() {
     // --- Optional: Add a Delete button to the toolbar ---
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
+        menuInflater.inflate(R.menu.detail_menu, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_delete_all -> {
+            R.id.action_delete -> {
                 showDeleteConfirmationDialog()
                 true
             }
