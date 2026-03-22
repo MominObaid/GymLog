@@ -10,7 +10,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() {
-    //    private val repository: WorkoutRepository
     val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
 
     //LiveData to hold the list of Exercise from the API
@@ -20,14 +19,11 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     val apiError: MutableLiveData<String> = MutableLiveData()
 
     init {
-        viewModelScope.launch {
-            repository.fetchFromApi()
-            fetchExercisesFromApi()
-        }
+        fetchExercisesFromApi()
     }
 
     fun fetchExercisesFromApi() {
-        viewModelScope.launch { //Runs on the Background thread.
+        viewModelScope.launch { // viewModelScope uses Dispatchers.Main.immediate by default
             when (val result = repository.fetchFromApi()) {
                 is WorkoutRepository.ApiResult.Success -> {
                     apiExercises.postValue(result.data)
@@ -44,7 +40,6 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         repository.insert(workout)
     }
 
-    // Functions to interact with the repository, wrapped in Coroutines.
     fun delete(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
         repository.delete(workout)
     }
