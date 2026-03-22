@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,20 +28,22 @@ import java.util.Locale
 class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var workoutViewModel: WorkoutViewModel //by viewModels()
+    private var currentWorkouts: List<Workout> = emptyList()
 
+    private lateinit var adapter: WorkoutAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        val adapter = WorkoutAdapter(this)
+        adapter = WorkoutAdapter(this)
         binding.recyclerViewWorkout.adapter = adapter
         binding.recyclerViewWorkout.layoutManager = LinearLayoutManager(this)
 
         val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
         val apiService = RetrofitInstance.api
-        val repository = WorkoutRepository(workoutDao,apiService)
+        val repository = WorkoutRepository(workoutDao, apiService)
         val factory = WorkoutViewModelFactory(repository)
         workoutViewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
 
@@ -48,7 +51,10 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         //Observe the LiveData from the ViewModel.
 
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
-            workouts?.let { adapter.setData(it) }
+            workouts?.let {
+                currentWorkouts = it
+                applyFilter()
+            }
         })
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             0,
@@ -81,6 +87,41 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
             }
         })
+        binding.chipAll.setOnClickListener {
+            binding.chipRecent.isChecked = false
+            binding.chipAll.isChecked = true
+            applyFilter()
+        }
+        binding.chipRecent.setOnClickListener {
+            binding.chipAll.isChecked = false
+            binding.chipRecent.isChecked = true
+            applyFilter()
+        }
+    }
+
+    private fun applyFilter() {
+        val filteredList = if (binding.chipRecent.isChecked) {
+            val sevenDaysAgo = getDaysAgo(7)
+            currentWorkouts.filter { it.date >= sevenDaysAgo }
+        } else {
+            //show Everything
+            currentWorkouts
+        }
+        //update UI based on the filtered result
+        if (filteredList.isEmpty()) {
+            binding.layoutEmptyState.visibility = View.VISIBLE
+            binding.recyclerViewWorkout.visibility = View.GONE
+        } else {
+            binding.layoutEmptyState.visibility = View.GONE
+            binding.recyclerViewWorkout.visibility = View.VISIBLE
+            adapter.setData(filteredList)
+        }
+    }
+        private fun getDaysAgo(daysAgo: Int): String {
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            return dateFormat.format(calendar.time)
     }
 
     override fun onItemClick(workout: Workout) {
@@ -98,7 +139,8 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         return when (item.itemId) {
             R.id.action_delete_all -> {
                 workoutViewModel.deleteAll()
-                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "All workouts have been deleted", Toast.LENGTH_SHORT)
+                    .show()
                 true
             }
 
@@ -115,20 +157,46 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         dialogBinding.autoCompleteExerciseName.setAdapter(exerciseNameAdapter)
 //        dialogBinding.autoCompleteExerciseName.setOnItemClickListener { _, _, position, _ ->
 
-        var selectedDate = ""
+//        var selectedDate = ""
+//        val calendar = Calendar.getInstance()
+//        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+//
+//        selectedDate = dateFormat.format(calendar.time)
+//        dialogBinding.textViewDate.text = selectedDate
+//
+//        dialogBinding.textViewDate.setOnClickListener {
+//            val datePickerDialog = DatePickerDialog(
+//                this,
+//                {_, year, month, dayOfMonth ->
+//                    calendar.set(year,month,dayOfMonth)
+//                    selectedDate = dateFormat.format(calendar.time)
+//                    dialogBinding.textViewDate.text = selectedDate
+//                },
+//                calendar.get(Calendar.YEAR),
+//                calendar.get(Calendar.MONTH),
+//                calendar.get(Calendar.DAY_OF_MONTH)
+//            )
+//            datePickerDialog.show()
+//        }
+
+        // Set initial date to today
         val calendar = Calendar.getInstance()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-        selectedDate = dateFormat.format(calendar.time)
-        dialogBinding.textViewDate.text = selectedDate
+        var selectedDate = dateFormat.format(calendar.time)
+        dialogBinding.textViewDate.text = "Date: $selectedDate"
 
         dialogBinding.textViewDate.setOnClickListener {
             val datePickerDialog = DatePickerDialog(
                 this,
-                {_, year, month, dayOfMonth ->
-                    calendar.set(year,month,dayOfMonth)
+                { _, year, month, dayOfMonth ->
+                    // Update the calendar object with user selection
+                    calendar.set(Calendar.YEAR, year)
+                    calendar.set(Calendar.MONTH, month)
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+                    // Format and update the variable and UI
                     selectedDate = dateFormat.format(calendar.time)
-                    dialogBinding.textViewDate.text = selectedDate
+                    dialogBinding.textViewDate.text = "Date: $selectedDate"
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -136,7 +204,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             )
             datePickerDialog.show()
         }
-
 
         //Observe the API exercise LiveData
         workoutViewModel.apiExercises.observe(this, Observer { exercises ->
@@ -176,4 +243,4 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             }
             .show()
     }
-} pires on Sun, Feb 15 2026.
+}
