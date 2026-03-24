@@ -1,41 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?><androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="?attr/colorSurface"
     tools:context=".WorkoutDetailActivity">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/detailToolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:layout_marginBottom="80dp"
-        />
+        android:background="@android:color/transparent"
+        app:elevation="0dp">
 
-    <!-- Card containing the editable workout details -->
-    <com.google.android.material.card.MaterialCardView
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/detailToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/baseline_add_24"
+            app:title="Edit Workout"
+            app:titleCentered="true" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardElevation="4dp"
-        >
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            >
+            android:padding="24dp">
 
-            <!-- Exercise Name Input -->
+            <!-- Title Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Update Details"
+                android:textAppearance="@style/TextAppearance.Material3.HeadlineMedium"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:alpha="0.6"
+                android:text="Refine your exercise stats for this session."
+                android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+            <!-- Exercise Name -->
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/hint_exercise_name">
+                android:hint="@string/hint_exercise_name"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:startIconDrawable="@drawable/baseline_add_24">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextExerciseNameDetail"
@@ -44,178 +69,118 @@
                     android:inputType="textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Sets, Reps, Weight Inputs -->
-            <LinearLayout
+            <!-- Performance Card (The Dashboard Look) -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Material3.CardView.Filled"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="20dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="@string/hint_sets">
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:baselineAligned="false">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editTextSetsDetail"
-                        android:layout_width="match_parent"
+                    <!-- SETS -->
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="SETS" android:textSize="10sp" android:textStyle="bold" android:alpha="0.6"/>
+                        <EditText
+                            android:id="@+id/editTextSetsDetail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:inputType="number"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:paddingVertical="8dp"/>
+                    </LinearLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:hint="@string/hint_reps">
+                    <View android:layout_width="1dp" android:layout_height="35dp" android:layout_gravity="center_vertical"
+                        android:background="?attr/colorOnSurface" android:alpha="0.1"/>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editTextRepsDetail"
-                        android:layout_width="match_parent"
+                    <!-- REPS -->
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="REPS" android:textSize="10sp" android:textStyle="bold" android:alpha="0.6"/>
+                        <EditText
+                            android:id="@+id/editTextRepsDetail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:inputType="number"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:paddingVertical="8dp"/>
+                    </LinearLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:hint="@string/hint_weight_kg">
+                    <View android:layout_width="1dp" android:layout_height="35dp" android:layout_gravity="center_vertical"
+                        android:background="?attr/colorOnSurface" android:alpha="0.1"/>
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editTextWeightDetail"
-                        android:layout_width="match_parent"
+                    <!-- WEIGHT -->
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="numberDecimal" />
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
+                        android:layout_weight="1.2"
+                        android:gravity="center"
+                        android:orientation="vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="WEIGHT (KG)" android:textSize="10sp" android:textStyle="bold" android:alpha="0.6"/>
+                        <EditText
+                            android:id="@+id/editTextWeightDetail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:inputType="numberDecimal"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:paddingVertical="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            <TextView
+            <!-- Date Button -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/textViewDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:padding="12dp"
-                android:background="?attr/selectableItemBackground"
-                android:drawableStart="@drawable/baseline_calendar_today_24"
-                android:drawablePadding="8dp"
-                android:text="Select Date"
-                android:textSize="16sp" />
-
-            <!-- Update Button -->
-            <Button
-                android:id="@+id/buttonUpdate"
+                style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="@string/button_update_workout" />
+                android:padding="16dp"
+                android:text="Change Date"
+                app:icon="@drawable/baseline_calendar_today_24"
+                app:cornerRadius="16dp" />
+
+            <!-- Update Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonUpdate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:padding="16dp"
+                android:text="@string/button_update_workout"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                app:cornerRadius="16dp"
+                app:elevation="4dp" />
 
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.core.widget.NestedScrollView>
 
-</LinearLayout>
-
-<!--with this code input fields will appear at Center on detail screen.-->
-
-    <!--    <?xml version="1.0" encoding="utf-8"?>-->
-<!--    &lt;!&ndash; 1. Change the root layout to RelativeLayout &ndash;&gt;-->
-<!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--xmlns:tools="http://schemas.android.com/tools"-->
-<!--android:layout_width="match_parent"-->
-<!--android:layout_height="match_parent"-->
-<!--tools:context=".WorkoutDetailActivity">-->
-
-<!--&lt;!&ndash; Card containing the editable workout details &ndash;&gt;-->
-<!--<com.google.android.material.card.MaterialCardView-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="wrap_content"-->
-<!--    android:layout_margin="16dp"-->
-<!--    app:cardElevation="4dp"-->
-<!--    android:layout_centerInParent="true"  > &lt;!&ndash; 2. This attribute centers the card &ndash;&gt;-->
-
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        android:padding="16dp"-->
-<!--        > &lt;!&ndash; 3. Remove android:gravity="center" from here &ndash;&gt;-->
-
-<!--        &lt;!&ndash; Exercise Name Input &ndash;&gt;-->
-<!--        <com.google.android.material.textfield.TextInputLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:hint="@string/hint_exercise_name">-->
-
-<!--            <com.google.android.material.textfield.TextInputEditText-->
-<!--                android:id="@+id/editTextExerciseNameDetail"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:inputType="textCapWords" />-->
-<!--        </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--        &lt;!&ndash; Sets, Reps, Weight Inputs &ndash;&gt;-->
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            android:orientation="horizontal">-->
-
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_weight="1"-->
-<!--                android:hint="@string/hint_sets">-->
-
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:id="@+id/editTextSetsDetail"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:inputType="number" />-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="8dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:hint="@string/hint_reps">-->
-
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:id="@+id/editTextRepsDetail"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:inputType="number" />-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="8dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:hint="@string/hint_weight_kg">-->
-
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:id="@+id/editTextWeightDetail"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:inputType="numberDecimal" />-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-<!--        </LinearLayout>-->
-
-<!--        &lt;!&ndash; Update Button &ndash;&gt;-->
-<!--        <Button-->
-<!--            android:id="@+id/buttonUpdate"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="24dp"-->
-<!--            android:text="@string/button_update_workout" />-->
-
-<!--    </LinearLayout>-->
-<!--</com.google.android.material.card.MaterialCardView>-->
-
-<!--</RelativeLayout>-->
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
