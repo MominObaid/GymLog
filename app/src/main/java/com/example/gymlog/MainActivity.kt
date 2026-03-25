@@ -21,6 +21,7 @@ import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDatabase
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var workoutViewModel: WorkoutViewModel //by viewModels()
     private var currentWorkouts: List<Workout> = emptyList()
+    private var currentSearchQuery: String = ""
 
     private lateinit var adapter: WorkoutAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,10 +72,18 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                val workoutToDelete =
-                    (binding.recyclerViewWorkout.adapter as WorkoutAdapter).getWorkoutAt(position)
+                val workoutToDelete = adapter.getWorkoutAt(position)
+//                    (binding.recyclerViewWorkout.adapter as WorkoutAdapter).getWorkoutAt(position)
                 workoutViewModel.delete(workoutToDelete)
                 Toast.makeText(this@MainActivity, "Exercise Deleted!", Toast.LENGTH_SHORT).show()
+
+                Snackbar.make(
+                    binding.root,
+                    "${workoutToDelete.name} Deleted",
+                    Snackbar.LENGTH_SHORT
+                ).setAction("UNDO") {
+                    workoutViewModel.insert(workoutToDelete)
+                }.show()
             }
         }
         val itemTouchHelper = ItemTouchHelper(itemTouchHelperCallback)
@@ -100,12 +110,18 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     }
 
     private fun applyFilter() {
-        val filteredList = if (binding.chipRecent.isChecked) {
+        var filteredList = if (binding.chipRecent.isChecked) {
             val sevenDaysAgo = getDaysAgo(7)
             currentWorkouts.filter { it.date >= sevenDaysAgo }
         } else {
             //show Everything
             currentWorkouts
+        }
+        if (currentSearchQuery.isNotEmpty()) {
+            filteredList = filteredList.filter { workout ->
+                workout.name.orEmpty().contains(currentSearchQuery, ignoreCase = true)
+
+            }
         }
         //update UI based on the filtered result
         if (filteredList.isEmpty()) {
@@ -117,11 +133,11 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             adapter.setData(filteredList)
         }
     }
-        private fun getDaysAgo(daysAgo: Int): String {
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            return dateFormat.format(calendar.time)
+    private fun getDaysAgo(daysAgo: Int): String {
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return dateFormat.format(calendar.time)
     }
 
     override fun onItemClick(workout: Workout) {
@@ -132,6 +148,35 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+        val searchItem = menu?.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as androidx.appcompat.widget.SearchView
+
+        searchView.queryHint = "Search Exercises...."
+
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean {
+                return true
+            }
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                // When user clicks the "back" arrow or closes the search,
+                currentSearchQuery = "" //reset the search query
+                applyFilter()          //apply the filter with empty query means Show all workout again
+                return true         // Allow the search bar to collapse back to an icon.
+            }
+        })
+        searchView.setOnQueryTextListener(object :
+            androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchView.clearFocus() //this Hide keyboard on sumbit
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                currentSearchQuery = newText.orEmpty()
+                applyFilter()
+                return true
+            }
+        })
         return true
     }
 
@@ -209,7 +254,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         workoutViewModel.apiExercises.observe(this, Observer { exercises ->
             exercises?.let {
                 //When data is Fetched update the adapter
-                val exerciseName = it.map { exercises -> exercises.exerciseName }
+                val exerciseName = it.map { exercises -> exercises.name }
                 exerciseNameAdapter.clear()
                 exerciseNameAdapter.addAll(exerciseName)
                 exerciseNameAdapter.notifyDataSetChanged()
