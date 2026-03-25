@@ -1,6 +1,5 @@
 package com.example.gymlog.api
 
-import com.example.gymlog.api.ApiCategory
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -13,9 +12,10 @@ data class ExerciseApiResponse(
 data class ApiExercise(
     val id : Int,
     @Json(name = "name")
-    val exerciseName: String,
+    val name : String,
+    @Json(name = "description")
     val description: String,
-    val category: ApiCategory
+//    val category: ApiCategory
 )
 
 
