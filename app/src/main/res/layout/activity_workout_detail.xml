@@ -17,8 +17,8 @@
             android:id="@+id/detailToolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/baseline_add_24"
-            app:title="Edit Workout"
+            app:navigationIcon="@drawable/outline_arrow_back_24"
+            app:title=""
             app:titleCentered="true" />
     </com.google.android.material.appbar.AppBarLayout>
 
