@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.model.Workout
 
@@ -47,6 +48,35 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
     }
     fun getWorkoutAt(position: Int): Workout {
         return workouts[position]
+    }
+
+    class WorkoutDiffCallback(
+        private val oldList: List<Workout>,
+        private val newList: List<Workout>
+
+    ): DiffUtil.Callback(){
+        override fun getOldListSize(): Int {
+            return oldList.size
+        }
+
+        override fun getNewListSize(): Int {
+            return newList.size
+        }
+
+        override fun areItemsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+            return oldList[oldItemPosition].id == newList[newItemPosition].id
+        }
+
+        override fun areContentsTheSame(
+            oldItemPosition: Int,
+            newItemPosition: Int
+        ): Boolean {
+            return oldList[oldItemPosition] == newList[newItemPosition]
+        }
+
     }
     interface OnItemClickListener{
         fun onItemClick(workout: Workout)
