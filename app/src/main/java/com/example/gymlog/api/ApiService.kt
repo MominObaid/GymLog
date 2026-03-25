@@ -9,6 +9,5 @@ interface ApiService {
     suspend fun getExercises(
         @Query("limit") limit : Int = 500,
         @Query("language") language: Int = 2
-
     ): Response<ExerciseApiResponse>
 }
