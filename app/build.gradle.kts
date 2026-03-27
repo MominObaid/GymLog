@@ -114,4 +114,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 }
