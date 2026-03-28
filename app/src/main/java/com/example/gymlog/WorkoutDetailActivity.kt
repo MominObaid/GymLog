@@ -1,6 +1,7 @@
 package com.example.gymlog
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -46,6 +47,10 @@ class WorkoutDetailActivity : AppCompatActivity() {
             finish()
             return
         }
+
+//        val chartIntent = Intent(this, ProgressChartActivity::class.java)
+//        chartIntent.putExtra("EXERCISE_NAME", currentWorkout?.name)
+//        startActivity(chartIntent)
 
         // Observe the workout data from the ViewModel
         workoutViewModel.getWorkoutById(workoutId).observe(this, Observer { workout ->
