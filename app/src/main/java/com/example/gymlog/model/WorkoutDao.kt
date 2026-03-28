@@ -25,4 +25,6 @@ interface WorkoutDao {  //WorkoutDao is the Data Access Object
     @Query("SELECT * FROM workout_table WHERE id = :id")
     fun getWorkoutById(id: Int): LiveData<Workout>
 
+    @Query("SELECT * FROM workout_table WHERE name = :exerciseName ORDER BY date ASC")
+    fun getWorkoutsHistory(exerciseName: String): LiveData<List<Workout>>
 }
