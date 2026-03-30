@@ -43,8 +43,10 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
         return workouts.size
     }
     fun setData(workouts : List<Workout>){
+        val diffCallback = WorkoutDiffCallback(this.workouts, workouts)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         this.workouts = workouts
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
     fun getWorkoutAt(position: Int): Workout {
         return workouts[position]
