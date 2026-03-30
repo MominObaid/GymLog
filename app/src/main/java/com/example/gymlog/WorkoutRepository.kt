@@ -132,6 +132,10 @@ class WorkoutRepository(
         return workoutDao.getWorkoutById(id)
     }
 
+    fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
+        return workoutDao.getWorkoutsHistory(exerciseName)
+    }
+
 
     // --- API Operation ---
 
