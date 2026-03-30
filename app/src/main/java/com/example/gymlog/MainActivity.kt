@@ -31,7 +31,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
     private lateinit var workoutViewModel: WorkoutViewModel //by viewModels()
     private var currentWorkouts: List<Workout> = emptyList()
     private var currentSearchQuery: String = ""
-
     private lateinit var adapter: WorkoutAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,17 +132,49 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             adapter.setData(filteredList)
         }
     }
+
     private fun getDaysAgo(daysAgo: Int): String {
         val calendar = Calendar.getInstance()
         calendar.add(Calendar.DAY_OF_YEAR, -daysAgo)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return dateFormat.format(calendar.time)
     }
+//
+//    private var isNavigating= false
+//
+//    override fun onResume() {
+//        super.onResume()
+//        isNavigating = false
+//    }
 
     override fun onItemClick(workout: Workout) {
-        val intent = Intent(this, WorkoutDetailActivity::class.java)
-        intent.putExtra("WORKOUT_ID", workout.id)
-        startActivity(intent)
+//        if (isNavigating) return
+//        isNavigating = true
+        val option = arrayOf("View Details/ Edit ", "View Progress Chart")
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(workout.name)
+            .setItems(option) { _, which ->
+                when (which) {
+                    0 -> {
+                        val intent = Intent(this, WorkoutDetailActivity::class.java)
+                        intent.putExtra("WORKOUT_ID", workout.id)
+                        intent.putExtra("EXERCISE_NAME", workout.name)
+                        startActivity(intent)
+                    }
+
+                    1 -> {
+                        val intent = Intent(this, ProgressChartActivity::class.java)
+//                        intent.putExtra("WORKOUT_ID", workout.id)
+                        intent.putExtra("EXERCISE_NAME", workout.name)
+                        startActivity(intent)
+                    }
+                }
+            }
+//            .setOnCancelListener {
+//                isNavigating = false
+//            }
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -157,6 +188,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             override fun onMenuItemActionExpand(item: MenuItem): Boolean {
                 return true
             }
+
             override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
                 // When user clicks the "back" arrow or closes the search,
                 currentSearchQuery = "" //reset the search query
