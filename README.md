@@ -69,3 +69,13 @@ the following technologies:
 
 
 ![IMG_20260331_061618](https://github.com/user-attachments/assets/8f2f2fed-df32-412a-9d99-76b1732c2765)
+
+
+
+
+
+
+
+
+![IMG_20260331_061636](https://github.com/user-attachments/assets/832e6a9c-9c56-4be7-b6f7-3bc977a85ed4)
+
