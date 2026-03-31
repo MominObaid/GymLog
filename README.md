@@ -59,7 +59,15 @@ the following technologies:
 
 
 
-<img src = "https://github.com/user-attachments/assets/65610aff-2b0a-487e-880e-9df499f18bc8" width="400" hspace ="40" vspace="40">
+<img src = "https://github.com/user-attachments/assets/65610aff-2b0a-487e-880e-9df499f18bc8" width="350" hspace ="30" vspace="30">
+
+
+
+
+
+
+
+
 
 
 
