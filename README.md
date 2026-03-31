@@ -58,4 +58,14 @@ the following technologies:
 
 
 
+
+
 ![IMG_20260331_061559](https://github.com/user-attachments/assets/a4ed7dc5-e7f8-4921-b168-de0e8583c4ee)
+
+
+
+
+
+
+
+![IMG_20260331_061618](https://github.com/user-attachments/assets/8f2f2fed-df32-412a-9d99-76b1732c2765)
