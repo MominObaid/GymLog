@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
 //    override fun onResume() {
 //        super.onResume()
 //        isNavigating = false
-//    }
+//        }
 
     override fun onItemClick(workout: Workout) {
 //        if (isNavigating) return
