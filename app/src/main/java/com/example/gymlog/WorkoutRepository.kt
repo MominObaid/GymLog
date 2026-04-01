@@ -1,13 +1,4 @@
 //package com.example.gymlog
-//
-//import androidx.lifecycle.LiveData
-//import androidx.lifecycle.MutableLiveData
-//import com.example.gymlog.api.ApiExercise
-//import com.example.gymlog.api.ApiService
-//import com.example.gymlog.model.Workout
-//import com.example.gymlog.model.WorkoutDao
-//import com.example.gymlog.model.WorkoutDatabase
-//
 //class WorkoutRepository(
 //    private val workoutDao: WorkoutDao,
 //    private val apiService: ApiService,
