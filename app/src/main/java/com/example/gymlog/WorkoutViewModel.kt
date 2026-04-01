@@ -55,4 +55,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAll()
     }
+    fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
+        return repository.getWorkoutHistory(exerciseName)
+    }
 }
