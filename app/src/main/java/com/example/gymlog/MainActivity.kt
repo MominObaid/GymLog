@@ -1,5 +1,7 @@
 package com.example.gymlog
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
@@ -7,8 +9,10 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewAnimationUtils
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +24,7 @@ import com.example.gymlog.databinding.ActivityMainBinding
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDatabase
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
@@ -106,7 +111,129 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             binding.chipRecent.isChecked = true
             applyFilter()
         }
+
+        // Logic for BottomSheet, a screen that appears from the bottom of the screen
+//        val bottomSheetBehavior = BottomSheetBehavior.from(binding.chatSheet.bottomSheet)
+
+//        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback(){
+//            override fun onStateChanged(bottomSheet: View, newState: Int) {
+//                when(newState){
+//                    BottomSheetBehavior.STATE_EXPANDED -> {
+//                        // Hide FAB when chatbot is full screen
+//                        binding.fabAddWorkout.hide()
+//                    }
+//                    BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
+//                        // Show FAB when chatbot is closed or peeked
+//                        binding.fabAddWorkout.show()
+//                    }
+//                }
+//            }
+//
+//            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+//                // Fade the FAB out as the sheet slides up
+//                binding.fabAddWorkout.alpha = 1 - slideOffset
+//            }
+//        })
+//        binding.chatSheet.btnSendChat.setOnClickListener {
+//            val message = binding.chatSheet.etChatInput.text.toString()
+//            if (message.isNotEmpty()){
+//                binding.chatSheet.tvChatContent.append("\n\nYou: $message")
+//                binding.chatSheet.tvChatContent.append("\n\nAI: Thinking...")
+//                workoutViewModel.askAi(message)
+//                binding.chatSheet.etChatInput.text.clear()
+//            }
+//        }
+
+
+        binding.chatOverlay.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnSendChat).setOnClickListener {
+            val etInput = binding.chatOverlay.findViewById<android.widget.EditText>(R.id.etChatInput)
+            val tvContent = binding.chatOverlay.findViewById<android.widget.TextView>(R.id.tvChatContent)
+
+            val message = etInput.text.toString()
+            if (message.isNotEmpty()) {
+                tvContent.append("\n\nYou: $message")
+                tvContent.append("\n\nAI: Thinking...")
+                workoutViewModel.askAi(message)
+                etInput.text.clear()
+            }
+        }
+        //Observe AI Response
+        workoutViewModel.aiResponse.observe(this, Observer { response ->
+            response?.let {
+                val tvContent = binding.chatOverlay.findViewById<android.widget.TextView>(R.id.tvChatContent)
+                val currentText = tvContent.text.toString()
+
+                if (currentText.contains("AI: Thinking...")) {
+                    val updateText = currentText.replace("AI: Thinking...", "AI: $it")
+                    tvContent.text = updateText
+                }else{
+                    tvContent.append("\n\nAI: $it")
+                }
+                workoutViewModel.clearAiResponse()
+//                binding.fabAddWorkout.visibility = View.INVISIBLE
+            }
+        })
+        binding.fabAiChat.setOnClickListener {
+            revealChat()
+
+        }
+        binding.chatOverlay.setOnClickListener {
+            hideChat()
+        }
+        // Modern Back Press Handling
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.chatOverlay.visibility == View.VISIBLE) {
+                    // 1. If chat is open, just hide the chat
+                    hideChat()
+                } else {
+                    // 2. If chat is already closed, disable this callback and
+                    // let the system handle it (which will exit the app)
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        })
     }
+//    override fun onBackPressed() {
+//        if (binding.chatOverlay.visibility == View.VISIBLE) {
+//            hideChat()
+//        } else {
+//            super.onBackPressed()
+//        }
+//    }
+    private fun revealChat(){
+        val chatView = binding.chatOverlay
+        val cx = binding.fabAiChat.x.toInt() + binding.fabAiChat.width / 2
+        val cy = binding.fabAiChat.y.toInt() + binding.fabAiChat.height/ 2
+
+        val finalRadius = Math.hypot(chatView.width.toDouble(), chatView.height.toDouble()).toFloat()
+        val anim = ViewAnimationUtils.createCircularReveal(chatView, cx, cy, 0f, finalRadius)
+        chatView.visibility = View.VISIBLE
+        binding.fabAddWorkout.hide()
+        binding.fabAiChat.hide()
+        anim.duration = 500
+        anim.start()
+    }
+
+    private fun hideChat(){
+        val chatView = binding.chatOverlay
+        val cx = binding.fabAiChat.x.toInt() + binding.fabAiChat.width / 2
+        val cy = binding.fabAiChat.y.toInt() + binding.fabAiChat.height/ 2
+
+        val initialRadius = Math.hypot(chatView.width.toDouble(), chatView.height.toDouble()).toFloat()
+        val anim = ViewAnimationUtils.createCircularReveal(chatView, cx, cy, initialRadius, 0f)
+        anim.addListener(object : AnimatorListenerAdapter(){
+            override fun onAnimationEnd(animation: Animator) {
+                chatView.visibility = View.INVISIBLE
+                binding.fabAddWorkout.show()
+                binding.fabAiChat.show()
+            }
+        })
+            anim.start()
+    }
+
 
     private fun applyFilter() {
         var filteredList = if (binding.chipRecent.isChecked) {
@@ -227,6 +354,17 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
 
     private fun showAddWorkoutDialog() {
         val dialogBinding = DialogAddWorkoutBinding.inflate(LayoutInflater.from(this))
+
+//        dialogBinding.btnAskAi.setOnClickListener { //for ai
+//            val exercise = dialogBinding.autoCompleteExerciseName.text.toString()
+//            if (exercise.isNotEmpty()) {
+//                Toast.makeText(this, "Asking AI for tips on $exercise...", Toast.LENGTH_SHORT)
+//                    .show()
+//                workoutViewModel.askAi("Give me 3 short, expert tips for the exercise: $exercise. Focus on safety and form.")
+//            } else {
+//                Toast.makeText(this, "Please enter an exercise name", Toast.LENGTH_SHORT).show()
+//            }
+//        }
 
         //Create an empty adapter for now, We will update it when the data arrives.
         val exerciseNameAdapter =
