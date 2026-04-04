@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.appbar.MaterialToolbar   xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chatToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:navigationIcon="@android:drawable/ic_menu_revert"
+    app:navigationIconTint="?attr/colorPrimary"
+    app:title="GymLog AI"
+    app:titleCentered="true" >
+
+<com.google.android.material.card.MaterialCardView
     android:id="@+id/bottomSheet"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,15 +19,6 @@
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
 
-    <!-- Inside your chatbot layout file (e.g., layout_chatbot_sheet.xml) -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/chatToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:navigationIcon="@android:drawable/ic_menu_revert"
-        app:navigationIconTint="?attr/colorPrimary"
-        app:title="GymLog AI"
-        app:titleCentered="true" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -82,3 +81,4 @@
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+</com.google.android.material.appbar.MaterialToolbar>
