@@ -17,6 +17,20 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
 
     //LiveData for error handling
     val apiError: MutableLiveData<String> = MutableLiveData()
+    private val aiManager = AiAssistantManager()
+    private val _aiResponse = MutableLiveData<String>()
+    val aiResponse: LiveData<String> = _aiResponse
+
+    fun clearAiResponse(){
+        _aiResponse.value = null // Clear the value
+    }
+
+    fun askAi(prompt : String){
+        viewModelScope.launch {
+            val result = aiManager.getWorkoutAdvice(prompt)
+            _aiResponse.postValue(result)
+        }
+    }
 
     init {
         fetchExercisesFromApi()
@@ -55,6 +69,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAll()
     }
+
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
         return repository.getWorkoutHistory(exerciseName)
     }
