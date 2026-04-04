@@ -24,7 +24,6 @@ import com.example.gymlog.databinding.ActivityMainBinding
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDatabase
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
@@ -111,7 +110,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             binding.chipRecent.isChecked = true
             applyFilter()
         }
-
         // Logic for BottomSheet, a screen that appears from the bottom of the screen
 //        val bottomSheetBehavior = BottomSheetBehavior.from(binding.chatSheet.bottomSheet)
 
@@ -157,6 +155,10 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                 etInput.text.clear()
             }
         }
+        binding.chatOverlay.findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.chatToolbar)
+            .setNavigationOnClickListener {
+                hideChat()
+            }
         //Observe AI Response
         workoutViewModel.aiResponse.observe(this, Observer { response ->
             response?.let {
