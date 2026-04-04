@@ -57,7 +57,7 @@
                             android:text="All Workouts"
                             android:checked="true"
                             android:textColor="?attr/colorSurface"
-                            app:chipBackgroundColor="@color/design_default_color_primary_variant" />
+                            app:chipBackgroundColor="@color/primary_light" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chipRecent"
@@ -110,7 +110,9 @@
             android:layout_height="160dp"
             android:alpha="0.6"
             android:src="@drawable/baseline_add_24"
-            app:tint="#D1D1D1" />
+            app:tint="#D1D1D1"
+
+            />
 
         <TextView
             android:layout_width="wrap_content"
@@ -144,6 +146,37 @@
         app:icon="@drawable/baseline_add_24"
         app:iconTint="?attr/colorSurface"
         app:elevation="8dp"
-        app:backgroundTint="@color/design_default_color_primary" />
+        app:backgroundTint="@color/primary_light" />
 
+<!--    <include--><!--this is for BottomSheet that scrren appears from bottom of the screen-->
+<!--        android:id="@+id/chatSheet"-->
+<!--        layout="@layout/layout_chatbot_sheet" />-->
+
+    <FrameLayout
+        android:id="@+id/chatOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:background="?attr/colorSurface"
+        android:elevation="12dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <include
+            android:id="@+id/chatContent"
+            layout="@layout/layout_chatbot_sheet" /> <!-- Reuse your existing sheet layout -->
+    </FrameLayout>
+
+    <!-- Add an AI FAB next to your existing FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAiChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="100dp"
+        android:layout_marginEnd="30dp"
+        app:srcCompat="@drawable/ic_ai_sparkles"
+        app:tint="?attr/colorOnPrimary"
+        app:backgroundTint="@color/primary_light" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
