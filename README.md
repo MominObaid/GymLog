@@ -81,9 +81,6 @@ the following technologies:
 
 
 
-
-
-
 <img src ="https://github.com/user-attachments/assets/a4ed7dc5-e7f8-4921-b168-de0e8583c4ee" width="300" hspace="30" vspace="30">
 
 
