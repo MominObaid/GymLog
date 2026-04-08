@@ -117,12 +117,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
 //                        // Hide FAB when chatbot is full screen
 //                        binding.fabAddWorkout.hide()
 //                    }
-//                    BottomSheetBehavior.STATE_COLLAPSED, BottomSheetBehavior.STATE_HIDDEN -> {
-//                        // Show FAB when chatbot is closed or peeked
-//                        binding.fabAddWorkout.show()
-//                    }
-//                }
-//            }
 //
 //            override fun onSlide(bottomSheet: View, slideOffset: Float) {
 //                // Fade the FAB out as the sheet slides up
