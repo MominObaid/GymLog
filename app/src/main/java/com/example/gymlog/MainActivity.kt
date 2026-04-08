@@ -110,9 +110,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             binding.chipRecent.isChecked = true
             applyFilter()
         }
-        // Logic for BottomSheet, a screen that appears from the bottom of the screen
-//        val bottomSheetBehavior = BottomSheetBehavior.from(binding.chatSheet.bottomSheet)
-
 //        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback(){
 //            override fun onStateChanged(bottomSheet: View, newState: Int) {
 //                when(newState){
