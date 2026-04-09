@@ -148,10 +148,6 @@
         app:elevation="8dp"
         app:backgroundTint="@color/primary_light" />
 
-<!--    <include--><!--this is for BottomSheet that scrren appears from bottom of the screen-->
-<!--        android:id="@+id/chatSheet"-->
-<!--        layout="@layout/layout_chatbot_sheet" />-->
-
     <FrameLayout
         android:id="@+id/chatOverlay"
         android:layout_width="match_parent"
