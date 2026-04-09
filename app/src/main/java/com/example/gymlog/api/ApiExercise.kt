@@ -15,7 +15,6 @@ data class ApiExercise(
     val name : String,
     @Json(name = "description")
     val description: String,
-//    val category: ApiCategory
 )
 
 
