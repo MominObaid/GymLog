@@ -76,14 +76,6 @@
 
 
 
-
-
-
-
-
-
-
-//
 package com.example.gymlog
 
 import androidx.lifecycle.LiveData
