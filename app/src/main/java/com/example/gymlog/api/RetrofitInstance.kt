@@ -32,13 +32,6 @@ object RetrofitInstance {
     }
 }
 
-
-
-
-
-
-
-
 //object RetrofitInstance {
 //
 //    //The base URL of the API
