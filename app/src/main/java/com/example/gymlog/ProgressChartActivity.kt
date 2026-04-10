@@ -1,6 +1,5 @@
 package com.example.gymlog
 
-import android.R.attr.entries
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
