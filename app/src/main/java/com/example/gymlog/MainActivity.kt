@@ -24,6 +24,7 @@ import com.example.gymlog.databinding.ActivityMainBinding
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDatabase
+import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import java.text.SimpleDateFormat
@@ -170,7 +171,8 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
             revealChat()
 
         }
-        binding.chatOverlay.setOnClickListener {
+        binding.chatOverlay.findViewById<MaterialToolbar>(R.id.chatToolbar)
+            .setNavigationOnClickListener {
             hideChat()
         }
         // Modern Back Press Handling
@@ -282,7 +284,6 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                         intent.putExtra("EXERCISE_NAME", workout.name)
                         startActivity(intent)
                     }
-
                     1 -> {
                         val intent = Intent(this, ProgressChartActivity::class.java)
 //                        intent.putExtra("WORKOUT_ID", workout.id)
