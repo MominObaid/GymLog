@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="220dp"
         android:background="?attr/colorSurface"
+        app:liftOnScroll="true"
         android:theme="@style/ThemeOverlay.MaterialComponents.Light">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -23,7 +24,8 @@
             app:expandedTitleMarginBottom="80dp"
             app:expandedTitleTextAppearance="@style/TextAppearance.Material3.HeadlineLarge"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:title="My Workouts">
+            app:title="My Workouts"
+            app:titleCollapseMode="fade">
 
             <!-- Background Header Decoration -->
             <View
@@ -39,36 +41,29 @@
                 android:padding="16dp">
 
                 <!-- Simple Stats Row -->
-                <HorizontalScrollView
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupFilter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:scrollbars="none">
+                    app:singleSelection="true"
+                    app:selectionRequired="true"
+                    >
 
-                    <LinearLayout
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAll"
+                        style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:text="All Workouts"
+                        android:checked="true" />
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipAll"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="All Workouts"
-                            android:checked="true"
-                            android:textColor="?attr/colorSurface"
-                            app:chipBackgroundColor="@color/primary_light" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRecent"
-                            style="@style/Widget.Material3.Chip.Filter"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="This Week" />
-
-                    </LinearLayout>
-                </HorizontalScrollView>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipRecent"
+                        style="@style/Widget.Material3.Chip.Filter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="This Week" />
+                </com.google.android.material.chip.ChipGroup>
             </LinearLayout>
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -119,8 +114,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="No Workouts Recorded"
-            android:textColor="#424242"
-            android:fontFamily="sans-serif-medium"
+            android:textColor="?attr/colorSurface"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
             android:textSize="20sp" />
 
         <TextView
@@ -129,7 +124,7 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:text="Consistency is key! Tap the button below to log your first session."
-            android:textColor="#757575"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -146,7 +141,8 @@
         app:icon="@drawable/baseline_add_24"
         app:iconTint="?attr/colorSurface"
         app:elevation="8dp"
-        app:backgroundTint="@color/primary_light" />
+        app:backgroundTint="@color/primary_light"
+        android:contentDescription="Add New Workout session"/>
 
     <FrameLayout
         android:id="@+id/chatOverlay"
