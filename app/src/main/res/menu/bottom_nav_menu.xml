@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_workouts"
+        android:icon="@drawable/baseline_add_24"
+        android:title="Dashboard" />
+    <item
+        android:id="@+id/nav_stats"
+        android:icon="@drawable/baseline_calendar_today_24"
+        android:title="Progress" />
+    <item
+        android:id="@+id/nav_ai"
+        android:icon="@drawable/ic_ai_sparkles"
+        android:title="Profile" />
+</menu>
