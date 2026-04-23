@@ -190,6 +190,25 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
                 }
             }
         })
+//        binding.bottomNavigation.setOnItemSelectedListener { item ->
+//            when (item.itemId){
+//                R.id.nav_workouts -> {  // Show current list
+//                    binding.recyclerViewWorkout.visibility = View.VISIBLE
+//                    binding.appBarLayout.setExpanded(true)
+//                    binding.chatOverlay.visibility = View.GONE
+//                    true
+//                }
+//                R.id.nav_stats -> {
+                    // Navigate to your Chart Activity
+//                    false
+//                }
+//                R.id.nav_ai -> {
+//                    revealChat()  //Open Chat overlay logic
+//                    true
+//                }
+//                else -> false
+//            }
+//        }
     }
 //    override fun onBackPressed() {
 //        if (binding.chatOverlay.visibility == View.VISIBLE) {
