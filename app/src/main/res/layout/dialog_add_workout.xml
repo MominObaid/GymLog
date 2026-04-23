@@ -6,16 +6,16 @@
     android:background="@drawable/dialog_bg">
 
     <!-- Watermark Background Icon -->
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="-40dp"
-        android:layout_marginBottom="-40dp"
-        android:alpha="0.05"
-        android:rotation="-15"
-        android:src="@drawable/baseline_add_24"
-        app:tint="?attr/colorPrimary" />
+<!--    <ImageView-->
+<!--        android:layout_width="200dp"-->
+<!--        android:layout_height="200dp"-->
+<!--        android:layout_gravity="bottom|end"-->
+<!--        android:layout_marginEnd="-40dp"-->
+<!--        android:layout_marginBottom="-40dp"-->
+<!--        android:alpha="0.05"-->
+<!--        android:rotation="-15"-->
+<!--        android:src="@drawable/baseline_add_24"-->
+<!--        app:tint="?attr/colorPrimary" />-->
 
     <ScrollView
         android:layout_width="match_parent"
@@ -54,7 +54,6 @@
 
             <!-- Exercise Group -->
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Search Exercise"
@@ -65,14 +64,16 @@
                 app:boxCornerRadiusTopStart="16dp"
                 app:boxStrokeWidth="0dp"
                 app:boxStrokeWidthFocused="0dp"
-                app:startIconTint="?attr/colorPrimary">
+                app:startIconTint="?attr/colorPrimary"
+ >
 
                 <AutoCompleteTextView
                     android:id="@+id/autoCompleteExerciseName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textCapWords"
-                    android:paddingVertical="20dp" />
+                    android:paddingVertical="20dp"
+                    android:paddingStart="18dp"/>
 
 <!--                <com.google.android.material.button.MaterialButton-->
 <!--                    android:id="@+id/btnAskAi"-->
