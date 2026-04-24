@@ -13,4 +13,8 @@
     <string name="profile">Profile</string>
     <string name="progress">Progress</string>
     <string name="dashboard">Dashboard</string>
+    <string name="add_new_workout_session">Add New Workout session</string>
+    <string name="new_session">New Session</string>
+    <string name="consistency_is_key_tap_the_button_below_to_log_your_first_session">Consistency is key! Tap the button below to log your first session.</string>
+    <string name="no_workouts_recorded">No Workouts Recorded</string>
 </resources>
