@@ -18,8 +18,8 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     //LiveData for error handling
     val apiError: MutableLiveData<String> = MutableLiveData()
     private val aiManager = AiAssistantManager()
-    private val _aiResponse = MutableLiveData<String>()
-    val aiResponse: LiveData<String> = _aiResponse
+    private val _aiResponse = MutableLiveData<String?>()
+    val aiResponse: LiveData<String> = _aiResponse as LiveData<String>
 
     fun clearAiResponse(){
         _aiResponse.value = null // Clear the value
