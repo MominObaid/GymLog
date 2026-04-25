@@ -84,13 +84,13 @@ import com.example.gymlog.api.ApiService
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDao
 
-// 1. Simplified constructor. Only request dependencies you actually use.
+// 1. constructor. Only request dependencies you actually use.
 class WorkoutRepository(
     private val workoutDao: WorkoutDao,
     private val apiService: ApiService
 ) {
 
-    // This correctly exposes the LiveData list from the database.
+    // This exposes the LiveData list from the database.
     val allWorkouts: LiveData<List<Workout>> = workoutDao.getAllWorkouts()
 
     // --- Database Operations ---
@@ -128,11 +128,10 @@ class WorkoutRepository(
         data class Error(val message: String) : ApiResult<Nothing>()
     }
 
-    /**
-     * This function contains the business logic for fetching exercises from the API.
-     * It handles success, failure, and network exceptions, returning a sealed result.
-     */
-    // 3. This is the fully corrected and robust implementation.
+
+    //This function contains the business logic for fetching exercises from the API.
+     //It handles success, failure, and network exceptions, returning a sealed result.
+
     suspend fun fetchFromApi(): ApiResult<List<ApiExercise>> {
         return try {
             // Make the API call
