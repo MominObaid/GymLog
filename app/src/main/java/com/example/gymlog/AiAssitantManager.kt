@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 
 class AiAssistantManager() {
-    private val apiKey = "AIzaSyB_oZT5kDDnTXBzObih4i7qmZ2E7RlxGBY"
     private val model = GenerativeModel(
         modelName = "gemini-1.5-flash",
         apiKey = apiKey
