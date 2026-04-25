@@ -1,7 +1,6 @@
 package com.example.gymlog
 
 import android.util.Log
-import com.google.ai.client.generativeai.GenerativeModel
 
 class AiAssistantManager() {
     private val model = GenerativeModel(
