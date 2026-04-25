@@ -55,7 +55,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             }
         })
 
-        // Set click listener for the update button
+        // click listener for the update button
         binding.buttonUpdate.setOnClickListener {
             updateWorkout()
         }
@@ -123,7 +123,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
         finish() // Go back to the main list
     }
 
-    // --- Add a Delete button to the toolbar ---
+    // Add a Delete button to the toolbar
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.detail_menu, menu)
