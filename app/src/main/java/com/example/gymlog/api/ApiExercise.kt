@@ -6,15 +6,15 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class ExerciseApiResponse(
     @Json(name = "results")
-    val results: List<ApiExercise>
+    val results: List<ApiExercise>?
 )
 @JsonClass(generateAdapter = true)
 data class ApiExercise(
     val id : Int,
     @Json(name = "name")
-    val name : String,
+    val name : String?,
     @Json(name = "description")
-    val description: String,
+    val description: String?,
 )
 
 
