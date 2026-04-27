@@ -58,6 +58,8 @@ the following technologies:
 
 •Persistent Storage: All workout data is saved locally on the device using a Room database, so your data is safe even when the app is closed.
 
+•Sort: User can sort workout by chiping on this week's workout, so that only that week's workout will be listed.
+
 
 
 
