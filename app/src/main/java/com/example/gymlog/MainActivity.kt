@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         val factory = WorkoutViewModelFactory(repository)
         workoutViewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
 
-        workoutViewModel.fetchExercisesFromApi()
+        // workoutViewModel.fetchExercisesFromApi() // Removed redundant call, it's in VM init
         //Observe the LiveData from the ViewModel.
 
         workoutViewModel.allWorkouts.observe(this, Observer { workouts ->
@@ -440,7 +440,7 @@ class MainActivity : AppCompatActivity(), WorkoutAdapter.OnItemClickListener {
         workoutViewModel.apiExercises.observe(this, Observer { exercises ->
             exercises?.let {
                 //When data is Fetched update the adapter
-                val exerciseName = it.map { exercises -> exercises.name }
+                val exerciseName = it.mapNotNull { it.name }
                 exerciseNameAdapter.clear()
                 exerciseNameAdapter.addAll(exerciseName)
                 exerciseNameAdapter.notifyDataSetChanged()
