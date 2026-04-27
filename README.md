@@ -60,6 +60,8 @@ the following technologies:
 
 •Sort: User can sort workout by chiping on this week's workout, so that only that week's workout will be listed.
 
+•AI: AI chatbot that help user about workouts or form or anything related to workout 
+
 
 
 
