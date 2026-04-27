@@ -11,11 +11,12 @@ It provides a clean interface to add, view, update, and delete workout entries, 
 
 This project is built using modern Android development practices and serves as a great example of a database-driven mobile application.
 
-_🛠️ Tech Stack & Architecture_
+**_🛠️ Tech Stack & Architecture_**
 
 This project follows the official Android recommended architecture and utilizes 
 
 the following technologies:
+
 
 •Language: Kotlin - The officially recommended language for Android development.
 
