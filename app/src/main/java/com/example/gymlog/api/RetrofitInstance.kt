@@ -16,6 +16,15 @@ object RetrofitInstance {
     }
      val client = OkHttpClient.Builder()
         .addInterceptor(logging)
+        .addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("User-Agent", "GymLogApp/1.0")
+                .header("Accept", "application/json")
+                .build()
+            chain.proceed(request)
+        }
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
         .build()
 
      val moshi = Moshi.Builder()
