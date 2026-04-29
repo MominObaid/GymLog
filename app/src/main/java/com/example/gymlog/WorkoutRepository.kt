@@ -139,21 +139,17 @@ class WorkoutRepository(
 
             if (response.isSuccessful) {
                 val body = response.body()
-                // Check that the body is not null AND the results list is not empty
-                if (body != null && body.results.isNotEmpty()) {
-                    // On success, return the list of exercises
-                    ApiResult.Success(body.results)
+                val results = body?.results
+                if (results != null && results.isNotEmpty()) {
+                    ApiResult.Success(results)
                 } else {
-                    // Handle the case of a successful response with an empty body
-                    ApiResult.Error("API Error: Response body is empty.")
+                    ApiResult.Error("API Error: No exercises found.")
                 }
             } else {
-                // Handle non-successful HTTP responses (e.g., 404, 500)
                 ApiResult.Error("API Error ${response.code()}: ${response.message()}")
             }
         } catch (e: Exception) {
-            // Handle network errors (e.g., no internet connection) or other exceptions
-            ApiResult.Error("Network Error: ${e.message}")
+            ApiResult.Error("Network Error: ${e.localizedMessage ?: "Unknown error"}")
         }
     }
 }
