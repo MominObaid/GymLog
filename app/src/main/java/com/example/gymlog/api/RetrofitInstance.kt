@@ -40,7 +40,6 @@ object RetrofitInstance {
             .create(ApiService::class.java)
     }
 }
-
 //object RetrofitInstance {
 //
 //    //The base URL of the API
