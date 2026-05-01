@@ -45,9 +45,6 @@ object RetrofitInstance {
 //    //The base URL of the API
 //    private const val BASE_URL = "https://wger.de/api/v2"
 
-////"https://wger.de/api/v2/exerciseinfo/?limit=500&language=2"
-//https://wger.de/api/v2/exerciseinfo/?language=2&limit=500
-
 ////    //Create a Moshi instance with a Kotlin adapter
 //    private val moshi = Moshi.Builder()
 //        .add(KotlinJsonAdapterFactory())
