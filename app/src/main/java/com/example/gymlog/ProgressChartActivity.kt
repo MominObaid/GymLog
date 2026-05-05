@@ -53,18 +53,6 @@ class ProgressChartActivity : AppCompatActivity() {
             valueTextColor = textColor
         }
 
-//        val dataSet = LineDataSet(entries, "Weight (kg)").apply {
-//            color = Color.BLUE
-//            setCircleColor(Color.BLUE)
-//            valueTextColor = Color.BLACK
-//            lineWidth = 2f
-//            circleRadius = 5f
-//            setDrawCircleHole(false)
-//            setDrawFilled(true) // Highlights the area under the line
-//            fillColor = Color.CYAN
-//            mode = LineDataSet.Mode.CUBIC_BEZIER
-//        }
-
         lineChart.apply {
             data = LineData(dataSet)
             lineChart.description.isEnabled = false
