@@ -4,29 +4,26 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.example.gymlog.api.RetrofitInstance
+import androidx.activity.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import com.example.gymlog.model.Workout
-import com.example.gymlog.model.WorkoutDatabase
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 
+@AndroidEntryPoint
 class ProgressChartActivity : AppCompatActivity() {
 
     private lateinit var lineChart: LineChart
-    private lateinit var viewModel: WorkoutViewModel
+    private val viewModel: WorkoutViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_progress_chart)
 
-        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
-        val repository = WorkoutRepository(workoutDao, RetrofitInstance.api)
-        val factory = WorkoutViewModelFactory(repository)
-        viewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
+        // viewModel is now injected via Hilt
 
 
         val exerciseName = intent.getStringExtra("EXERCISE_NAME") ?: return
