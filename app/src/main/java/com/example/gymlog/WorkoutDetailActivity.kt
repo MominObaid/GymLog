@@ -7,20 +7,20 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import com.example.gymlog.api.RetrofitInstance
 import com.example.gymlog.databinding.ActivityWorkoutDetailBinding
 import com.example.gymlog.model.Workout
-import com.example.gymlog.model.WorkoutDatabase
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.activity.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class WorkoutDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWorkoutDetailBinding
-    private lateinit var workoutViewModel: WorkoutViewModel
+    private val workoutViewModel: WorkoutViewModel by viewModels()
     private var currentWorkout: Workout? = null
     private var workoutId: Int = -1
     private var selectedDate: String = ""
@@ -31,12 +31,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.detailToolbar)
 
-
-        val workoutDao = WorkoutDatabase.getDatabase(application).workoutDao()
-        val apiService = RetrofitInstance.api
-        val repository = WorkoutRepository(workoutDao, apiService)
-        val factory = WorkoutViewModelFactory(repository)
-        workoutViewModel = ViewModelProvider(this, factory).get(WorkoutViewModel::class.java)
+        // workoutViewModel is now injected via Hilt
 
 
         // Get the workout ID from the intent
