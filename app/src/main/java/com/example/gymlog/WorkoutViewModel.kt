@@ -6,10 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymlog.api.ApiExercise
 import com.example.gymlog.model.Workout
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() {
+@HiltViewModel
+class WorkoutViewModel @Inject constructor(
+    private val repository: WorkoutRepository,
+    private val aiManager: AiAssistantManager
+) : ViewModel() {
     val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
 
     //LiveData to hold the list of Exercise from the API
@@ -17,7 +23,6 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
 
     //LiveData for error handling
     val apiError: MutableLiveData<String> = MutableLiveData()
-    private val aiManager = AiAssistantManager()
     private val _aiResponse = MutableLiveData<String?>()
     val aiResponse: LiveData<String> = _aiResponse as LiveData<String>
 
