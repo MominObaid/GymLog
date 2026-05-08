@@ -15,5 +15,5 @@ data class Workout(
     var sets: Int,
     var reps: Int,
     var weight: Double,
-    var date: String,
+    var date: Long,
 )
