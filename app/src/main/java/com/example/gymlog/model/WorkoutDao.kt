@@ -19,6 +19,17 @@ interface WorkoutDao {  //WorkoutDao is the Data Access Object
     @Query("SELECT * FROM workout_table ORDER BY id DESC")
     fun getAllWorkouts(): LiveData<List<Workout>>
 
+    @Query("SELECT * FROM workout_table WHERE date >= :sinceDate ORDER BY id DESC")
+    fun getRecentWorkouts(sinceDate: Long): LiveData<List<Workout>>
+
+    @Query("""
+        SELECT * FROM workout_table 
+        WHERE (name LIKE '%' || :query || '%') 
+        AND (:sinceDate IS NULL OR date >= :sinceDate) 
+        ORDER BY date DESC, id DESC
+    """)
+    fun getFilteredWorkouts(query: String, sinceDate: Long?): LiveData<List<Workout>>
+
     @Query("DELETE FROM workout_table")
     suspend fun deleteAll()
 
