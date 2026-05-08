@@ -7,6 +7,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.model.Workout
+import java.text.SimpleDateFormat
+import java.util.*
 
 class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.Adapter<WorkoutAdapter.WorkoutViewHolder>() {
     private var workouts = emptyList<Workout>()
@@ -36,7 +38,9 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
         holder.nameTextView.text = current.name
         holder.detailTextView.text =
             "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
-        holder.dateTextView.text = current.date
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        holder.dateTextView.text = dateFormat.format(Date(current.date))
 
     }
     override fun getItemCount(): Int {
