@@ -1,20 +1,29 @@
 package com.example.gymlog
 
 import android.util.Log
+import com.example.gymlog.api.AiPromptRequest
+import com.example.gymlog.api.GeminiApiService
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AiAssistantManager() {
-    private val model = GenerativeModel(
-        modelName = "gemini-1.5-flash",
-        apiKey = apiKey
-    )
+@Singleton
+class AiAssistantManager @Inject constructor(
+    private val geminiApiService: GeminiApiService
+) {
 
-    suspend fun getWorkoutAdvice(userPrompt: String):String?{
+    suspend fun getWorkoutAdvice(userPrompt: String): String? {
         return try {
-            val response = model.generateContent(userPrompt)
-            response.text
-        }catch (e: Exception){
-            Log.e("AI_ERROR", "Gemini Fialed: ${e.message}")
-            return "Error: ${e.message}"
+            val response = geminiApiService.getWorkoutAdvice(AiPromptRequest(userPrompt))
+            if (response.isSuccessful) {
+                response.body()?.advice
+            } else {
+                val errorMsg = "Backend Error: ${response.code()}"
+                Log.e("AI_ERROR", errorMsg)
+                "Error: $errorMsg"
+            }
+        } catch (e: Exception) {
+            Log.e("AI_ERROR", "Network Failed: ${e.message}")
+            "Error: ${e.message}"
         }
     }
 }
