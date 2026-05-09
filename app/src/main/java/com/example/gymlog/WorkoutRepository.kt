@@ -83,9 +83,11 @@ import com.example.gymlog.api.ApiExercise
 import com.example.gymlog.api.ApiService
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDao
+import javax.inject.Inject
+import javax.inject.Singleton
 
-// 1. constructor. Only request dependencies you actually use.
-class WorkoutRepository(
+@Singleton
+class WorkoutRepository @Inject constructor(
     private val workoutDao: WorkoutDao,
     private val apiService: ApiService
 ) {
@@ -113,6 +115,14 @@ class WorkoutRepository(
 
     fun getWorkoutById(id: Int): LiveData<Workout> {
         return workoutDao.getWorkoutById(id)
+    }
+
+    fun getRecentWorkouts(sinceDate: Long): LiveData<List<Workout>> {
+        return workoutDao.getRecentWorkouts(sinceDate)
+    }
+
+    fun getFilteredWorkouts(query: String, sinceDate: Long?): LiveData<List<Workout>> {
+        return workoutDao.getFilteredWorkouts(query, sinceDate)
     }
 
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
