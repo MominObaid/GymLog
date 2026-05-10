@@ -11,8 +11,7 @@ import com.example.gymlog.databinding.ActivityWorkoutDetailBinding
 import com.example.gymlog.model.Workout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 import androidx.activity.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -23,7 +22,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
     private val workoutViewModel: WorkoutViewModel by viewModels()
     private var currentWorkout: Workout? = null
     private var workoutId: Int = -1
-    private var selectedDate: String = ""
+    private var selectedDateMillis: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,8 +60,9 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding.editTextSetsDetail.setText(workout.sets.toString())
         binding.editTextRepsDetail.setText(workout.reps.toString())
         binding.editTextWeightDetail.setText(workout.weight.toString())
-        selectedDate = workout.date
-        binding.textViewDate.text = selectedDate
+        selectedDateMillis = workout.date
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        binding.textViewDate.text = dateFormat.format(Date(selectedDateMillis))
 
         binding.textViewDate.setOnClickListener {
             showDatePicker()
@@ -71,21 +71,15 @@ class WorkoutDetailActivity : AppCompatActivity() {
 
     private fun showDatePicker() {
         val calendar = Calendar.getInstance()
-        // If we already have a date, try to set the picker to that date
-        val dateFormat =
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        try {
-            val date = dateFormat.parse(selectedDate)
-            if (date != null) calendar.time = date
-        } catch (e: Exception) {
-        }
+        calendar.timeInMillis = selectedDateMillis
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
         DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
                 calendar.set(year, month, dayOfMonth)
-                selectedDate = dateFormat.format(calendar.time)
-                binding.textViewDate.text = selectedDate
+                selectedDateMillis = calendar.timeInMillis
+                binding.textViewDate.text = dateFormat.format(calendar.time)
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -110,7 +104,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             sets = sets,
             reps = reps,
             weight = weight,
-            date = selectedDate     //you can set the date here or use the current date
+            date = selectedDateMillis
         )
 
         workoutViewModel.update(updatedWorkout)
