@@ -3,6 +3,7 @@ package com.example.gymlog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.gymlog.api.ApiExercise
 import com.example.gymlog.model.Workout
@@ -18,13 +19,28 @@ class WorkoutViewModel @Inject constructor(
 ) : ViewModel() {
     val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
 
+    private val _filterParams = MutableLiveData(FilterParams("", null))
+    val filteredWorkouts: LiveData<List<Workout>> = _filterParams.switchMap { params ->
+        repository.getFilteredWorkouts(params.query, params.sinceDate)
+    }
+
+    fun updateFilter(query: String? = null, sinceDate: Long? = null, clearDate: Boolean = false) {
+        val current = _filterParams.value ?: FilterParams("", null)
+        _filterParams.value = FilterParams(
+            query = query ?: current.query,
+            sinceDate = if (clearDate) null else (sinceDate ?: current.sinceDate)
+        )
+    }
+
+    data class FilterParams(val query: String, val sinceDate: Long?)
+
     //LiveData to hold the list of Exercise from the API
     val apiExercises: MutableLiveData<List<ApiExercise>> = MutableLiveData()
 
     //LiveData for error handling
     val apiError: MutableLiveData<String> = MutableLiveData()
     private val _aiResponse = MutableLiveData<String?>()
-    val aiResponse: LiveData<String> = _aiResponse as LiveData<String>
+    val aiResponse: LiveData<String?> = _aiResponse
 
     fun clearAiResponse(){
         _aiResponse.value = null // Clear the value
@@ -69,6 +85,10 @@ class WorkoutViewModel @Inject constructor(
 
     fun getWorkoutById(id: Int): LiveData<Workout> {
         return repository.getWorkoutById(id)
+    }
+
+    fun getRecentWorkouts(sinceDate: Long): LiveData<List<Workout>> {
+        return repository.getRecentWorkouts(sinceDate)
     }
 
     fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
