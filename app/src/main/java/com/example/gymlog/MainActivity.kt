@@ -92,7 +92,6 @@ class MainActivity : AppCompatActivity() {
         anim.duration = 500
         anim.start()
     }
-
     private fun hideChat() {
         val chatView = binding.aiChatContainer
         val cx = binding.fabAiChat.x.toInt() + binding.fabAiChat.width / 2
