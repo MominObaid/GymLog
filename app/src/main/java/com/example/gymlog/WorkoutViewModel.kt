@@ -9,6 +9,9 @@ import com.example.gymlog.api.ApiExercise
 import com.example.gymlog.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,17 +42,16 @@ class WorkoutViewModel @Inject constructor(
 
     //LiveData for error handling
     val apiError: MutableLiveData<String> = MutableLiveData()
-    private val _aiResponse = MutableLiveData<String?>()
-    val aiResponse: LiveData<String?> = _aiResponse
-
-    fun clearAiResponse(){
-        _aiResponse.value = null // Clear the value
-    }
+    
+    private val _aiResponseEvent = MutableSharedFlow<String>()
+    val aiResponseEvent: SharedFlow<String> = _aiResponseEvent.asSharedFlow()
 
     fun askAi(prompt : String){
         viewModelScope.launch {
             val result = aiManager.getWorkoutAdvice(prompt)
-            _aiResponse.postValue(result)
+            if (result != null) {
+                _aiResponseEvent.emit(result)
+            }
         }
     }
 
@@ -98,4 +100,8 @@ class WorkoutViewModel @Inject constructor(
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
         return repository.getWorkoutHistory(exerciseName)
     }
+
+//    fun getWorkoutByHistory(): Flow<Workout> = repository.getWorkoutByHistory()
+//        return repository.getWorkoutByHistory()
+//    }
 }
