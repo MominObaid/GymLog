@@ -7,8 +7,11 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,7 +46,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         super.onViewCreated(view, savedInstanceState)
 
         (activity as? AppCompatActivity)?.setSupportActionBar(binding.toolbar)
-        setHasOptionsMenu(true)
+        setupMenu()
 
         adapter = WorkoutAdapter(this)
         binding.recyclerViewWorkout.adapter = adapter
@@ -149,44 +152,49 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             .show()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.main_menu, menu)
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem?.actionView as androidx.appcompat.widget.SearchView
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.main_menu, menu)
+                val searchItem = menu.findItem(R.id.action_search)
+                val searchView = searchItem?.actionView as androidx.appcompat.widget.SearchView
 
-        searchView.queryHint = "Search Exercises...."
+                searchView.queryHint = "Search Exercises...."
 
-        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionExpand(item: MenuItem): Boolean = true
+                searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+                    override fun onMenuItemActionExpand(item: MenuItem): Boolean = true
 
-            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
-                workoutViewModel.updateFilter(query = "")
-                return true
+                    override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                        workoutViewModel.updateFilter(query = "")
+                        return true
+                    }
+                })
+                searchView.setOnQueryTextListener(object :
+                    androidx.appcompat.widget.SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        searchView.clearFocus()
+                        return false
+                    }
+
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        workoutViewModel.updateFilter(query = newText.orEmpty())
+                        return true
+                    }
+                })
             }
-        })
-        searchView.setOnQueryTextListener(object :
-            androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                searchView.clearFocus()
-                return false
-            }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                workoutViewModel.updateFilter(query = newText.orEmpty())
-                return true
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.action_delete_all -> {
+                        workoutViewModel.deleteAll()
+                        Toast.makeText(requireContext(), "All workouts have been deleted", Toast.LENGTH_SHORT).show()
+                        true
+                    }
+                    else -> false
+                }
             }
-        })
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_delete_all -> {
-                workoutViewModel.deleteAll()
-                Toast.makeText(requireContext(), "All workouts have been deleted", Toast.LENGTH_SHORT).show()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun showAddWorkoutDialog() {
