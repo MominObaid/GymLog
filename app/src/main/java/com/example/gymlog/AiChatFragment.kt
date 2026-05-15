@@ -4,15 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.gymlog.databinding.FragmentAiChatBinding
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AiChatFragment : Fragment() {
@@ -33,38 +32,35 @@ class AiChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val chatOverlay = binding.root
-        val btnSendChat = chatOverlay.findViewById<MaterialButton>(R.id.btnSendChat)
-        val etInput = chatOverlay.findViewById<EditText>(R.id.etChatInput)
-        val tvContent = chatOverlay.findViewById<TextView>(R.id.tvChatContent)
-        val toolbar = chatOverlay.findViewById<MaterialToolbar>(R.id.chatToolbar)
+        val chatContent = binding.chatContent
 
-        btnSendChat.setOnClickListener {
-            val message = etInput.text.toString()
+        chatContent.btnSendChat.setOnClickListener {
+            val message = chatContent.etChatInput.text.toString()
             if (message.isNotEmpty()) {
-                tvContent.append("\n\nYou: $message")
-                tvContent.append("\n\nAI: Thinking...")
+                chatContent.tvChatContent.append("\n\nYou: $message")
+                chatContent.tvChatContent.append("\n\nAI: Thinking...")
                 workoutViewModel.askAi(message)
-                etInput.text.clear()
+                chatContent.etChatInput.text.clear()
             }
         }
 
-        toolbar.setNavigationOnClickListener {
+        chatContent.chatToolbar.setNavigationOnClickListener {
             closeChat()
         }
 
-        workoutViewModel.aiResponse.observe(viewLifecycleOwner, Observer { response ->
-            response?.let {
-                val currentText = tvContent.text.toString()
-                if (currentText.contains("AI: Thinking...")) {
-                    val updateText = currentText.replace("AI: Thinking...", "AI: $it")
-                    tvContent.text = updateText
-                } else {
-                    tvContent.append("\n\nAI: $it")
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                workoutViewModel.aiResponseEvent.collect { response ->
+                    val currentText = chatContent.tvChatContent.text.toString()
+                    if (currentText.contains("AI: Thinking...")) {
+                        val updateText = currentText.replace("AI: Thinking...", "AI: $response")
+                        chatContent.tvChatContent.text = updateText
+                    } else {
+                        chatContent.tvChatContent.append("\n\nAI: $response")
+                    }
                 }
-                workoutViewModel.clearAiResponse()
             }
-        })
+        }
     }
 
     private fun closeChat() {
