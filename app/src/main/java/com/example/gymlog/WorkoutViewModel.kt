@@ -100,8 +100,4 @@ class WorkoutViewModel @Inject constructor(
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
         return repository.getWorkoutHistory(exerciseName)
     }
-
-//    fun getWorkoutByHistory(): Flow<Workout> = repository.getWorkoutByHistory()
-//        return repository.getWorkoutByHistory()
-//    }
 }
