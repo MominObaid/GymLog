@@ -51,6 +51,8 @@ class WorkoutRepository @Inject constructor(
         return workoutDao.getWorkoutsHistory(exerciseName)
     }
 
+    suspend fun getProfile() = workoutDao.getProfile()
+
     // API Operation
     // A clean sealed class to represent the result of an operation.
     sealed class ApiResult<out T> {
