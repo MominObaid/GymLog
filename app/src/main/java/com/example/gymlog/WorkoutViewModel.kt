@@ -48,7 +48,7 @@ class WorkoutViewModel @Inject constructor(
 
     fun askAi(prompt : String){
         viewModelScope.launch {
-            val result = aiManager.getWorkoutAdvice(prompt)
+            val result = aiManager.getCoachingAdvice(prompt)
             if (result != null) {
                 _aiResponseEvent.emit(result)
             }
@@ -100,4 +100,6 @@ class WorkoutViewModel @Inject constructor(
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
         return repository.getWorkoutHistory(exerciseName)
     }
+
+    suspend fun getProfile() = repository.getProfile()
 }
