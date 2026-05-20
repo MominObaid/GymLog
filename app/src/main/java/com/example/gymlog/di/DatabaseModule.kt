@@ -30,4 +30,9 @@ object DatabaseModule {
     fun provideWorkoutDao(database: WorkoutDatabase): WorkoutDao {
         return database.workoutDao()
     }
+
+    @Provides
+    fun provideRoutineDao(database: WorkoutDatabase): com.example.gymlog.model.RoutineDao {
+        return database.routineDao()
+    }
 }
