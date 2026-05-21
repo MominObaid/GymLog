@@ -13,9 +13,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
+import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.databinding.FragmentWorkoutListBinding
 import com.example.gymlog.model.Workout
@@ -32,7 +36,16 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
     private val binding get() = _binding!!
 
     private val workoutViewModel: WorkoutViewModel by viewModels()
+    private val routineViewModel: RoutineViewModel by viewModels()
     private lateinit var adapter: WorkoutAdapter
+
+    private val requestPermissions = registerForActivityResult(
+        androidx.health.connect.client.PermissionController.createRequestPermissionResultContract()
+    ) { granted ->
+        if (granted.isNotEmpty()) {
+            routineViewModel.loadHealthData()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,17 +78,60 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         })
 
-        setupItemTouchHelper()
+        routineViewModel.streak.observe(viewLifecycleOwner) { streak ->
+            binding.textViewStreak.text = streak.toString()
+        }
 
-        binding.fabAddWorkout.setOnClickListener {
+        routineViewModel.totalWorkouts.observe(viewLifecycleOwner) { total ->
+            binding.textViewTotalWorkouts.text = total.toString()
+        }
+
+        // Check Health Connect Availability
+        val healthConnectManager = com.example.gymlog.health.HealthConnectManager(requireContext())
+        if (healthConnectManager.isHealthConnectAvailable() && routineViewModel.todaySteps.value == null) {
+            binding.buttonSyncHealth.visibility = View.VISIBLE
+        }
+
+        binding.cardStartWorkout.setOnClickListener {
             showAddWorkoutDialog()
         }
+
+        routineViewModel.todaySteps.observe(viewLifecycleOwner) { steps ->
+            binding.layoutHealthSync.visibility = View.VISIBLE
+            binding.textViewSteps.text = steps.toString()
+            binding.buttonSyncHealth.visibility = View.GONE
+        }
+
+        routineViewModel.latestWeight.observe(viewLifecycleOwner) { weight ->
+            weight?.let {
+                binding.textViewWeight.text = String.format(Locale.getDefault(), "%.1f kg", it)
+            }
+        }
+
+        binding.buttonSyncHealth.setOnClickListener {
+            requestPermissions.launch(
+                setOf(
+                    HealthPermission.getReadPermission(androidx.health.connect.client.records.StepsRecord::class),
+                    HealthPermission.getReadPermission(androidx.health.connect.client.records.WeightRecord::class),
+                    HealthPermission.getWritePermission(androidx.health.connect.client.records.ExerciseSessionRecord::class)
+                )
+            )
+        }
+
+        setupItemTouchHelper()
 
         workoutViewModel.apiError.observe(viewLifecycleOwner, Observer { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
         })
+
+        // Configure MainActivity FAB for AI Chat on this fragment
+        (activity as? MainActivity)?.configureFab(
+            R.drawable.ic_ai_sparkles,
+            "Ask AI",
+            { (activity as? MainActivity)?.revealChat() }
+        )
 
         binding.chipAll.setOnClickListener {
             binding.chipRecent.isChecked = false
@@ -152,6 +208,37 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             .show()
     }
 
+    private fun showProfileDialog() {
+        val dialogBinding = com.example.gymlog.databinding.DialogUserProfileBinding.inflate(LayoutInflater.from(requireContext()))
+        
+        // Load existing profile
+        lifecycleScope.launch {
+            val profile = routineViewModel.userProfile.value ?: workoutViewModel.getProfile()
+            profile?.let {
+                dialogBinding.etProfileGoal.setText(it.goal)
+                dialogBinding.etProfileLevel.setText(it.experienceLevel)
+                dialogBinding.etProfileDays.setText(it.workoutDaysPerWeek.toString())
+                dialogBinding.etProfileEquipment.setText(it.availableEquipment)
+            }
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("User Fitness Profile")
+            .setView(dialogBinding.root)
+            .setPositiveButton("Save") { _, _ ->
+                val profile = com.example.gymlog.model.UserProfile(
+                    goal = dialogBinding.etProfileGoal.text.toString(),
+                    experienceLevel = dialogBinding.etProfileLevel.text.toString(),
+                    workoutDaysPerWeek = dialogBinding.etProfileDays.text.toString().toIntOrNull() ?: 3,
+                    availableEquipment = dialogBinding.etProfileEquipment.text.toString()
+                )
+                routineViewModel.updateProfile(profile)
+                Toast.makeText(requireContext(), "Profile Updated!", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun setupMenu() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(object : MenuProvider {
@@ -189,6 +276,10 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                     R.id.action_delete_all -> {
                         workoutViewModel.deleteAll()
                         Toast.makeText(requireContext(), "All workouts have been deleted", Toast.LENGTH_SHORT).show()
+                        true
+                    }
+                    R.id.action_settings -> {
+                        showProfileDialog()
                         true
                     }
                     else -> false
@@ -255,6 +346,11 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                 }
             }
             .show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        routineViewModel.updateMilestones()
     }
 
     override fun onDestroyView() {
