@@ -9,8 +9,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.gymlog.databinding.ActivityMainBinding
+import com.example.gymlog.notifications.SmartReminderWorker
+import com.example.gymlog.notifications.WorkoutReminderWorker
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -25,21 +31,28 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.commit {
                 replace(R.id.fragment_container, WorkoutListFragment())
             }
+            scheduleWorkoutReminders()
         }
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
+            if (binding.aiChatContainer.visibility == View.VISIBLE) {
+                hideChat()
+            }
+            
             when (item.itemId) {
                 R.id.nav_workouts -> {
                     showFragment(WorkoutListFragment())
-                    binding.fabAiChat.show()
+                    true
+                }
+                R.id.nav_routines -> {
+                    showFragment(RoutineListFragment())
                     true
                 }
                 R.id.nav_stats -> {
-                    val intent = android.content.Intent(this, ProgressChartActivity::class.java)
-                    startActivity(intent)
+                    showFragment(AnalyticsFragment())
                     true
                 }
-                R.id.nav_ai -> {
+                R.id.nav_profile -> {
                     if (binding.aiChatContainer.visibility != View.VISIBLE) {
                         revealChat()
                     }
@@ -47,10 +60,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> false
             }
-        }
-
-        binding.fabAiChat.setOnClickListener {
-            revealChat()
         }
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -72,7 +81,41 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun revealChat() {
+    fun configureFab(iconRes: Int?, text: String?, onClick: View.OnClickListener?) {
+        if (iconRes == null || text == null || onClick == null) {
+            binding.primaryFab.hide()
+        } else {
+            binding.primaryFab.setIconResource(iconRes)
+            binding.primaryFab.text = text
+            binding.primaryFab.setOnClickListener(onClick)
+            binding.primaryFab.show()
+        }
+    }
+
+    private fun scheduleWorkoutReminders() {
+        val reminderRequest = PeriodicWorkRequestBuilder<WorkoutReminderWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .build()
+
+        val smartRequest = PeriodicWorkRequestBuilder<SmartReminderWorker>(12, TimeUnit.HOURS)
+            .build()
+
+        val workManager = WorkManager.getInstance(this)
+        
+        workManager.enqueueUniquePeriodicWork(
+            "workout_reminder",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            reminderRequest
+        )
+
+        workManager.enqueueUniquePeriodicWork(
+            "smart_streak_reminder",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            smartRequest
+        )
+    }
+
+    fun revealChat() {
         val chatView = binding.aiChatContainer
         
         // Add fragment to the container
@@ -80,22 +123,23 @@ class MainActivity : AppCompatActivity() {
             replace(R.id.ai_chat_container, AiChatFragment(), "AI_CHAT_TAG")
         }
 
-        val cx = binding.fabAiChat.x.toInt() + binding.fabAiChat.width / 2
-        val cy = binding.fabAiChat.y.toInt() + binding.fabAiChat.height / 2
+        val cx = binding.primaryFab.x.toInt() + binding.primaryFab.width / 2
+        val cy = binding.primaryFab.y.toInt() + binding.primaryFab.height / 2
 
         val finalRadius = Math.hypot(chatView.width.toDouble(), chatView.height.toDouble()).toFloat()
         val anim = ViewAnimationUtils.createCircularReveal(chatView, cx, cy, 0f, finalRadius)
         
         chatView.visibility = View.VISIBLE
-        binding.fabAiChat.hide()
+        binding.primaryFab.hide()
         
         anim.duration = 500
         anim.start()
     }
-    private fun hideChat() {
+
+    fun hideChat() {
         val chatView = binding.aiChatContainer
-        val cx = binding.fabAiChat.x.toInt() + binding.fabAiChat.width / 2
-        val cy = binding.fabAiChat.y.toInt() + binding.fabAiChat.height / 2
+        val cx = binding.primaryFab.x.toInt() + binding.primaryFab.width / 2
+        val cy = binding.primaryFab.y.toInt() + binding.primaryFab.height / 2
 
         val initialRadius = Math.hypot(chatView.width.toDouble(), chatView.height.toDouble()).toFloat()
         val anim = ViewAnimationUtils.createCircularReveal(chatView, cx, cy, initialRadius, 0f)
@@ -103,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 chatView.visibility = View.INVISIBLE
-                binding.fabAiChat.show()
+                binding.primaryFab.show()
                 // Remove fragment to save resources
                 supportFragmentManager.findFragmentByTag("AI_CHAT_TAG")?.let {
                     supportFragmentManager.commit { remove(it) }
