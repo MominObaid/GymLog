@@ -13,15 +13,26 @@
     <color name="surface_dark">#2B2930</color>
     <color name="text_primary_dark">#E6E1E5</color>
     <color name="text_secondary_dark">#CAC4D0</color>
+
+    <!-- Modern Vibrant Palette -->
+    <color name="md_theme_primary">#6750A4</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_theme_secondary">#625B71</color>
+    <color name="md_theme_tertiary">#7D5260</color>
+
+    <!-- Section Specific Colors -->
+    <color name="streak_amber">#FF8F00</color>
+    <color name="streak_amber_light">#FFF8E1</color>
+    <color name="workout_blue">#1976D2</color>
+    <color name="workout_blue_light">#E3F2FD</color>
+    <color name="health_green">#388E3C</color>
+    <color name="health_green_light">#E8F5E9</color>
+    <color name="health_purple">#7B1FA2</color>
+    <color name="health_purple_light">#F3E5F5</color>
+    <color name="pr_gold">#FBC02D</color>
+    <color name="pr_gold_light">#FFF9C4</color>
+
+    <!-- UI Elements -->
+    <color name="divider_color">#1F000000</color>
+    <color name="card_stroke_color">#E0E0E0</color>
 </resources>
-
-
-
-<!--<resources>-->
-<!--    <color name="black">#FF000000</color>-->
-<!--    <color name="white">#FFFFFFFF</color>-->
-<!--    <color name="colorPrimary">#3F51B5</color>-->
-<!--    <color name="colorPrimaryVariant">#E8EAF6</color>-->
-<!--    &lt;!&ndash; Light blue for the background of the chips &ndash;&gt;-->
-<!--    <color name="chipBackground">#E3F2FD</color>-->
-<!--</resources>-->
