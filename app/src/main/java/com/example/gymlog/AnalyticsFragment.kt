@@ -41,7 +41,7 @@ class AnalyticsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Configure MainActivity FAB for AI Chat
+        // Configure MainActivity FAB
         (activity as? MainActivity)?.configureFab(
             R.drawable.ic_ai_sparkles,
             "Ask AI",
@@ -49,20 +49,23 @@ class AnalyticsFragment : Fragment() {
         )
 
         setupSessionRecyclerView()
+        observeData()
+    }
 
+    private fun observeData() {
         viewModel.weeklyVolume.observe(viewLifecycleOwner) { volume ->
-            binding.textViewWeeklyVolume.text = String.format(Locale.getDefault(), "%.1f kg", volume)
+            binding.textViewWeeklyVolume.text = String.format(Locale.getDefault(), "%.1f kg", volume ?: 0f)
         }
 
         viewModel.volumeHistory.observe(viewLifecycleOwner) { history ->
-            if (history.isNotEmpty()) {
+            if (!history.isNullOrEmpty()) {
                 setupVolumeChart(history)
             }
         }
 
         viewModel.strongestExercises.observe(viewLifecycleOwner) { stats ->
             binding.layoutStrongestExercises.removeAllViews()
-            stats.forEach { stat ->
+            stats?.forEach { stat ->
                 val textView = TextView(requireContext()).apply {
                     text = String.format(Locale.getDefault(), "%s: %.1f kg", stat.exerciseName, stat.maxWeight)
                     setPadding(0, 4, 0, 4)
@@ -73,7 +76,7 @@ class AnalyticsFragment : Fragment() {
         }
 
         viewModel.plateaus.observe(viewLifecycleOwner) { plateaus ->
-            if (plateaus.isNotEmpty()) {
+            if (!plateaus.isNullOrEmpty()) {
                 binding.cardPlateaus.visibility = View.VISIBLE
                 binding.layoutPlateaus.removeAllViews()
                 plateaus.forEach { plateau ->
@@ -88,9 +91,12 @@ class AnalyticsFragment : Fragment() {
                 binding.cardPlateaus.visibility = View.GONE
             }
         }
-        
-        // Use LiveData from Repository via ViewModel for sessions
-        // We'll add this to RoutineViewModel if it's not there
+
+        viewModel.allSessions.observe(viewLifecycleOwner) { sessions ->
+            if (sessions != null) {
+                sessionAdapter.setData(sessions)
+            }
+        }
     }
 
     private fun setupSessionRecyclerView() {
@@ -108,13 +114,16 @@ class AnalyticsFragment : Fragment() {
         binding.recyclerViewSessions.apply {
             adapter = sessionAdapter
             layoutManager = LinearLayoutManager(requireContext())
+            isNestedScrollingEnabled = false
         }
         
-        // Add swipe to delete for sessions too
         val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val session = sessionAdapter.getSessionAt(viewHolder.adapterPosition)
+                val position = viewHolder.adapterPosition
+                if (position == RecyclerView.NO_POSITION) return
+
+                val session = sessionAdapter.getSessionAt(position)
                 viewModel.deleteSession(session.id)
                 Snackbar.make(binding.root, "Session deleted", Snackbar.LENGTH_LONG).show()
             }
@@ -123,37 +132,39 @@ class AnalyticsFragment : Fragment() {
     }
 
     private fun setupVolumeChart(history: List<VolumePoint>) {
-        val entries = history.mapIndexed { index, point ->
-            Entry(index.toFloat(), point.volume)
-        }
+        try {
+            val entries = history.mapIndexed { index, point ->
+                Entry(index.toFloat(), point.volume)
+            }
 
-        val dataSet = LineDataSet(entries, "Total Volume").apply {
-            color = Color.BLUE
-            setDrawCircles(true)
-            setDrawValues(false)
-            lineWidth = 2f
-            mode = LineDataSet.Mode.CUBIC_BEZIER
-        }
+            val dataSet = LineDataSet(entries, "Total Volume").apply {
+                color = Color.parseColor("#7B1FA2")
+                setDrawCircles(true)
+                setDrawValues(false)
+                lineWidth = 2f
+                mode = LineDataSet.Mode.CUBIC_BEZIER
+                setDrawFilled(true)
+                fillColor = Color.parseColor("#7B1FA2")
+                fillAlpha = 50
+            }
 
-        binding.chartVolumeHistory.apply {
-            data = LineData(dataSet)
-            description.isEnabled = false
-            xAxis.position = XAxis.XAxisPosition.BOTTOM
-            xAxis.granularity = 1f
-            xAxis.setDrawLabels(false)
-            animateY(1000)
-            invalidate()
+            binding.chartVolumeHistory.apply {
+                data = LineData(dataSet)
+                description.isEnabled = false
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.granularity = 1f
+                xAxis.setDrawLabels(false)
+                animateY(1000)
+                invalidate()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.updateMilestones()
-        
-        // Start observing sessions
-        viewModel.allSessions.observe(viewLifecycleOwner) { sessions ->
-            sessionAdapter.setData(sessions)
-        }
     }
 
     override fun onDestroyView() {
