@@ -3,62 +3,80 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
+
+        <!-- Visual accent -->
+        <View
+            android:id="@+id/viewAccent"
+            android:layout_width="8dp"
+            android:layout_height="0dp"
+            android:background="@color/workout_blue"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
+            android:id="@+id/layoutContent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:padding="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/buttonStartSession"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/viewAccent"
             app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/textViewRoutineName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:layout_marginStart="10dp"
-            android:textStyle="bold"
-            android:text="Push Day" />
+            <TextView
+                android:id="@+id/textViewRoutineName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Push Day"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/textViewRoutineGoal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="10dp"
-            android:text="Hypertrophy" />
+            <TextView
+                android:id="@+id/textViewRoutineGoal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:alpha="0.7"
+                android:text="Hypertrophy"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
         </LinearLayout>
 
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonStartSession"
+            style="@style/Widget.Material3.Button.TonalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/start_session"
+            android:layout_marginEnd="16dp"
+            android:text="Start"
+            app:cornerRadius="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/buttonDeleteRoutine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete routine"
             android:src="@android:drawable/ic_menu_delete"
-            app:layout_constraintEnd_toEndOf="@+id/buttonStartSession"
-            app:layout_constraintTop_toBottomOf="@+id/buttonStartSession"
-            app:tint="@color/design_default_color_error"
-            android:contentDescription="Delete routine" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/design_default_color_error" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
