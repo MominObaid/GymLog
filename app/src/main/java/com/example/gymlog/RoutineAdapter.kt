@@ -1,7 +1,9 @@
 package com.example.gymlog
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.ItemRoutineBinding
@@ -15,11 +17,24 @@ class RoutineAdapter(
 
     private var routines = emptyList<RoutineEntity>()
 
+    private val colors = intArrayOf(
+        R.color.workout_blue,
+        R.color.streak_amber,
+        R.color.health_purple,
+        R.color.health_green,
+        R.color.md_theme_tertiary
+    )
+
     inner class RoutineViewHolder(private val binding: ItemRoutineBinding) : RecyclerView.ViewHolder(binding.root) {
         
-        fun bind(routine: RoutineEntity) {
+        fun bind(routine: RoutineEntity, position: Int) {
             binding.textViewRoutineName.text = routine.name
             binding.textViewRoutineGoal.text = routine.goal
+            
+            // Set accent color based on position
+            val colorRes = colors[position % colors.size]
+            val color = ContextCompat.getColor(binding.root.context, colorRes)
+            binding.viewAccent.setBackgroundColor(color)
             
             binding.root.setOnClickListener {
                 onItemClick(routine)
@@ -41,7 +56,7 @@ class RoutineAdapter(
     }
 
     override fun onBindViewHolder(holder: RoutineViewHolder, position: Int) {
-        holder.bind(routines[position])
+        holder.bind(routines[position], position)
     }
 
     override fun getItemCount(): Int = routines.size
