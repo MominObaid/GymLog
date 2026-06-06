@@ -53,9 +53,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    if (binding.aiChatContainer.visibility != View.VISIBLE) {
-                        revealChat()
-                    }
+                    showFragment(ProfileFragment())
                     true
                 }
                 else -> false
