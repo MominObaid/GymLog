@@ -14,7 +14,7 @@ import androidx.room.RoomDatabase
         SessionExerciseEntity::class,
         UserProfile::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 abstract class WorkoutDatabase : RoomDatabase() {
