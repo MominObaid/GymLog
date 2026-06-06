@@ -60,6 +60,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
 
         (activity as? AppCompatActivity)?.setSupportActionBar(binding.toolbar)
         setupMenu()
+        updateGreetingAndDate()
 
         adapter = WorkoutAdapter(this)
         binding.recyclerViewWorkout.adapter = adapter
@@ -86,6 +87,21 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             binding.textViewTotalWorkouts.text = total.toString()
         }
 
+        routineViewModel.userProfile.observe(viewLifecycleOwner) { profile ->
+            profile?.let {
+                if (it.name.isNotBlank()) {
+                    val calendar = Calendar.getInstance()
+                    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+                    val greeting = when (hour) {
+                        in 0..11 -> "Good Morning"
+                        in 12..16 -> "Good Afternoon"
+                        else -> "Good Evening"
+                    }
+                    binding.textViewGreeting.text = "$greeting, ${it.name}!"
+                }
+            }
+        }
+
         // Check Health Connect Availability
         val healthConnectManager = com.example.gymlog.health.HealthConnectManager(requireContext())
         if (healthConnectManager.isHealthConnectAvailable() && routineViewModel.todaySteps.value == null) {
@@ -93,7 +109,16 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         }
 
         binding.cardStartWorkout.setOnClickListener {
-            showAddWorkoutDialog()
+            val options = arrayOf("Start from Routine", "Manual Log Entry")
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("How do you want to train?")
+                .setItems(options) { _, which ->
+                    when (which) {
+                        0 -> (activity as? MainActivity)?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_routines
+                        1 -> showAddWorkoutDialog()
+                    }
+                }
+                .show()
         }
 
         routineViewModel.todaySteps.observe(viewLifecycleOwner) { steps ->
@@ -185,6 +210,22 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         return calendar.timeInMillis
     }
 
+    private fun updateGreetingAndDate() {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        
+        val greeting = when (hour) {
+            in 0..11 -> "Good Morning"
+            in 12..16 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+        
+        binding.textViewGreeting.text = greeting
+        
+        val dateFormat = SimpleDateFormat("EEEE, MMM dd", Locale.getDefault())
+        binding.textViewDateHeader.text = dateFormat.format(calendar.time)
+    }
+
     override fun onItemClick(workout: Workout) {
         val options = arrayOf("View Details/ Edit", "View Progress Chart")
 
@@ -205,37 +246,6 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                     }
                 }
             }
-            .show()
-    }
-
-    private fun showProfileDialog() {
-        val dialogBinding = com.example.gymlog.databinding.DialogUserProfileBinding.inflate(LayoutInflater.from(requireContext()))
-        
-        // Load existing profile
-        lifecycleScope.launch {
-            val profile = routineViewModel.userProfile.value ?: workoutViewModel.getProfile()
-            profile?.let {
-                dialogBinding.etProfileGoal.setText(it.goal)
-                dialogBinding.etProfileLevel.setText(it.experienceLevel)
-                dialogBinding.etProfileDays.setText(it.workoutDaysPerWeek.toString())
-                dialogBinding.etProfileEquipment.setText(it.availableEquipment)
-            }
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("User Fitness Profile")
-            .setView(dialogBinding.root)
-            .setPositiveButton("Save") { _, _ ->
-                val profile = com.example.gymlog.model.UserProfile(
-                    goal = dialogBinding.etProfileGoal.text.toString(),
-                    experienceLevel = dialogBinding.etProfileLevel.text.toString(),
-                    workoutDaysPerWeek = dialogBinding.etProfileDays.text.toString().toIntOrNull() ?: 3,
-                    availableEquipment = dialogBinding.etProfileEquipment.text.toString()
-                )
-                routineViewModel.updateProfile(profile)
-                Toast.makeText(requireContext(), "Profile Updated!", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
             .show()
     }
 
@@ -279,7 +289,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                         true
                     }
                     R.id.action_settings -> {
-                        showProfileDialog()
+                        (activity as? MainActivity)?.findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_profile
                         true
                     }
                     else -> false
