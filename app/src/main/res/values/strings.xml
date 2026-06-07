@@ -17,10 +17,12 @@
     <string name="new_session">New Session</string>
     <string name="consistency_is_key_tap_the_button_below_to_log_your_first_session">Consistency is key! Tap the button below to log your first session.</string>
     <string name="no_workouts_recorded">No Workouts Recorded</string>
+    <string name="no_recent_workouts">No recent workouts</string>
     <string name="routines">Routines</string>
     <string name="add_routine">Add Routine</string>
     <string name="routine_name">Routine Name</string>
     <string name="routine_goal">Goal (e.g. Strength)</string>
     <string name="save_routine">Save Routine</string>
+    <string name="update_routine">Update Routine</string>
     <string name="start_session">Start Session</string>
 </resources>
