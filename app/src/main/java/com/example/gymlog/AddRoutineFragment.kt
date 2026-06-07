@@ -34,7 +34,8 @@ class AddRoutineFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentAddRoutineBinding.inflate(inflater, container, false)
@@ -69,7 +70,7 @@ class AddRoutineFragment : Fragment() {
                 binding.editTextRoutineName.setText(it.name)
                 binding.editTextRoutineGoal.setText(it.goal)
                 binding.editTextRestTimer.setText(it.restTimerSeconds.toString())
-                binding.buttonSaveRoutine.text = "Update Routine"
+                binding.buttonSaveRoutine.text = getString(R.string.update_routine)
             }
         }
         viewModel.getExercisesForRoutine(routineId).observe(viewLifecycleOwner) { exercises ->
