@@ -14,11 +14,9 @@ GymLog helps users track workouts, monitor progress, manage training routines, a
 - Health Integration: Sync daily steps and weight directly from **Health Connect**
 - Quick Actions: One-tap access to routines or manual logging
 
-### 📋 Routine Management
-- Create and edit reusable workout routines
-- Organize training splits (Push/Pull/Legs, Upper/Lower, Full Body)
-- **AI Routine Generator**: Describe your goal, and the AI builds a structured routine for you
-- Custom Rest Timers: Set default rest intervals for each routine
+
+
+_Simple Android Workout Logger_
 
 ### 🏋️ Active Session Tracking
 - Real-time logging of sets, reps, and weight
@@ -41,21 +39,15 @@ GymLog helps users track workouts, monitor progress, manage training routines, a
 - Comprehensive storage for age, height, weight, and target weight
 - Preferences for experience level, frequency, and available equipment
 
----
+
+**_🛠️ Tech Stack & Architecture_**
 
 ## 🏗️ Architecture
 
 GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
 
-```text
-UI (Fragments/Activities)
-        ↓
-     ViewModel
-        ↓
-    Repository
-        ↓
- Room Database / APIs
-```
+
+•Language: Kotlin - The officially recommended language for Android development.
 
 ### Architecture Components
 
@@ -104,20 +96,99 @@ UI (Fragments/Activities)
 
 ---
 
-## 📸 Screenshots
+•LiveData: To build data objects that notify views of any database changes, ensuring the UI is always up-to-date.
 
-| Dashboard | Workout Library | Progress Tracking |
-| :---: | :---: | :---: |
-| ![Dashboard](https://github.com/user-attachments/assets/70070129-cb0f-4d8c-81e8-91aa9389555e) | ![Routines](https://github.com/user-attachments/assets/4ba5a6f1-4219-49cc-bfde-78ea63aa11ec) | ![Progress](#) |
+•Coroutines: For managing background threads and performing database operations asynchronously without blocking the main UI thread.
 
----
 
-## 👨‍💻 Author
 
-**Momin Obaid**
-Android Developer
 
-[GitHub Profile](https://github.com/MominObaid)
 
----
-*Built with ❤️ for the fitness community.*
+**🚀 Features**
+
+•View All Workouts: A clear, scrollable list of all past workout entries.
+
+•Add New Workouts: A simple form to quickly add a new exercise with its name, sets, reps, and weight.
+
+•Edit Existing Workouts: Click on any workout in the list to open a detail screen where you can modify its details.
+
+•Delete Workouts: Swipe to delete individual workouts or use the menu to delete all entries at once.
+
+•Persistent Storage: All workout data is saved locally on the device using a Room database, so your data is safe even when the app is closed.
+
+•Sort: User can sort workout by chiping on this week's workout, so that only that week's workout will be listed.
+
+•AI: AI chatbot that help user about workouts or form or anything related to workout 
+
+
+
+
+<img width="350"  hspace="250" alt="Screenshot_20260518_150535" src="https://github.com/user-attachments/assets/a38c4cc6-b218-4ec6-96d3-ab49067e0fc7" />
+
+
+
+
+
+
+<img src = "https://github.com/user-attachments/assets/65610aff-2b0a-487e-880e-9df499f18bc8" width="350" hspace ="30" vspace="30">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<img src ="https://github.com/user-attachments/assets/a4ed7dc5-e7f8-4921-b168-de0e8583c4ee" width="300" hspace="30" vspace="30">
+
+
+
+
+
+
+
+<img src= "https://github.com/user-attachments/assets/8f2f2fed-df32-412a-9d99-76b1732c2765" width="300"  hspace="30" vspace="30">
+
+
+
+
+
+
+
+
+<img src = "https://github.com/user-attachments/assets/832e6a9c-9c56-4be7-b6f7-3bc977a85ed4" width = "300"  hspace="30" vspace="30">
+
+
+
+
+
+
+
+
+
+<img src= "https://github.com/user-attachments/assets/52d728ba-a645-488e-91e1-c65cd87059dc" width = "300"  hspace="30" vspace="30">
+
+
+
+
+
+
+
+
+
+<img src="https://github.com/user-attachments/assets/016054eb-2fa5-4555-a02e-5b30f6e91a03" width="300"  hspace="30" vspace="30">
+
+
+
+
+
+
+
+
+<img src = "https://github.com/user-attachments/assets/1a687514-20ad-441a-b9da-45008991f60f" width="300"  hspace="30" vspace="30">
