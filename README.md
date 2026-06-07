@@ -1,43 +1,100 @@
-**GymLog** -
+# 💪 GymLog
+
+A modern Android fitness tracking application built with **Kotlin**, **MVVM**, **Room**, **Hilt**, **Health Connect**, **WorkManager**, and **AI-powered coaching features**.
+
+GymLog helps users track workouts, monitor progress, manage training routines, analyze performance trends, and receive intelligent fitness insights—all within a clean and scalable Android architecture.
+
+---
+
+## 📱 Features
+
+### 🏠 Daily Hub (Dashboard)
+- Personalized greetings and dynamic date display
+- Glanceable widgets for current workout streak and total sessions
+- Health Integration: Sync daily steps and weight directly from **Health Connect**
+- Quick Actions: One-tap access to routines or manual logging
 
 
 
 _Simple Android Workout Logger_
 
+### 🏋️ Active Session Tracking
+- Real-time logging of sets, reps, and weight
+- Interactive visual rest timer with notifications
+- **PR Alerts**: Automatic detection and celebration of new Personal Records
+- Safety First: Confirmation dialogs to prevent accidental session discards
 
-GymLog is a lightweight and straightforward Android application designed to help users log their daily workout sessions. 
+### 📈 Progress Analytics
+- Visual volume trends with interactive line charts
+- Top Strengths: Identification of strongest exercises by max weight
+- Plateau Detection: Smart alerts when progress on specific exercises stalls
+- Complete session history with swipe-to-delete management
 
-It provides a clean interface to add, view, update, and delete workout entries, making it easy to track your fitness progress over time.
+### 🤖 AI Fitness Assistant
+- Built-in AI coach that understands your profile and recent stats
+- Data-driven recommendations to improve form or break plateaus
+- Fitness-related Q&A support
 
-This project is built using modern Android development practices and serves as a great example of a database-driven mobile application.
+### 👤 User Profile
+- Comprehensive storage for age, height, weight, and target weight
+- Preferences for experience level, frequency, and available equipment
 
 
 **_🛠️ Tech Stack & Architecture_**
 
-This project follows the official Android recommended architecture and utilizes 
+## 🏗️ Architecture
 
-the following technologies:
+GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
 
 
 •Language: Kotlin - The officially recommended language for Android development.
 
-•Architecture: MVVM (Model-View-ViewModel) - A robust architectural pattern that separates the UI from the business logic.
+### Architecture Components
 
-•UI:•XML Layouts with ViewBinding: To safely and easily interact with views.
+- MVVM
+- Repository Pattern
+- Dependency Injection (Hilt)
+- Kotlin Coroutines & Flow
+- ViewBinding
+- Navigation Component
+- Room Database
+- WorkManager
+- Health Connect
 
-•Fragments: For creating modular and reusable UI components.
+---
 
-•RecyclerView: To efficiently display a long list of workouts.
+## 🛠️ Tech Stack
 
+- **Language**: [Kotlin](https://kotlinlang.org/)
+- **Dependency Injection**: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
+- **Local Database**: [Room](https://developer.android.com/training/data-storage/room)
+- **Networking**: [Retrofit](https://square.github.io/retrofit/) & [Moshi](https://github.com/square/moshi) (Gemini AI API)
+- **Background Tasks**: [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager)
+- **Charts**: [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
+- **Health**: [Health Connect](https://developer.android.com/health-and-fitness/guides/health-connect)
 
-**•Android Jetpack Components:**
+---
 
+## 🚀 Roadmap
 
-•Navigation Component: To handle all in-app navigation and pass data between screens in a type-safe manner using Safe Args.
+### Phase 1 & 2 (Completed)
+- [x] Workout & Manual Logging
+- [x] Routine Editor & Management
+- [x] **Home Dashboard Hub**
+- [x] **Active Workout Session Mode**
+- [x] **AI Routine Generator & Assistant**
+- [x] **Personal Records (PR) Tracking**
+- [x] **Milestone & Streak System**
+- [x] Health Connect integration
+- [x] Progress Analytics & Charts
 
-•Room Database: For robust, local persistence of workout data.
+### Phase 3
+- [ ] Advanced Analytics (Volume per Muscle Group)
+- [ ] AI-Powered Smart Progression Engine
+- [ ] Exercise Video Library Integration
+- [ ] Recovery & Fatigue Recommendations
 
-•ViewModel: To manage UI-related data in a lifecycle-conscious way.
+---
 
 •LiveData: To build data objects that notify views of any database changes, ensuring the UI is always up-to-date.
 
