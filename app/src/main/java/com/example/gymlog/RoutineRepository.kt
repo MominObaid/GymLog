@@ -57,6 +57,14 @@ class RoutineRepository @Inject constructor(
         return routineDao.getAllSessions()
     }
 
+    fun getRecentSessions(): Flow<List<WorkoutSessionEntity>> {
+        return routineDao.getRecentSessions()
+    }
+
+    suspend fun getFavoriteExercise(): String? {
+        return routineDao.getFavoriteExercise()
+    }
+
     suspend fun getMaxWeightForExercise(exerciseName: String): Float? {
         return routineDao.getMaxWeightForExercise(exerciseName)
     }
@@ -67,6 +75,10 @@ class RoutineRepository @Inject constructor(
 
     suspend fun getWorkoutCount(): Int {
         return routineDao.getWorkoutCount()
+    }
+
+    suspend fun getWorkoutCountSince(since: Long): Int {
+        return routineDao.getWorkoutCountSince(since)
     }
 
     suspend fun getAllSessionTimes(): List<Long> {
