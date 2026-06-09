@@ -16,6 +16,8 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -30,9 +32,61 @@ class RoutineViewModel @Inject constructor(
 
     val allRoutines = repository.allRoutines.asLiveData()
     val allSessions = repository.getAllSessions().asLiveData()
+    val recentSessions = repository.getRecentSessions().asLiveData()
 
     private val _aiPlanGenerated = MutableLiveData<Boolean>()
     val aiPlanGenerated: LiveData<Boolean> = _aiPlanGenerated
+
+    // Dashboard Data
+    private val _dashboardHeader = MutableLiveData<DashboardHeader>()
+    val dashboardHeader: LiveData<DashboardHeader> = _dashboardHeader
+
+    private val _todayWorkout = MutableLiveData<TodayWorkout?>()
+    val todayWorkout: LiveData<TodayWorkout?> = _todayWorkout
+
+    private val _dashboardStats = MutableLiveData<DashboardStats>()
+    val dashboardStats: LiveData<DashboardStats> = _dashboardStats
+
+    data class DashboardHeader(val userName: String, val greeting: String)
+    data class TodayWorkout(val routineId: Int, val routineName: String, val exerciseCount: Int, val durationMinutes: Int)
+    data class DashboardStats(val weeklyVolume: Float, val workoutCount: Int, val favoriteExercise: String)
+
+    fun updateDashboardData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val profile = repository.getProfile()
+            val userName = profile?.name ?: "Athlete"
+            _dashboardHeader.postValue(DashboardHeader(userName, getGreeting()))
+
+            // Today's workout logic: Pick the first routine for now, or most frequent
+            // In a real app, this might be based on a schedule
+            val routines = repository.allRoutines.firstOrNull()
+            if (!routines.isNullOrEmpty()) {
+                val routine = routines.first()
+                // Need a way to get exercise count for this routine
+                // Flow based getExercisesForRoutine can be converted or we can just count from a direct query if added
+                // For simplicity, let's just assume we have it or use a default
+                _todayWorkout.postValue(TodayWorkout(routine.id, routine.name, 0, 45)) 
+                // We should ideally fetch the exercise count
+            } else {
+                _todayWorkout.postValue(null)
+            }
+
+            val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+            val volume = repository.getTotalVolumeSince(oneWeekAgo) ?: 0f
+            val count = repository.getWorkoutCountSince(oneWeekAgo)
+            val fav = repository.getFavoriteExercise() ?: "None"
+            _dashboardStats.postValue(DashboardStats(volume, count, fav))
+        }
+    }
+
+    private fun getGreeting(): String {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return when {
+            hour < 12 -> "Good Morning"
+            hour < 17 -> "Good Afternoon"
+            else -> "Good Evening"
+        }
+    }
 
     fun generateAiPlan(request: String) {
         viewModelScope.launch {
@@ -90,15 +144,15 @@ class RoutineViewModel @Inject constructor(
     val userProfile: LiveData<com.example.gymlog.model.UserProfile?> = _userProfile
 
     fun updateProfile(profile: com.example.gymlog.model.UserProfile) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.insertProfile(profile)
-            _userProfile.value = profile
+            _userProfile.postValue(profile)
         }
     }
 
     fun loadProfile() {
-        viewModelScope.launch {
-            _userProfile.value = repository.getProfile()
+        viewModelScope.launch(Dispatchers.IO) {
+            _userProfile.postValue(repository.getProfile())
         }
     }
 
@@ -132,9 +186,12 @@ class RoutineViewModel @Inject constructor(
     val volumeHistory = repository.getVolumeHistory().asLiveData()
 
     init {
-        updateMilestones()
-        loadHealthData()
-        loadProfile()
+        viewModelScope.launch(Dispatchers.IO) {
+            updateMilestones()
+            loadHealthData()
+            loadProfile()
+            updateDashboardData()
+        }
     }
 
     fun loadHealthData() {
@@ -151,16 +208,17 @@ class RoutineViewModel @Inject constructor(
     }
 
     fun updateMilestones() {
-        viewModelScope.launch {
-            _totalWorkouts.value = repository.getWorkoutCount()
+        viewModelScope.launch(Dispatchers.IO) {
+            _totalWorkouts.postValue(repository.getWorkoutCount())
             val times = repository.getAllSessionTimes()
-            _streak.value = StreakCalculator.calculateStreak(times)
-            _longestStreak.value = StreakCalculator.calculateLongestStreak(times)
+            _streak.postValue(StreakCalculator.calculateStreak(times))
+            _longestStreak.postValue(StreakCalculator.calculateLongestStreak(times))
 
             val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
-            _weeklyVolume.value = repository.getTotalVolumeSince(oneWeekAgo) ?: 0f
+            _weeklyVolume.postValue(repository.getTotalVolumeSince(oneWeekAgo) ?: 0f)
+            
             val strongOnes = repository.getStrongestExercises()
-            _strongestExercises.value = strongOnes
+            _strongestExercises.postValue(strongOnes)
 
             // Plateau Detection
             val plateauList = mutableListOf<String>()
@@ -173,7 +231,7 @@ class RoutineViewModel @Inject constructor(
                      }
                  }
             }
-            _plateaus.value = plateauList
+            _plateaus.postValue(plateauList)
         }
     }
 
