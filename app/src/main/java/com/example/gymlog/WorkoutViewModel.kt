@@ -60,7 +60,7 @@ class WorkoutViewModel @Inject constructor(
     }
 
     fun fetchExercisesFromApi() {
-        viewModelScope.launch { // viewModelScope uses Dispatchers.Main.immediate by default
+        viewModelScope.launch(Dispatchers.IO) {
             when (val result = repository.fetchFromApi()) {
                 is WorkoutRepository.ApiResult.Success -> {
                     apiExercises.postValue(result.data)
