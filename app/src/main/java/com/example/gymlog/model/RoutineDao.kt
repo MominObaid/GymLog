@@ -64,6 +64,18 @@ interface RoutineDao {
     @Query("DELETE FROM session_exercises WHERE sessionId = :sessionId")
     suspend fun deleteExercisesBySessionId(sessionId: Int)
 
+    @Query("SELECT * FROM workout_sessions ORDER BY startTime DESC LIMIT 3")
+    fun getRecentSessions(): Flow<List<WorkoutSessionEntity>>
+
+    @Query("""
+        SELECT exerciseName 
+        FROM session_exercises 
+        GROUP BY exerciseName 
+        ORDER BY COUNT(*) DESC 
+        LIMIT 1
+    """)
+    suspend fun getFavoriteExercise(): String?
+
     // Session Exercises
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSessionExercise(exercise: SessionExerciseEntity)
@@ -80,6 +92,9 @@ interface RoutineDao {
 
     @Query("SELECT COUNT(*) FROM workout_sessions")
     suspend fun getWorkoutCount(): Int
+
+    @Query("SELECT COUNT(*) FROM workout_sessions WHERE startTime >= :since")
+    suspend fun getWorkoutCountSince(since: Long): Int
 
     @Query("SELECT startTime FROM workout_sessions ORDER BY startTime DESC")
     suspend fun getAllSessionTimes(): List<Long>
