@@ -25,4 +25,8 @@
     <string name="save_routine">Save Routine</string>
     <string name="update_routine">Update Routine</string>
     <string name="start_session">Start Session</string>
+    <string name="health_insight">Health Insight</string>
+    <string name="bmi_score">BMI Score</string>
+    <string name="fitness_strategy">Fitness Strategy</string>
+    <string name="save_profile">Save &amp; Update Health Profile</string>
 </resources>
