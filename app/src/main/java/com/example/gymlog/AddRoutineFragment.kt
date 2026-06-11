@@ -45,6 +45,15 @@ class AddRoutineFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Setup Toolbar with Back Button
+        binding.toolbar.setNavigationIcon(R.drawable.outline_arrow_back_24)
+        binding.toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        // Hide MainActivity FAB if visible
+//        (activity as? MainActivity)?.configureFab(null, null, null)
+
         adapter = AddedExerciseAdapter(onRemoveClick = { position ->
             adapter.removeExercise(position)
         })
