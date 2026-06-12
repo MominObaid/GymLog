@@ -41,13 +41,6 @@ class AnalyticsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Configure MainActivity FAB
-        (activity as? MainActivity)?.configureFab(
-            R.drawable.ic_ai_sparkles,
-            "Ask AI",
-            { (activity as? MainActivity)?.revealChat() }
-        )
-
         setupSessionRecyclerView()
         observeData()
     }
