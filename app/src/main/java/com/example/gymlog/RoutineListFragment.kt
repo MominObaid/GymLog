@@ -3,12 +3,10 @@ package com.example.gymlog
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.FragmentRoutineListBinding
-import com.example.gymlog.model.RoutineEntity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -31,33 +29,23 @@ class RoutineListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Setup Toolbar Menu
-        binding.toolbar.inflateMenu(R.menu.routine_menu)
-        binding.toolbar.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_add_routine -> {
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, AddRoutineFragment())
-                        .addToBackStack(null)
-                        .commit()
-                    true
-                }
-                else -> false
-            }
-        }
-
         setupRecyclerView()
 
         viewModel.allRoutines.observe(viewLifecycleOwner) { routines ->
             adapter.setData(routines)
+            binding.layoutNoRoutines.visibility = if (routines.isEmpty()) View.VISIBLE else View.GONE
         }
 
-        // Configure MainActivity FAB for AI Plan Generation
-        (activity as? MainActivity)?.configureFab(
-            R.drawable.ic_ai_sparkles,
-            "AI Generate",
-            { showAiGenerateDialog() }
-        )
+        binding.fabAddRoutine.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, AddRoutineFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+        binding.fabAiGenerate.setOnClickListener {
+            showAiGenerateDialog()
+        }
 
         viewModel.aiPlanGenerated.observe(viewLifecycleOwner) { generated ->
             if (generated) {
