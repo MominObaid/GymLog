@@ -23,6 +23,11 @@ class ProgressChartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_progress_chart)
 
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.chartToolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.outline_arrow_back_24)
+
         // viewModel is now injected via Hilt
 
 
@@ -35,6 +40,11 @@ class ProgressChartActivity : AppCompatActivity() {
                 setupChart(workouts)
             }
         }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
 
     private fun setupChart(workouts: List<Workout>) {
