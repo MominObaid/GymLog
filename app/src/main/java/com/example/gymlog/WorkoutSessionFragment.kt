@@ -49,13 +49,12 @@ class WorkoutSessionFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // UI Setup
-        binding.toolbar.setNavigationIcon(android.R.drawable.ic_menu_close_clear_cancel)
+        binding.toolbar.setNavigationIcon(R.drawable.outline_arrow_back_24)
         binding.toolbar.setNavigationOnClickListener { 
             parentFragmentManager.popBackStack()
         }
         
         // Hide primary FAB during active session to avoid distractions
-        (activity as? MainActivity)?.configureFab(null, null, null)
 
         binding.textViewSessionTitle.text = "Session: $routineName"
         startTime = System.currentTimeMillis()
