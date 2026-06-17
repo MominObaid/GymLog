@@ -112,7 +112,7 @@ interface RoutineDao {
     suspend fun getTotalVolumeSince(since: Long): Float?
 
     @Query("""
-        SELECT se.exerciseName, MAX(se.weight) as maxWeight 
+        SELECT se.exerciseName, COALESCE(MAX(se.weight), 0.0) as maxWeight 
         FROM session_exercises se 
         GROUP BY se.exerciseName 
         ORDER BY maxWeight DESC 
@@ -121,7 +121,7 @@ interface RoutineDao {
     suspend fun getStrongestExercises(): List<ExerciseStat>
 
     @Query("""
-        SELECT ws.startTime as date, SUM(se.weight * se.reps) as volume 
+        SELECT ws.startTime as date, COALESCE(SUM(se.weight * se.reps), 0.0) as volume
         FROM workout_sessions ws 
         JOIN session_exercises se ON ws.id = se.sessionId 
         GROUP BY ws.id 
@@ -140,10 +140,28 @@ interface RoutineDao {
 
     // User Profile
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProfile(profile: UserProfile)
+    suspend fun insertProfile(profile: UserProfile): Long
 
-    @Query("SELECT * FROM user_profile WHERE id = 0")
-    suspend fun getProfile(): UserProfile?
+    @Query("SELECT * FROM user_profile WHERE isActive = 1 LIMIT 1")
+    suspend fun getActiveProfile(): UserProfile?
+
+    @Query("SELECT * FROM user_profile")
+    fun getAllProfiles(): Flow<List<UserProfile>>
+
+    @Query("UPDATE user_profile SET isActive = 0")
+    suspend fun deactivateAllProfiles()
+
+    @Query("UPDATE user_profile SET isActive = 1 WHERE id = :profileId")
+    suspend fun activateProfile(profileId: Int)
+
+    @Transaction
+    suspend fun setActiveProfile(profileId: Int) {
+        deactivateAllProfiles()
+        activateProfile(profileId)
+    }
+
+    @Delete
+    suspend fun deleteProfile(profile: UserProfile)
 }
 
 data class ExerciseStat(val exerciseName: String, val maxWeight: Float)
