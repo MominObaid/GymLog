@@ -143,16 +143,37 @@ class RoutineViewModel @Inject constructor(
     private val _userProfile = MutableLiveData<com.example.gymlog.model.UserProfile?>()
     val userProfile: LiveData<com.example.gymlog.model.UserProfile?> = _userProfile
 
+    val allProfiles = repository.getAllProfiles().asLiveData()
+
     fun updateProfile(profile: com.example.gymlog.model.UserProfile) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.insertProfile(profile)
-            _userProfile.postValue(profile)
+            loadProfile()
         }
     }
 
     fun loadProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            _userProfile.postValue(repository.getProfile())
+            val active = repository.getProfile()
+            _userProfile.postValue(active)
+            updateDashboardData()
+        }
+    }
+
+    fun switchProfile(profileId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.setActiveProfile(profileId)
+            loadProfile()
+            updateMilestones()
+        }
+    }
+
+    fun deleteProfile(profile: com.example.gymlog.model.UserProfile) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteProfile(profile)
+            if (profile.isActive) {
+                loadProfile()
+            }
         }
     }
 
