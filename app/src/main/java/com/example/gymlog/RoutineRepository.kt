@@ -110,6 +110,16 @@ class RoutineRepository @Inject constructor(
     }
 
     suspend fun getProfile(): UserProfile? {
-        return routineDao.getProfile()
+        return routineDao.getActiveProfile()
+    }
+
+    fun getAllProfiles() = routineDao.getAllProfiles()
+
+    suspend fun setActiveProfile(profileId: Int) {
+        routineDao.setActiveProfile(profileId)
+    }
+
+    suspend fun deleteProfile(profile: UserProfile) {
+        routineDao.deleteProfile(profile)
     }
 }
