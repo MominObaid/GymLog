@@ -3,6 +3,7 @@ package com.example.gymlog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.gymlog.api.ApiExercise
@@ -20,11 +21,11 @@ class WorkoutViewModel @Inject constructor(
     private val repository: WorkoutRepository,
     private val aiManager: AiAssistantManager
 ) : ViewModel() {
-    val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts
+    val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts.asLiveData()
 
     private val _filterParams = MutableLiveData(FilterParams("", null))
     val filteredWorkouts: LiveData<List<Workout>> = _filterParams.switchMap { params ->
-        repository.getFilteredWorkouts(params.query, params.sinceDate)
+        repository.getFilteredWorkouts(params.query, params.sinceDate).asLiveData()
     }
 
     fun updateFilter(query: String? = null, sinceDate: Long? = null, clearDate: Boolean = false) {
@@ -85,12 +86,12 @@ class WorkoutViewModel @Inject constructor(
         repository.update(workout)
     }
 
-    fun getWorkoutById(id: Int): LiveData<Workout> {
-        return repository.getWorkoutById(id)
+    fun getWorkoutById(id: Int): LiveData<Workout?> {
+        return repository.getWorkoutById(id).asLiveData()
     }
 
     fun getRecentWorkouts(sinceDate: Long): LiveData<List<Workout>> {
-        return repository.getRecentWorkouts(sinceDate)
+        return repository.getRecentWorkouts(sinceDate).asLiveData()
     }
 
     fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
@@ -98,7 +99,7 @@ class WorkoutViewModel @Inject constructor(
     }
 
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
-        return repository.getWorkoutHistory(exerciseName)
+        return repository.getWorkoutHistory(exerciseName).asLiveData()
     }
 
     suspend fun getProfile() = repository.getProfile()
