@@ -1,19 +1,22 @@
 package com.example.gymlog
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.databinding.FragmentWorkoutListBinding
 import com.example.gymlog.model.Workout
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
 import java.util.*
 
 @AndroidEntryPoint
@@ -40,13 +43,6 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         setupRecentActivityList()
         setupClickListeners()
         observeDashboardData()
-
-        // Configure MainActivity FAB
-        (activity as? MainActivity)?.configureFab(
-            R.drawable.ic_ai_sparkles,
-            "Ask AI",
-            { (activity as? MainActivity)?.revealChat() }
-        )
     }
 
     private fun setupRecentActivityList() {
@@ -69,8 +65,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
 
     private fun setupClickListeners() {
         binding.btnQuickLog.setOnClickListener {
-            (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_workouts
-            // In a better flow, this might open the dialog directly
+            showAddWorkoutDialog()
         }
 
         binding.btnAiCoach.setOnClickListener {
@@ -128,6 +123,66 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         intent.putExtra("WORKOUT_ID", workout.id)
         intent.putExtra("EXERCISE_NAME", workout.name)
         startActivity(intent)
+    }
+
+    private fun showAddWorkoutDialog() {
+        val dialogBinding = DialogAddWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
+        val exerciseNameAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1, mutableListOf())
+        dialogBinding.autoCompleteExerciseName.setAdapter(exerciseNameAdapter)
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        var selectedDateMillis = calendar.timeInMillis
+        dialogBinding.textViewDate.text = "Date: ${dateFormat.format(calendar.time)}"
+
+        dialogBinding.textViewDate.setOnClickListener {
+            DatePickerDialog(
+                requireContext(),
+                { _, year, month, dayOfMonth ->
+                    calendar.set(year, month, dayOfMonth)
+                    selectedDateMillis = calendar.timeInMillis
+                    dialogBinding.textViewDate.text = "Date: ${dateFormat.format(calendar.time)}"
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        workoutViewModel.apiExercises.observe(viewLifecycleOwner, Observer { exercises ->
+            exercises?.let {
+                val names = it.mapNotNull { ex -> ex.name }
+                exerciseNameAdapter.clear()
+                exerciseNameAdapter.addAll(names)
+                exerciseNameAdapter.notifyDataSetChanged()
+            }
+        })
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Quick Log Workout")
+            .setView(dialogBinding.root)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Add") { _, _ ->
+                val name = dialogBinding.autoCompleteExerciseName.text.toString().trim()
+                val setsText = dialogBinding.editTextSetsDialog.text.toString()
+                val repsText = dialogBinding.editTextRepsDialog.text.toString()
+                val weightText = dialogBinding.editTextWeightDialog.text.toString()
+
+                if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
+                    Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
+                } else {
+                    val workout = Workout(
+                        name = name,
+                        sets = setsText.toInt(),
+                        reps = repsText.toInt(),
+                        weight = weightText.toDouble(),
+                        date = selectedDateMillis
+                    )
+                    workoutViewModel.insert(workout)
+                    Toast.makeText(requireContext(), "Exercise Logged!", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .show()
     }
 
     override fun onResume() {
