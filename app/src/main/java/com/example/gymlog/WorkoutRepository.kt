@@ -1,10 +1,10 @@
 package com.example.gymlog
 
-import androidx.lifecycle.LiveData
 import com.example.gymlog.api.ApiExercise
 import com.example.gymlog.api.ApiService
 import com.example.gymlog.model.Workout
 import com.example.gymlog.model.WorkoutDao
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -14,8 +14,8 @@ class WorkoutRepository @Inject constructor(
     private val apiService: ApiService
 ) {
 
-    // This exposes the LiveData list from the database.
-    val allWorkouts: LiveData<List<Workout>> = workoutDao.getAllWorkouts()
+    // This exposes the Flow from the database.
+    val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts()
 
     // Database Operations
     // These functions simply pass the request to the DAO. Local Database
@@ -35,19 +35,19 @@ class WorkoutRepository @Inject constructor(
         workoutDao.update(workout)
     }
 
-    fun getWorkoutById(id: Int): LiveData<Workout> {
+    fun getWorkoutById(id: Int): Flow<Workout?> {
         return workoutDao.getWorkoutById(id)
     }
 
-    fun getRecentWorkouts(sinceDate: Long): LiveData<List<Workout>> {
+    fun getRecentWorkouts(sinceDate: Long): Flow<List<Workout>> {
         return workoutDao.getRecentWorkouts(sinceDate)
     }
 
-    fun getFilteredWorkouts(query: String, sinceDate: Long?): LiveData<List<Workout>> {
+    fun getFilteredWorkouts(query: String, sinceDate: Long?): Flow<List<Workout>> {
         return workoutDao.getFilteredWorkouts(query, sinceDate)
     }
 
-    fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
+    fun getWorkoutHistory(exerciseName: String): Flow<List<Workout>> {
         return workoutDao.getWorkoutsHistory(exerciseName)
     }
 
