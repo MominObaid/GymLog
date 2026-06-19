@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [
@@ -14,7 +16,7 @@ import androidx.room.RoomDatabase
         SessionExerciseEntity::class,
         UserProfile::class
     ],
-    version = 7,
+    version = 10,
     exportSchema = false
 )
 abstract class WorkoutDatabase : RoomDatabase() {
@@ -24,6 +26,11 @@ abstract class WorkoutDatabase : RoomDatabase() {
     companion object{
         @Volatile
         private var INSTANCE : WorkoutDatabase? = null
+
+        val MIGRATIONS = arrayOf<Migration>(
+            // Future migration examples:
+            // object : Migration(9, 10) { override fun migrate(db: SupportSQLiteDatabase) { ... } }
+        )
 
         fun getDatabase(context: Context): WorkoutDatabase{
             val temInstance = INSTANCE
@@ -36,7 +43,8 @@ abstract class WorkoutDatabase : RoomDatabase() {
                     context.applicationContext,
                     WorkoutDatabase::class.java,
                     "workout_database"
-                ).fallbackToDestructiveMigration()
+                ).addMigrations(*MIGRATIONS)
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 return instance
