@@ -29,4 +29,7 @@
     <string name="bmi_score">BMI Score</string>
     <string name="fitness_strategy">Fitness Strategy</string>
     <string name="save_profile">Save &amp; Update Health Profile</string>
+    <string name="cloud_sync">Cloud Sync</string>
+    <string name="backup_desc">Backup your data to the cloud</string>
+    <string name="sync_now">Sync Now</string>
 </resources>
