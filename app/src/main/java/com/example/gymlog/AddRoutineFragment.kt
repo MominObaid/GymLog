@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.gymlog.databinding.DialogAddExerciseToRoutineBinding
 import com.example.gymlog.databinding.FragmentAddRoutineBinding
 import com.example.gymlog.model.RoutineExerciseEntity
@@ -24,13 +26,12 @@ class AddRoutineFragment : Fragment() {
     private val viewModel: RoutineViewModel by viewModels()
     private val workoutViewModel: WorkoutViewModel by viewModels()
     private lateinit var adapter: AddedExerciseAdapter
+    private val args: AddRoutineFragmentArgs by navArgs()
     private var routineId: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            routineId = it.getInt(ARG_ROUTINE_ID, -1)
-        }
+        routineId = args.routineId
     }
 
     override fun onCreateView(
@@ -48,11 +49,8 @@ class AddRoutineFragment : Fragment() {
         // Setup Toolbar with Back Button
         binding.toolbar.setNavigationIcon(R.drawable.outline_arrow_back_24)
         binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
+            findNavController().popBackStack()
         }
-
-        // Hide MainActivity FAB if visible
-//        (activity as? MainActivity)?.configureFab(null, null, null)
 
         adapter = AddedExerciseAdapter(onRemoveClick = { position ->
             adapter.removeExercise(position)
@@ -140,7 +138,7 @@ class AddRoutineFragment : Fragment() {
             } else {
                 viewModel.insertRoutine(name, goal, exercises, restTimer)
             }
-            parentFragmentManager.popBackStack()
+            findNavController().popBackStack()
         } else {
             Toast.makeText(requireContext(), "Routine name and exercises required", Toast.LENGTH_SHORT).show()
         }
@@ -149,15 +147,5 @@ class AddRoutineFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    companion object {
-        private const val ARG_ROUTINE_ID = "routine_id"
-
-        fun newInstance(routineId: Int) = AddRoutineFragment().apply {
-            arguments = Bundle().apply {
-                putInt(ARG_ROUTINE_ID, routineId)
-            }
-        }
     }
 }
