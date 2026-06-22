@@ -5,18 +5,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gymlog.databinding.FragmentAnalyticsBinding
+import com.example.gymlog.model.MuscleVolume
+import com.example.gymlog.model.OneRMPoint
 import com.example.gymlog.model.VolumePoint
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,7 +45,35 @@ class AnalyticsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupSessionRecyclerView()
+        setupClickListeners()
+        setupSpinners()
         observeData()
+    }
+
+    private fun setupClickListeners() {
+        binding.btnPredictProgress.setOnClickListener {
+            binding.textViewPredictions.text = "Consulting the coach..."
+            viewModel.predictProgress()
+        }
+    }
+
+    private fun setupSpinners() {
+        val commonLifts = arrayOf("Bench Press", "Squat", "Deadlift", "Overhead Press")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, commonLifts)
+        binding.spinnerStrengthExercise.setAdapter(adapter)
+        
+        binding.spinnerStrengthExercise.setOnItemClickListener { _, _, _, _ ->
+            val exercise = binding.spinnerStrengthExercise.text.toString()
+            updateStrengthChart(exercise)
+        }
+    }
+
+    private fun updateStrengthChart(exerciseName: String) {
+        viewModel.getOneRMHistory(exerciseName).observe(viewLifecycleOwner) { history ->
+            if (history != null && history.isNotEmpty()) {
+                setupOneRMChart(history)
+            }
+        }
     }
 
     private fun observeData() {
@@ -85,10 +116,93 @@ class AnalyticsFragment : Fragment() {
             }
         }
 
+        viewModel.progressPredictions.observe(viewLifecycleOwner) { predictions ->
+            predictions?.let {
+                binding.textViewPredictions.text = it
+                binding.btnPredictProgress.visibility = View.GONE
+            }
+        }
+
+        viewModel.recoveryScore.observe(viewLifecycleOwner) { score ->
+            binding.tvRecoveryScore.text = String.format(Locale.getDefault(), "%d%%", score)
+            val color = when {
+                score > 80 -> R.color.health_green
+                score > 50 -> R.color.streak_amber
+                else -> R.color.error_red
+            }
+            binding.tvRecoveryScore.setTextColor(ContextCompat.getColor(requireContext(), color))
+        }
+
+        viewModel.fatigueScore.observe(viewLifecycleOwner) { score ->
+            binding.tvFatigueScore.text = String.format(Locale.getDefault(), "%d%%", score)
+            val color = when {
+                score < 40 -> R.color.health_green
+                score < 70 -> R.color.streak_amber
+                else -> R.color.error_red
+            }
+            binding.tvFatigueScore.setTextColor(ContextCompat.getColor(requireContext(), color))
+        }
+
+        viewModel.muscleVolume.observe(viewLifecycleOwner) { volume ->
+            if (volume.isNotEmpty()) {
+                setupMuscleChart(volume)
+            }
+        }
+
         viewModel.allSessions.observe(viewLifecycleOwner) { sessions ->
             if (sessions != null) {
                 sessionAdapter.setData(sessions)
             }
+        }
+
+        // Initial load of strength chart
+        updateStrengthChart("Bench Press")
+    }
+
+    private fun setupMuscleChart(data: List<MuscleVolume>) {
+        val entries = data.mapIndexed { index, item ->
+            BarEntry(index.toFloat(), item.value.toFloat())
+        }
+
+        val dataSet = BarDataSet(entries, "Sets per Muscle Group").apply {
+            color = ContextCompat.getColor(requireContext(), R.color.workout_blue)
+            valueTextSize = 10f
+        }
+
+        binding.chartMuscleVolume.apply {
+            this.data = BarData(dataSet)
+            description.isEnabled = false
+            xAxis.valueFormatter = IndexAxisValueFormatter(data.map { it.label })
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.setDrawGridLines(false)
+            axisLeft.setDrawGridLines(false)
+            axisRight.isEnabled = false
+            animateY(1000)
+            invalidate()
+        }
+    }
+
+    private fun setupOneRMChart(history: List<OneRMPoint>) {
+        val entries = history.mapIndexed { index, point ->
+            Entry(index.toFloat(), point.oneRM.toFloat())
+        }
+
+        val dataSet = LineDataSet(entries, "Estimated 1RM (kg)").apply {
+            color = ContextCompat.getColor(requireContext(), R.color.streak_amber)
+            setDrawCircles(true)
+            setDrawValues(false)
+            lineWidth = 2.5f
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+        }
+
+        binding.chartStrengthTrend.apply {
+            data = LineData(dataSet)
+            description.isEnabled = false
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.setDrawGridLines(false)
+            axisRight.isEnabled = false
+            animateX(1000)
+            invalidate()
         }
     }
 
@@ -158,6 +272,7 @@ class AnalyticsFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         viewModel.updateMilestones()
+        viewModel.updateAdvancedAnalytics()
     }
 
     override fun onDestroyView() {
