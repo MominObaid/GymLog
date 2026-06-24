@@ -22,7 +22,8 @@ object DatabaseModule {
             context,
             WorkoutDatabase::class.java,
             "workout_database"
-        ).fallbackToDestructiveMigration()
+        ).addMigrations(*WorkoutDatabase.MIGRATIONS)
+            .fallbackToDestructiveMigration()
             .build()
     }
 
