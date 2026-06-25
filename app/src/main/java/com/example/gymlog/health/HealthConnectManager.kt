@@ -6,6 +6,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -25,6 +26,7 @@ class HealthConnectManager @Inject constructor(
         val permissions = setOf(
             HealthPermission.getReadPermission(StepsRecord::class),
             HealthPermission.getReadPermission(WeightRecord::class),
+            HealthPermission.getReadPermission(SleepSessionRecord::class),
             HealthPermission.getWritePermission(ExerciseSessionRecord::class)
         )
         val granted = healthConnectClient.permissionController.getGrantedPermissions()
@@ -34,6 +36,7 @@ class HealthConnectManager @Inject constructor(
     fun getPermissions() = setOf(
         HealthPermission.getReadPermission(StepsRecord::class),
         HealthPermission.getReadPermission(WeightRecord::class),
+        HealthPermission.getReadPermission(SleepSessionRecord::class),
         HealthPermission.getWritePermission(ExerciseSessionRecord::class)
     )
 
@@ -64,6 +67,22 @@ class HealthConnectManager @Inject constructor(
             response.records.firstOrNull()?.weight?.inKilograms
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun readSleepDuration(startTime: Instant, endTime: Instant): Double {
+        return try {
+            val response = healthConnectClient.readRecords(
+                ReadRecordsRequest(
+                    SleepSessionRecord::class,
+                    timeRangeFilter = TimeRangeFilter.between(startTime, endTime)
+                )
+            )
+            response.records.sumOf { record ->
+                java.time.Duration.between(record.startTime, record.endTime).toMinutes().toDouble() / 60.0
+            }
+        } catch (e: Exception) {
+            0.0
         }
     }
 
