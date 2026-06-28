@@ -9,6 +9,7 @@ data class RoutineExerciseEntity(
     val id: Int = 0,
     val routineId: Int,
     val exerciseName: String,
+    val muscleGroup: String = "Other", // Added for Advanced Analytics
     val targetSets: Int,
     val targetReps: Int,
     val exerciseOrder: Int
