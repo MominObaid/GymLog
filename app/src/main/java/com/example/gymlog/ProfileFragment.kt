@@ -13,10 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.FragmentProfileBinding
+import com.example.gymlog.domain.usecase.CalculateBmiUseCase
 import com.example.gymlog.model.UserProfile
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment() {
@@ -25,6 +27,9 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: RoutineViewModel by viewModels()
     private lateinit var profileAdapter: ProfilePillAdapter
+    
+    @Inject
+    lateinit var calculateBmiUseCase: CalculateBmiUseCase
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,7 +56,23 @@ class ProfileFragment : Fragment() {
             saveProfile()
         }
 
+        binding.btnSyncNow.setOnClickListener {
+            viewModel.syncData()
+            Toast.makeText(requireContext(), "Syncing to cloud...", Toast.LENGTH_SHORT).show()
+        }
+
+        updateSyncStatus()
         viewModel.loadProfile()
+    }
+
+    private fun updateSyncStatus() {
+        if (viewModel.isCloudEnabled) {
+            binding.tvCloudStatus.text = "Cloud backup is enabled"
+            binding.btnSyncNow.isEnabled = true
+        } else {
+            binding.tvCloudStatus.text = "Login to enable cloud backup"
+            binding.btnSyncNow.isEnabled = false
+        }
     }
 
     private fun setupProfileList() {
@@ -147,32 +168,20 @@ class ProfileFragment : Fragment() {
         val heightStr = binding.etHeight.text.toString()
         val weightStr = binding.etCurrentWeight.text.toString()
 
-        if (heightStr.isNotEmpty() && weightStr.isNotEmpty()) {
-            val heightCm = heightStr.toFloatOrNull() ?: 0f
-            val weightKg = weightStr.toFloatOrNull() ?: 0f
+        val heightCm = heightStr.toFloatOrNull() ?: 0f
+        val weightKg = weightStr.toFloatOrNull() ?: 0f
 
-            if ((heightCm > 100) && (weightKg > 30)) {
-                val heightM = heightCm / 100
-                val bmi = weightKg / (heightM * heightM)
-                
-                binding.tvBmiScore.text = String.format(Locale.getDefault(), "%.1f", bmi)
-                
-                val (status, color, progress) = when {
-                    bmi < 18.5 -> Triple("Underweight", R.color.workout_blue, 25)
-                    bmi < 25.0 -> Triple("Healthy", R.color.health_green, 50)
-                    bmi < 30.0 -> Triple("Overweight", R.color.streak_amber, 75)
-                    else -> Triple("Obese", R.color.error_red, 100)
-                }
-
-                binding.tvBmiStatus.text = status
-                binding.tvBmiStatus.setTextColor(ContextCompat.getColor(requireContext(), color))
-                binding.bmiProgressBar.progress = progress
-                binding.bmiProgressBar.setIndicatorColor(ContextCompat.getColor(requireContext(), color))
-            } else {
+        when (val result = calculateBmiUseCase(heightCm, weightKg)) {
+            is CalculateBmiUseCase.BmiResult.Success -> {
+                binding.tvBmiScore.text = String.format(Locale.getDefault(), "%.1f", result.score)
+                binding.tvBmiStatus.text = result.status
+                binding.tvBmiStatus.setTextColor(ContextCompat.getColor(requireContext(), result.colorRes))
+                binding.bmiProgressBar.progress = result.progress
+                binding.bmiProgressBar.setIndicatorColor(ContextCompat.getColor(requireContext(), result.colorRes))
+            }
+            CalculateBmiUseCase.BmiResult.InvalidInput -> {
                 resetBmiDisplay()
             }
-        } else {
-            resetBmiDisplay()
         }
     }
 
