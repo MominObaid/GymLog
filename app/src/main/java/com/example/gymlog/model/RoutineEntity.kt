@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class RoutineEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val profileId: Int,
     val name: String,
     val goal: String,
     val createdAt: Long,
