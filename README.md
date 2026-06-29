@@ -96,9 +96,9 @@ GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
 
 ---
 
-•LiveData: To build data objects that notify views of any database changes, ensuring the UI is always up-to-date.
+•**LiveData**: To build data objects that notify views of any database changes, ensuring the UI is always up-to-date.
 
-•Coroutines: For managing background threads and performing database operations asynchronously without blocking the main UI thread.
+•**Coroutines**: For managing background threads and performing database operations asynchronously without blocking the main UI thread.
 
 
 
