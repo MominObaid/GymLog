@@ -5,6 +5,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.FragmentRoutineListBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -37,10 +38,7 @@ class RoutineListFragment : Fragment() {
         }
 
         binding.fabAddRoutine.setOnClickListener {
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, AddRoutineFragment())
-                .addToBackStack(null)
-                .commit()
+            findNavController().navigate(R.id.addRoutineFragment)
         }
 
         binding.fabAiGenerate.setOnClickListener {
@@ -77,10 +75,11 @@ class RoutineListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = RoutineAdapter(
             onStartSessionClick = { routine ->
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, WorkoutSessionFragment.newInstance(routine.id, routine.name))
-                    .addToBackStack(null)
-                    .commit()
+                val bundle = Bundle().apply {
+                    putInt("routine_id", routine.id)
+                    putString("routine_name", routine.name)
+                }
+                findNavController().navigate(R.id.workoutSessionFragment, bundle)
             },
             onDeleteClick = { routine ->
                 MaterialAlertDialogBuilder(requireContext())
@@ -93,10 +92,10 @@ class RoutineListFragment : Fragment() {
                     .show()
             },
             onItemClick = { routine ->
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, AddRoutineFragment.newInstance(routine.id))
-                    .addToBackStack(null)
-                    .commit()
+                val bundle = Bundle().apply {
+                    putInt("routine_id", routine.id)
+                }
+                findNavController().navigate(R.id.addRoutineFragment, bundle)
             }
         )
         binding.recyclerViewRoutines.apply {
