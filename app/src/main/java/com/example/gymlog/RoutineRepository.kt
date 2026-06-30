@@ -9,7 +9,9 @@ import javax.inject.Singleton
 class RoutineRepository @Inject constructor(
     private val routineDao: RoutineDao
 ) {
-    val allRoutines: Flow<List<RoutineEntity>> = routineDao.getAllRoutines()
+    fun getAllRoutines(profileId: Int): Flow<List<RoutineEntity>> {
+        return routineDao.getAllRoutines(profileId)
+    }
 
     suspend fun insertRoutine(routine: RoutineEntity): Long {
         return routineDao.insertRoutine(routine)
@@ -53,56 +55,64 @@ class RoutineRepository @Inject constructor(
         routineDao.deleteExercisesBySessionId(sessionId)
     }
 
-    fun getAllSessions(): Flow<List<WorkoutSessionEntity>> {
-        return routineDao.getAllSessions()
+    fun getAllSessions(profileId: Int): Flow<List<WorkoutSessionEntity>> {
+        return routineDao.getAllSessions(profileId)
     }
 
-    fun getRecentSessions(): Flow<List<WorkoutSessionEntity>> {
-        return routineDao.getRecentSessions()
+    fun getRecentSessions(profileId: Int): Flow<List<WorkoutSessionEntity>> {
+        return routineDao.getRecentSessions(profileId)
     }
 
-    suspend fun getFavoriteExercise(): String? {
-        return routineDao.getFavoriteExercise()
+    suspend fun getFavoriteExercise(profileId: Int): String? {
+        return routineDao.getFavoriteExercise(profileId)
     }
 
-    suspend fun getMaxWeightForExercise(exerciseName: String): Float? {
-        return routineDao.getMaxWeightForExercise(exerciseName)
+    suspend fun getMaxWeightForExercise(profileId: Int, exerciseName: String): Float? {
+        return routineDao.getMaxWeightForExercise(profileId, exerciseName)
     }
 
-    suspend fun getMaxRepsForExercise(exerciseName: String): Int? {
-        return routineDao.getMaxRepsForExercise(exerciseName)
+    suspend fun getMaxRepsForExercise(profileId: Int, exerciseName: String): Int? {
+        return routineDao.getMaxRepsForExercise(profileId, exerciseName)
     }
 
-    suspend fun getWorkoutCount(): Int {
-        return routineDao.getWorkoutCount()
+    suspend fun getWorkoutCount(profileId: Int): Int {
+        return routineDao.getWorkoutCount(profileId)
     }
 
-    suspend fun getWorkoutCountSince(since: Long): Int {
-        return routineDao.getWorkoutCountSince(since)
+    suspend fun getWorkoutCountSince(profileId: Int, since: Long): Int {
+        return routineDao.getWorkoutCountSince(profileId, since)
     }
 
-    suspend fun getAllSessionTimes(): List<Long> {
-        return routineDao.getAllSessionTimes()
+    suspend fun getAllSessionTimes(profileId: Int): List<Long> {
+        return routineDao.getAllSessionTimes(profileId)
     }
 
     suspend fun getSessionVolume(sessionId: Int): Float? {
         return routineDao.getSessionVolume(sessionId)
     }
 
-    suspend fun getTotalVolumeSince(since: Long): Float? {
-        return routineDao.getTotalVolumeSince(since)
+    suspend fun getTotalVolumeSince(profileId: Int, since: Long): Float? {
+        return routineDao.getTotalVolumeSince(profileId, since)
     }
 
-    suspend fun getStrongestExercises(): List<ExerciseStat> {
-        return routineDao.getStrongestExercises()
+    suspend fun getStrongestExercises(profileId: Int): List<ExerciseStat> {
+        return routineDao.getStrongestExercises(profileId)
     }
 
-    fun getVolumeHistory(): Flow<List<VolumePoint>> {
-        return routineDao.getVolumeHistory()
+    fun getVolumeHistory(profileId: Int): Flow<List<VolumePoint>> {
+        return routineDao.getVolumeHistory(profileId)
     }
 
-    suspend fun getWeightHistoryForExercise(exerciseName: String): List<Float> {
-        return routineDao.getWeightHistoryForExercise(exerciseName)
+    suspend fun getWeightHistoryForExercise(profileId: Int, exerciseName: String): List<Float> {
+        return routineDao.getWeightHistoryForExercise(profileId, exerciseName)
+    }
+
+    fun getMuscleGroupVolume(profileId: Int, since: Long): Flow<List<MuscleVolume>> {
+        return routineDao.getMuscleGroupVolume(profileId, since)
+    }
+
+    fun getOneRMHistory(profileId: Int, exerciseName: String): Flow<List<OneRMPoint>> {
+        return routineDao.getOneRMHistory(profileId, exerciseName)
     }
 
     suspend fun insertProfile(profile: UserProfile) {
