@@ -10,7 +10,8 @@ import com.example.gymlog.model.RoutineExerciseEntity
 import com.example.gymlog.model.SessionExerciseEntity
 
 class SessionExerciseAdapter(
-    private val onSetDone: () -> Unit
+    private val onSetDone: () -> Unit,
+    private val onSwapExercise: (String) -> Unit
 ) : RecyclerView.Adapter<SessionExerciseAdapter.ViewHolder>() {
 
     private var exercises = emptyList<RoutineExerciseEntity>()
@@ -28,6 +29,10 @@ class SessionExerciseAdapter(
             binding.textViewExerciseName.text = exercise.exerciseName
             binding.textViewTarget.text = "Target: ${exercise.targetSets} sets x ${exercise.targetReps} reps"
             
+            binding.btnSwapExercise.setOnClickListener {
+                onSwapExercise(exercise.exerciseName)
+            }
+
             val sets = sessionSets.getOrPut(exercise.id) {
                 MutableList(exercise.targetSets) { SessionSetData(reps = exercise.targetReps) }
             }
@@ -102,6 +107,7 @@ class SessionExerciseAdapter(
                         SessionExerciseEntity(
                             sessionId = 0, // Set later by repository
                             exerciseName = exercise.exerciseName,
+                            muscleGroup = exercise.muscleGroup,
                             setNumber = index + 1,
                             reps = setData.reps,
                             weight = setData.weight
