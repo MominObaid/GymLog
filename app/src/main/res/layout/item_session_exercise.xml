@@ -13,13 +13,28 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <TextView
-            android:id="@+id/textViewExerciseName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:text="Bench Press" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/textViewExerciseName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:text="Bench Press" />
+            <ImageButton
+                android:id="@+id/btnSwapExercise"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_ai_sparkles"
+                app:tint="?attr/colorPrimary"
+                android:contentDescription="Swap exercise with AI" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/textViewTarget"
