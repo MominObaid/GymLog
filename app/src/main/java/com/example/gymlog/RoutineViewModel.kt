@@ -5,19 +5,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import com.example.gymlog.domain.usecase.*
 import com.example.gymlog.health.HealthConnectManager
 import com.example.gymlog.model.RoutineEntity
 import com.example.gymlog.model.RoutineExerciseEntity
 import com.example.gymlog.model.SessionExerciseEntity
-import com.example.gymlog.model.WorkoutSessionEntity
 import com.example.gymlog.utils.StreakCalculator
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -27,123 +29,192 @@ import javax.inject.Inject
 class RoutineViewModel @Inject constructor(
     private val repository: RoutineRepository,
     private val healthConnectManager: HealthConnectManager,
-    private val aiManager: AiAssistantManager
+    private val authManager: com.example.gymlog.auth.AuthManager,
+    private val syncManager: com.example.gymlog.sync.CloudSyncManager,
+    private val getDashboardStatsUseCase: GetDashboardStatsUseCase,
+    private val updateMilestonesUseCase: UpdateMilestonesUseCase,
+    private val generateWorkoutPlanUseCase: GenerateWorkoutPlanUseCase,
+    private val saveWorkoutSessionUseCase: SaveWorkoutSessionUseCase,
+    private val analyzeWorkoutPerformanceUseCase: AnalyzeWorkoutPerformanceUseCase,
+    private val suggestExerciseSubstitutionUseCase: SuggestExerciseSubstitutionUseCase,
+    private val predictFitnessProgressUseCase: PredictFitnessProgressUseCase,
+    private val getRecoveryScoreUseCase: GetRecoveryScoreUseCase,
+    private val getFatigueScoreUseCase: GetFatigueScoreUseCase,
+    private val getMuscleVolumeUseCase: GetMuscleVolumeUseCase,
+    private val getOneRMHistoryUseCase: GetOneRMHistoryUseCase
 ) : ViewModel() {
 
-    val allRoutines = repository.allRoutines.asLiveData()
-    val allSessions = repository.getAllSessions().asLiveData()
-    val recentSessions = repository.getRecentSessions().asLiveData()
+    private val _userProfile = MutableLiveData<com.example.gymlog.model.UserProfile?>()
+    val userProfile: LiveData<com.example.gymlog.model.UserProfile?> = _userProfile
+
+    val allRoutines = _userProfile.switchMap { profile ->
+        if (profile != null) repository.getAllRoutines(profile.id).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
+    val allSessions = _userProfile.switchMap { profile ->
+        if (profile != null) repository.getAllSessions(profile.id).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
+    val recentSessions = _userProfile.switchMap { profile ->
+        if (profile != null) repository.getRecentSessions(profile.id).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
+    val volumeHistory = _userProfile.switchMap { profile ->
+        if (profile != null) repository.getVolumeHistory(profile.id).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
+    val allProfiles = repository.getAllProfiles().asLiveData()
 
     private val _aiPlanGenerated = MutableLiveData<Boolean>()
     val aiPlanGenerated: LiveData<Boolean> = _aiPlanGenerated
 
     // Dashboard Data
-    private val _dashboardHeader = MutableLiveData<DashboardHeader>()
-    val dashboardHeader: LiveData<DashboardHeader> = _dashboardHeader
+    private val _dashboardHeader = MutableLiveData<GetDashboardStatsUseCase.DashboardData>()
+    val dashboardHeader: LiveData<GetDashboardStatsUseCase.DashboardData> = _dashboardHeader
 
-    private val _todayWorkout = MutableLiveData<TodayWorkout?>()
-    val todayWorkout: LiveData<TodayWorkout?> = _todayWorkout
+    val todayWorkout: LiveData<GetDashboardStatsUseCase.TodayWorkout?> = _dashboardHeader.map { it.todayWorkout }
 
-    private val _dashboardStats = MutableLiveData<DashboardStats>()
-    val dashboardStats: LiveData<DashboardStats> = _dashboardStats
+    // AI Features Data
+    private val _workoutAnalysis = MutableLiveData<String?>()
+    val workoutAnalysis: LiveData<String?> = _workoutAnalysis
 
-    data class DashboardHeader(val userName: String, val greeting: String)
-    data class TodayWorkout(val routineId: Int, val routineName: String, val exerciseCount: Int, val durationMinutes: Int)
-    data class DashboardStats(val weeklyVolume: Float, val workoutCount: Int, val favoriteExercise: String)
+    private val _exerciseSubstitutions = MutableLiveData<List<String>>()
+    val exerciseSubstitutions: LiveData<List<String>> = _exerciseSubstitutions
 
-    fun updateDashboardData() {
+    private val _progressPredictions = MutableLiveData<String?>()
+    val progressPredictions: LiveData<String?> = _progressPredictions
+
+    // Advanced Analytics
+    private val _recoveryScore = MutableLiveData<Int>()
+    val recoveryScore: LiveData<Int> = _recoveryScore
+
+    private val _fatigueScore = MutableLiveData<Int>()
+    val fatigueScore: LiveData<Int> = _fatigueScore
+
+    val muscleVolume = _userProfile.switchMap { profile ->
+        if (profile != null) getMuscleVolumeUseCase(profile.id).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
+    fun updateAdvancedAnalytics() {
+        val profile = _userProfile.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            val profile = repository.getProfile()
-            val userName = profile?.name ?: "Athlete"
-            _dashboardHeader.postValue(DashboardHeader(userName, getGreeting()))
-
-            // Today's workout logic: Pick the first routine for now, or most frequent
-            // In a real app, this might be based on a schedule
-            val routines = repository.allRoutines.firstOrNull()
-            if (!routines.isNullOrEmpty()) {
-                val routine = routines.first()
-                // Need a way to get exercise count for this routine
-                // Flow based getExercisesForRoutine can be converted or we can just count from a direct query if added
-                // For simplicity, let's just assume we have it or use a default
-                _todayWorkout.postValue(TodayWorkout(routine.id, routine.name, 0, 45)) 
-                // We should ideally fetch the exercise count
-            } else {
-                _todayWorkout.postValue(null)
-            }
-
-            val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
-            val volume = repository.getTotalVolumeSince(oneWeekAgo) ?: 0f
-            val count = repository.getWorkoutCountSince(oneWeekAgo)
-            val fav = repository.getFavoriteExercise() ?: "None"
-            _dashboardStats.postValue(DashboardStats(volume, count, fav))
+            val recovery = getRecoveryScoreUseCase(profile.id)
+            val fatigue = getFatigueScoreUseCase(profile.id)
+            _recoveryScore.postValue(recovery)
+            _fatigueScore.postValue(fatigue)
         }
     }
 
-    private fun getGreeting(): String {
-        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-        return when {
-            hour < 12 -> "Good Morning"
-            hour < 17 -> "Good Afternoon"
-            else -> "Good Evening"
+    fun getOneRMHistory(exerciseName: String) = _userProfile.switchMap { profile ->
+        if (profile != null) getOneRMHistoryUseCase(profile.id, exerciseName).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
+    fun updateDashboardData() {
+        val profile = _userProfile.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val data = getDashboardStatsUseCase(profile.id, profile.name)
+            _dashboardHeader.postValue(data)
         }
     }
 
     fun generateAiPlan(request: String) {
+        val profile = _userProfile.value ?: return
         viewModelScope.launch {
-            val jsonResponse = aiManager.generateWorkoutPlan(request)
+            val success = generateWorkoutPlanUseCase(profile.id, request)
+            if (success) {
+                _aiPlanGenerated.value = true
+            }
+        }
+    }
+
+    fun analyzeLastWorkout(routineName: String, sessionExercises: List<SessionExerciseEntity>, duration: Int) {
+        val profile = _userProfile.value ?: return
+        viewModelScope.launch {
+            val jsonResponse = analyzeWorkoutPerformanceUseCase(profile.id, routineName, sessionExercises, duration)
             if (jsonResponse != null) {
                 try {
-                    // Extract JSON array more robustly
-                    val start = jsonResponse.indexOf("[")
-                    val end = jsonResponse.lastIndexOf("]")
-                    if (start == -1 || end == -1) {
-                        Log.e("AI_PARSE", "No JSON array found in response: $jsonResponse")
-                        return@launch
+                    val start = jsonResponse.indexOf("{")
+                    val end = jsonResponse.lastIndexOf("}")
+                    if (start != -1 && end != -1) {
+                        val fullJson = jsonResponse.substring(start, end + 1)
+                        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                        val adapter = moshi.adapter(AnalysisResponse::class.java)
+                        val response = adapter.fromJson(fullJson)
+                        
+                        val summary = """
+                            Focus: ${response?.focusArea}
+                            Recovery: ${response?.recoveryScore}%
+                            
+                            ${response?.insights?.joinToString("\n") { "• $it" }}
+                        """.trimIndent()
+                        _workoutAnalysis.value = summary
                     }
-                    val fullJson = jsonResponse.substring(start, end + 1)
-                    
-                    val moshi = Moshi.Builder()
-                        .add(KotlinJsonAdapterFactory())
-                        .build()
-                    val type = Types.newParameterizedType(List::class.java, AiRoutine::class.java)
-                    val adapter = moshi.adapter<List<AiRoutine>>(type)
-                    val routinesList = adapter.fromJson(fullJson)
-                    
-                    routinesList?.forEach { aiRoutine ->
-                        if (aiRoutine.exercises.isNotEmpty()) {
-                            insertRoutine(
-                                aiRoutine.name,
-                                aiRoutine.goal,
-                                aiRoutine.exercises.mapIndexed { index, ex ->
-                                    RoutineExerciseEntity(
-                                        routineId = 0,
-                                        exerciseName = ex.exerciseName,
-                                        targetSets = ex.targetSets,
-                                        targetReps = ex.targetReps,
-                                        exerciseOrder = index
-                                    )
-                                },
-                                restTimer = 90 // Default for AI plans
-                            )
-                        } else {
-                            Log.w("AI_GEN", "Skipping routine ${aiRoutine.name} because it has no exercises")
-                        }
-                    }
-                    _aiPlanGenerated.value = true
                 } catch (e: Exception) {
-                    Log.e("AI_PARSE", "Failed to parse AI plan: ${e.message}")
+                    _workoutAnalysis.value = jsonResponse // Fallback to raw if parsing fails
                 }
             }
         }
     }
 
-    data class AiRoutine(val name: String, val goal: String, val exercises: List<AiExercise>)
-    data class AiExercise(val exerciseName: String, val targetSets: Int, val targetReps: Int)
+    data class AnalysisResponse(val insights: List<String>, val recoveryScore: Int, val focusArea: String)
 
-    private val _userProfile = MutableLiveData<com.example.gymlog.model.UserProfile?>()
-    val userProfile: LiveData<com.example.gymlog.model.UserProfile?> = _userProfile
+    fun getSubstitutions(exerciseName: String) {
+        val profile = _userProfile.value ?: return
+        viewModelScope.launch {
+            val jsonResponse = suggestExerciseSubstitutionUseCase(profile.id, exerciseName)
+            if (jsonResponse != null) {
+                try {
+                    val start = jsonResponse.indexOf("[")
+                    val end = jsonResponse.lastIndexOf("]")
+                    if (start != -1 && end != -1) {
+                        val fullJson = jsonResponse.substring(start, end + 1)
+                        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                        val type = Types.newParameterizedType(List::class.java, String::class.java)
+                        val adapter = moshi.adapter<List<String>>(type)
+                        _exerciseSubstitutions.value = adapter.fromJson(fullJson) ?: emptyList()
+                    }
+                } catch (e: Exception) {
+                    Log.e("AI_SUB", "Failed to parse substitutions: ${e.message}")
+                }
+            }
+        }
+    }
 
-    val allProfiles = repository.getAllProfiles().asLiveData()
+    fun predictProgress() {
+        val profile = _userProfile.value ?: return
+        viewModelScope.launch {
+            val jsonResponse = predictFitnessProgressUseCase(profile.id)
+            if (jsonResponse != null) {
+                try {
+                    val start = jsonResponse.indexOf("{")
+                    val end = jsonResponse.lastIndexOf("}")
+                    if (start != -1 && end != -1) {
+                        val fullJson = jsonResponse.substring(start, end + 1)
+                        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                        val adapter = moshi.adapter(PredictionResponse::class.java)
+                        val response = adapter.fromJson(fullJson)
+                        
+                        val summary = response?.predictions?.joinToString("\n\n") { p ->
+                            "• ${p.exercise}:\n  Target: ${p.predictedMax}kg in ${p.weeks} weeks\n  Confidence: ${p.confidence}"
+                        }
+                        _progressPredictions.value = summary ?: "No predictions available yet."
+                    }
+                } catch (e: Exception) {
+                    Log.e("AI_PREDICT", "Failed to parse predictions: ${e.message}")
+                    _progressPredictions.value = "Unable to generate forecast. Keep training to provide more data!"
+                }
+            }
+        }
+    }
+
+    data class PredictionResponse(val predictions: List<Prediction>)
+    data class Prediction(val exercise: String, val currentMax: Float, val predictedMax: Float, val weeks: Int, val confidence: String)
 
     fun updateProfile(profile: com.example.gymlog.model.UserProfile) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -152,9 +223,29 @@ class RoutineViewModel @Inject constructor(
         }
     }
 
+    private suspend fun ensureProfileLoaded(): com.example.gymlog.model.UserProfile? {
+        var active = repository.getProfile()
+        if (active == null) {
+            val all = repository.getAllProfiles().first()
+            if (all.isNotEmpty()) {
+                repository.setActiveProfile(all.first().id)
+                active = repository.getProfile()
+            } else {
+                val defaultProfile = com.example.gymlog.model.UserProfile(
+                    name = "Athlete",
+                    isActive = true,
+                    avatarColor = 0xFF1976D2.toInt()
+                )
+                repository.insertProfile(defaultProfile)
+                active = repository.getProfile()
+            }
+        }
+        return active
+    }
+
     fun loadProfile() {
         viewModelScope.launch(Dispatchers.IO) {
-            val active = repository.getProfile()
+            val active = ensureProfileLoaded()
             _userProfile.postValue(active)
             updateDashboardData()
         }
@@ -204,14 +295,15 @@ class RoutineViewModel @Inject constructor(
     private val _latestWeight = MutableLiveData<Double?>()
     val latestWeight: LiveData<Double?> = _latestWeight
 
-    val volumeHistory = repository.getVolumeHistory().asLiveData()
-
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            val active = ensureProfileLoaded()
+            _userProfile.postValue(active)
+            
+            updateDashboardData()
             updateMilestones()
             loadHealthData()
-            loadProfile()
-            updateDashboardData()
+            updateAdvancedAnalytics()
         }
     }
 
@@ -229,30 +321,15 @@ class RoutineViewModel @Inject constructor(
     }
 
     fun updateMilestones() {
+        val profile = _userProfile.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            _totalWorkouts.postValue(repository.getWorkoutCount())
-            val times = repository.getAllSessionTimes()
-            _streak.postValue(StreakCalculator.calculateStreak(times))
-            _longestStreak.postValue(StreakCalculator.calculateLongestStreak(times))
-
-            val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
-            _weeklyVolume.postValue(repository.getTotalVolumeSince(oneWeekAgo) ?: 0f)
-            
-            val strongOnes = repository.getStrongestExercises()
-            _strongestExercises.postValue(strongOnes)
-
-            // Plateau Detection
-            val plateauList = mutableListOf<String>()
-            strongOnes.forEach { stat ->
-                 val history = repository.getWeightHistoryForExercise(stat.exerciseName)
-                 if (history.size >= 4) {
-                     val recent = history.take(4)
-                     if (recent.distinct().size == 1) {
-                         plateauList.add("${stat.exerciseName} has stalled at ${stat.maxWeight}kg")
-                     }
-                 }
-            }
-            _plateaus.postValue(plateauList)
+            val result = updateMilestonesUseCase(profile.id)
+            _totalWorkouts.postValue(result.totalWorkouts)
+            _streak.postValue(result.currentStreak)
+            _longestStreak.postValue(result.longestStreak)
+            _weeklyVolume.postValue(result.weeklyVolume)
+            _strongestExercises.postValue(result.strongestExercises)
+            _plateaus.postValue(result.plateaus)
         }
     }
 
@@ -278,8 +355,11 @@ class RoutineViewModel @Inject constructor(
 
     fun insertRoutine(name: String, goal: String, exercises: List<RoutineExerciseEntity>, restTimer: Int = 90) {
         viewModelScope.launch {
+            val profile = repository.getProfile()
+            val profileId = profile?.id ?: 0
+
             repository.insertRoutineWithExercises(
-                RoutineEntity(name = name, goal = goal, createdAt = System.currentTimeMillis(), restTimerSeconds = restTimer),
+                RoutineEntity(profileId = profileId, name = name, goal = goal, createdAt = System.currentTimeMillis(), restTimerSeconds = restTimer),
                 exercises
             )
         }
@@ -287,8 +367,11 @@ class RoutineViewModel @Inject constructor(
 
     fun updateRoutine(id: Int, name: String, goal: String, exercises: List<RoutineExerciseEntity>, restTimer: Int = 90) {
         viewModelScope.launch {
+            val profile = repository.getProfile()
+            val profileId = profile?.id ?: 0
+
             repository.updateRoutineWithExercises(
-                RoutineEntity(id = id, name = name, goal = goal, createdAt = System.currentTimeMillis(), restTimerSeconds = restTimer),
+                RoutineEntity(id = id, profileId = profileId, name = name, goal = goal, createdAt = System.currentTimeMillis(), restTimerSeconds = restTimer),
                 exercises
             )
         }
@@ -298,46 +381,33 @@ class RoutineViewModel @Inject constructor(
     val sessionSaved: LiveData<Boolean> = _sessionSaved
 
     fun saveWorkoutSession(routineId: Int, startTime: Long, endTime: Long, notes: String?, sessionExercises: List<SessionExerciseEntity>) {
+        val profileId = _userProfile.value?.id ?: 0
         viewModelScope.launch {
-            val sessionId = repository.insertSession(
-                WorkoutSessionEntity(routineId = routineId, startTime = startTime, endTime = endTime, notes = notes)
-            ).toInt()
-
-            val prsDetected = mutableListOf<String>()
-
-            sessionExercises.forEach { exercise ->
-                // Check for PRs before inserting
-                val prevMaxWeight = repository.getMaxWeightForExercise(exercise.exerciseName)
-                val prevMaxReps = repository.getMaxRepsForExercise(exercise.exerciseName)
-
-                if (prevMaxWeight == null || exercise.weight > prevMaxWeight) {
-                    prsDetected.add("New Max Weight for ${exercise.exerciseName}: ${exercise.weight}kg!")
-                } else if (prevMaxReps == null || (exercise.weight == prevMaxWeight && exercise.reps > prevMaxReps)) {
-                    prsDetected.add("New Rep Record for ${exercise.exerciseName}: ${exercise.reps} reps at ${exercise.weight}kg!")
-                }
-
-                repository.insertSessionExercise(exercise.copy(sessionId = sessionId))
-            }
-
-            if (prsDetected.isNotEmpty()) {
-                _prEvent.value = prsDetected.joinToString("\n")
-            }
+            val result = saveWorkoutSessionUseCase(
+                profileId = profileId,
+                routineId = routineId,
+                startTime = startTime,
+                endTime = endTime,
+                notes = notes,
+                sessionExercises = sessionExercises
+            )
             
-            // Write to Health Connect
-            if (healthConnectManager.isHealthConnectAvailable() && healthConnectManager.hasAllPermissions()) {
-                val routine = allRoutines.value?.find { it.id == routineId }
-                healthConnectManager.writeWorkoutSession(
-                    startTime = Instant.ofEpochMilli(startTime),
-                    endTime = Instant.ofEpochMilli(endTime),
-                    title = routine?.name ?: "Gym Workout",
-                    notes = notes
-                )
-            }
-
+            _prEvent.postValue(result.prMessage)
             updateMilestones()
-            _sessionSaved.value = true
+            _sessionSaved.postValue(true)
         }
     }
+
+    fun syncData() {
+        if (syncManager.isEnabled()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                syncManager.syncToCloud()
+            }
+        }
+    }
+
+    val isCloudEnabled: Boolean
+        get() = syncManager.isEnabled()
 
     fun resetSessionSaved() {
         _sessionSaved.value = false
@@ -349,5 +419,9 @@ class RoutineViewModel @Inject constructor(
 
     fun resetPrEvent() {
         _prEvent.value = null
+    }
+
+    fun resetAnalysis() {
+        _workoutAnalysis.value = null
     }
 }
