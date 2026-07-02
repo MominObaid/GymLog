@@ -24,7 +24,8 @@ class SmartReminderWorker(context: Context, params: WorkerParameters) : Coroutin
         val entryPoint = EntryPointAccessors.fromApplication(applicationContext, SmartReminderEntryPoint::class.java)
         val repository = entryPoint.repository()
 
-        val times = repository.getAllSessionTimes()
+        val profile = repository.getProfile() ?: return Result.success()
+        val times = repository.getAllSessionTimes(profile.id)
         val currentStreak = StreakCalculator.calculateStreak(times)
 
         if (currentStreak > 0) {
