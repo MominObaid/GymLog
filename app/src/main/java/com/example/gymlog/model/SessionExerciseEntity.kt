@@ -9,6 +9,7 @@ data class SessionExerciseEntity(
     val id: Int = 0,
     val sessionId: Int,
     val exerciseName: String,
+    val muscleGroup: String = "Other", // Added for Advanced Analytics
     val setNumber: Int,
     val reps: Int,
     val weight: Float
