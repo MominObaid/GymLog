@@ -10,6 +10,7 @@ import com.squareup.moshi.JsonClass
 data class Workout(
     @PrimaryKey(autoGenerate = true)
     var id: Int = 0,
+    var profileId: Int = 0,
     @Json(name = "name")
     var name: String?,
     var sets: Int,
