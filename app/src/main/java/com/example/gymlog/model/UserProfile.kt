@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "user_profile")
 data class UserProfile(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val firebaseUid: String? = null, // Link to Firebase Auth
     val name: String = "",
     val age: Int = 0,
     val height: Float = 0f,
