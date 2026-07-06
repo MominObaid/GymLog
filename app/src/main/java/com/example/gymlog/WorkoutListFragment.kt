@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.databinding.FragmentWorkoutListBinding
@@ -78,10 +79,8 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
 
         binding.btnStartTodayWorkout.setOnClickListener {
             routineViewModel.todayWorkout.value?.let { today ->
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, WorkoutSessionFragment.newInstance(today.routineId, today.routineName))
-                    .addToBackStack(null)
-                    .commit()
+                val action = WorkoutListFragmentDirections.actionWorkoutsToSession(today.routineId, today.routineName)
+                findNavController().navigate(action)
             } ?: run {
                 // If no routine, go to routines tab
                 (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_routines
@@ -90,11 +89,10 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
     }
 
     private fun observeDashboardData() {
-        routineViewModel.dashboardHeader.observe(viewLifecycleOwner) { header ->
-            binding.tvGreeting.text = "${header.greeting}, ${header.userName} 👋"
-        }
-
-        routineViewModel.todayWorkout.observe(viewLifecycleOwner) { today ->
+        routineViewModel.dashboardHeader.observe(viewLifecycleOwner) { data ->
+            binding.tvGreeting.text = "${data.greeting}, ${data.userName} 👋"
+            
+            val today = data.todayWorkout
             if (today != null) {
                 binding.tvHeaderSub.text = "Ready to crush ${today.routineName}?"
                 binding.tvTodayRoutineName.text = today.routineName
@@ -104,6 +102,11 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                 binding.tvHeaderSub.text = "Start your fitness journey today!"
                 binding.cardTodayWorkout.visibility = View.GONE
             }
+
+            val stats = data.stats
+            binding.tvWeeklyVolume.text = String.format(Locale.getDefault(), "%.1f kg", stats.weeklyVolume)
+            binding.tvWeeklyCount.text = stats.workoutCount.toString()
+            binding.tvFavExercise.text = stats.favoriteExercise
         }
 
         routineViewModel.streak.observe(viewLifecycleOwner) { streak ->
@@ -111,10 +114,15 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             binding.tvStreakInfo.text = "Current: $streak Days | Best: $best"
         }
 
-        routineViewModel.dashboardStats.observe(viewLifecycleOwner) { stats ->
-            binding.tvWeeklyVolume.text = String.format(Locale.getDefault(), "%.1f kg", stats.weeklyVolume)
-            binding.tvWeeklyCount.text = stats.workoutCount.toString()
-            binding.tvFavExercise.text = stats.favoriteExercise
+        routineViewModel.workoutAnalysis.observe(viewLifecycleOwner) { analysis ->
+            analysis?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Coach's Post-Workout Review")
+                    .setMessage(it)
+                    .setPositiveButton("Thanks Coach!") { _, _ -> routineViewModel.resetAnalysis() }
+                    .setCancelable(false)
+                    .show()
+            }
         }
     }
 
