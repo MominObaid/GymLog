@@ -29,6 +29,8 @@ class WorkoutDetailActivity : AppCompatActivity() {
         binding = ActivityWorkoutDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.detailToolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeAsUpIndicator(R.drawable.outline_arrow_back_24)
 
         // workoutViewModel is now injected via Hilt
 
