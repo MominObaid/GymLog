@@ -14,8 +14,9 @@ class WorkoutRepository @Inject constructor(
     private val apiService: ApiService
 ) {
 
-    // This exposes the Flow from the database.
-    val allWorkouts: Flow<List<Workout>> = workoutDao.getAllWorkouts()
+    fun getAllWorkouts(profileId: Int): Flow<List<Workout>> {
+        return workoutDao.getAllWorkouts(profileId)
+    }
 
     // Database Operations
     // These functions simply pass the request to the DAO. Local Database
@@ -27,8 +28,8 @@ class WorkoutRepository @Inject constructor(
         workoutDao.delete(workout)
     }
 
-    suspend fun deleteAll() {
-        workoutDao.deleteAll()
+    suspend fun deleteAll(profileId: Int) {
+        workoutDao.deleteAll(profileId)
     }
 
     suspend fun update(workout: Workout) {
@@ -39,16 +40,16 @@ class WorkoutRepository @Inject constructor(
         return workoutDao.getWorkoutById(id)
     }
 
-    fun getRecentWorkouts(sinceDate: Long): Flow<List<Workout>> {
-        return workoutDao.getRecentWorkouts(sinceDate)
+    fun getRecentWorkouts(profileId: Int, sinceDate: Long): Flow<List<Workout>> {
+        return workoutDao.getRecentWorkouts(profileId, sinceDate)
     }
 
-    fun getFilteredWorkouts(query: String, sinceDate: Long?): Flow<List<Workout>> {
-        return workoutDao.getFilteredWorkouts(query, sinceDate)
+    fun getFilteredWorkouts(profileId: Int, query: String, sinceDate: Long?): Flow<List<Workout>> {
+        return workoutDao.getFilteredWorkouts(profileId, query, sinceDate)
     }
 
-    fun getWorkoutHistory(exerciseName: String): Flow<List<Workout>> {
-        return workoutDao.getWorkoutsHistory(exerciseName)
+    fun getWorkoutHistory(profileId: Int, exerciseName: String): Flow<List<Workout>> {
+        return workoutDao.getWorkoutsHistory(profileId, exerciseName)
     }
 
     suspend fun getProfile() = workoutDao.getProfile()
