@@ -9,6 +9,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.FragmentWorkoutSessionBinding
 import com.example.gymlog.utils.NotificationHelper
@@ -23,6 +25,7 @@ class WorkoutSessionFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: RoutineViewModel by viewModels()
     private lateinit var adapter: SessionExerciseAdapter
+    private val args: WorkoutSessionFragmentArgs by navArgs()
     private var routineId: Int = -1
     private var routineName: String = ""
     private var restTimerSeconds: Int = 90
@@ -31,10 +34,8 @@ class WorkoutSessionFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            routineId = it.getInt(ARG_ROUTINE_ID)
-            routineName = it.getString(ARG_ROUTINE_NAME) ?: ""
-        }
+        routineId = args.routineId
+        routineName = args.routineName
     }
 
     override fun onCreateView(
@@ -51,11 +52,9 @@ class WorkoutSessionFragment : Fragment() {
         // UI Setup
         binding.toolbar.setNavigationIcon(R.drawable.outline_arrow_back_24)
         binding.toolbar.setNavigationOnClickListener { 
-            parentFragmentManager.popBackStack()
+            findNavController().popBackStack()
         }
         
-        // Hide primary FAB during active session to avoid distractions
-
         binding.textViewSessionTitle.text = "Session: $routineName"
         startTime = System.currentTimeMillis()
 
@@ -74,8 +73,6 @@ class WorkoutSessionFragment : Fragment() {
             if (exercises == null) return@observe
 
             if (exercises.isEmpty()) {
-                // If it's empty, we might be waiting for the DB to catch up
-                // but since we now use transactions, this should only happen if it's actually empty
                 binding.recyclerViewSessionExercises.visibility = View.GONE
                 binding.textViewEmptySession.visibility = View.VISIBLE
             } else {
@@ -99,10 +96,25 @@ class WorkoutSessionFragment : Fragment() {
             }
         }
 
+        viewModel.exerciseSubstitutions.observe(viewLifecycleOwner) { subs ->
+            if (subs.isNotEmpty()) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("AI Substitutions")
+                    .setItems(subs.toTypedArray()) { _, which ->
+                        Toast.makeText(requireContext(), "Try doing: ${subs[which]}", Toast.LENGTH_LONG).show()
+                    }
+                    .show()
+            }
+        }
+
         viewModel.sessionSaved.observe(viewLifecycleOwner) { saved ->
             if (saved) {
+                // Trigger AI analysis for the dashboard
+                val exercises = adapter.getSessionExercises()
+                viewModel.analyzeLastWorkout(routineName, exercises, ((System.currentTimeMillis() - startTime) / 60000).toInt())
+                
                 viewModel.resetSessionSaved()
-                parentFragmentManager.popBackStack()
+                findNavController().popBackStack()
             }
         }
 
@@ -116,9 +128,14 @@ class WorkoutSessionFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        adapter = SessionExerciseAdapter(onSetDone = {
-            startRestTimer(restTimerSeconds * 1000L)
-        })
+        adapter = SessionExerciseAdapter(
+            onSetDone = {
+                startRestTimer(restTimerSeconds * 1000L)
+            },
+            onSwapExercise = { exerciseName ->
+                viewModel.getSubstitutions(exerciseName)
+            }
+        )
         binding.recyclerViewSessionExercises.apply {
             adapter = this@WorkoutSessionFragment.adapter
             layoutManager = LinearLayoutManager(requireContext())
@@ -178,7 +195,7 @@ class WorkoutSessionFragment : Fragment() {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Discard Session?")
                 .setMessage("No sets were marked as done. Discard this session?")
-                .setPositiveButton("Discard") { _, _ -> parentFragmentManager.popBackStack() }
+                .setPositiveButton("Discard") { _, _ -> findNavController().popBackStack() }
                 .setNegativeButton("Keep Logging", null)
                 .show()
         }
@@ -188,18 +205,5 @@ class WorkoutSessionFragment : Fragment() {
         super.onDestroyView()
         countDownTimer?.cancel()
         _binding = null
-    }
-
-    companion object {
-        private const val ARG_ROUTINE_ID = "routine_id"
-        private const val ARG_ROUTINE_NAME = "routine_name"
-
-        fun newInstance(routineId: Int, routineName: String) =
-            WorkoutSessionFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_ROUTINE_ID, routineId)
-                    putString(ARG_ROUTINE_NAME, routineName)
-                }
-            }
     }
 }
