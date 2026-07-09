@@ -7,6 +7,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.gymlog.api.ApiExercise
+import com.example.gymlog.domain.usecase.GetCoachingAdviceUseCase
 import com.example.gymlog.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,13 +20,24 @@ import javax.inject.Inject
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
     private val repository: WorkoutRepository,
-    private val aiManager: AiAssistantManager
+    private val routineRepository: RoutineRepository,
+    private val getCoachingAdviceUseCase: GetCoachingAdviceUseCase
 ) : ViewModel() {
-    val allWorkouts: LiveData<List<Workout>> = repository.allWorkouts.asLiveData()
+
+    private val activeProfileId = routineRepository.getAllProfiles().asLiveData().switchMap { profiles ->
+        val active = profiles.find { it.isActive }?.id ?: profiles.firstOrNull()?.id ?: 0
+        MutableLiveData(active)
+    }
+
+    val allWorkouts: LiveData<List<Workout>> = activeProfileId.switchMap { id ->
+        repository.getAllWorkouts(id).asLiveData()
+    }
 
     private val _filterParams = MutableLiveData(FilterParams("", null))
-    val filteredWorkouts: LiveData<List<Workout>> = _filterParams.switchMap { params ->
-        repository.getFilteredWorkouts(params.query, params.sinceDate).asLiveData()
+    val filteredWorkouts: LiveData<List<Workout>> = activeProfileId.switchMap { profileId ->
+        _filterParams.switchMap { params ->
+            repository.getFilteredWorkouts(profileId, params.query, params.sinceDate).asLiveData()
+        }
     }
 
     fun updateFilter(query: String? = null, sinceDate: Long? = null, clearDate: Boolean = false) {
@@ -38,10 +50,7 @@ class WorkoutViewModel @Inject constructor(
 
     data class FilterParams(val query: String, val sinceDate: Long?)
 
-    //LiveData to hold the list of Exercise from the API
     val apiExercises: MutableLiveData<List<ApiExercise>> = MutableLiveData()
-
-    //LiveData for error handling
     val apiError: MutableLiveData<String> = MutableLiveData()
     
     private val _aiResponseEvent = MutableSharedFlow<String>()
@@ -49,7 +58,7 @@ class WorkoutViewModel @Inject constructor(
 
     fun askAi(prompt : String){
         viewModelScope.launch {
-            val result = aiManager.getCoachingAdvice(prompt)
+            val result = getCoachingAdviceUseCase(prompt)
             if (result != null) {
                 _aiResponseEvent.emit(result)
             }
@@ -66,7 +75,6 @@ class WorkoutViewModel @Inject constructor(
                 is WorkoutRepository.ApiResult.Success -> {
                     apiExercises.postValue(result.data)
                 }
-
                 is WorkoutRepository.ApiResult.Error -> {
                     apiError.postValue(result.message)
                 }
@@ -75,7 +83,8 @@ class WorkoutViewModel @Inject constructor(
     }
 
     fun insert(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insert(workout)
+        val profileId = activeProfileId.value ?: 0
+        repository.insert(workout.copy(profileId = profileId))
     }
 
     fun delete(workout: Workout) = viewModelScope.launch(Dispatchers.IO) {
@@ -91,15 +100,18 @@ class WorkoutViewModel @Inject constructor(
     }
 
     fun getRecentWorkouts(sinceDate: Long): LiveData<List<Workout>> {
-        return repository.getRecentWorkouts(sinceDate).asLiveData()
+        val profileId = activeProfileId.value ?: 0
+        return repository.getRecentWorkouts(profileId, sinceDate).asLiveData()
     }
 
     fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
-        repository.deleteAll()
+        val profileId = activeProfileId.value ?: 0
+        repository.deleteAll(profileId)
     }
 
     fun getWorkoutHistory(exerciseName: String): LiveData<List<Workout>> {
-        return repository.getWorkoutHistory(exerciseName).asLiveData()
+        val profileId = activeProfileId.value ?: 0
+        return repository.getWorkoutHistory(profileId, exerciseName).asLiveData()
     }
 
     suspend fun getProfile() = repository.getProfile()
