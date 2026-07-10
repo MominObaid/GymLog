@@ -5,10 +5,10 @@ import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewAnimationUtils
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
+import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.gymlog.databinding.ActivityMainBinding
@@ -20,16 +20,20 @@ import java.util.concurrent.TimeUnit
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+        
+        binding.bottomNavigation.setupWithNavController(navController)
+
         if (savedInstanceState == null) {
-            supportFragmentManager.commit {
-                replace(R.id.fragment_container, WorkoutListFragment())
-            }
             scheduleWorkoutReminders()
         }
 
@@ -37,53 +41,43 @@ class MainActivity : AppCompatActivity() {
             if (binding.aiChatContainer.visibility == View.VISIBLE) {
                 hideChat()
             }
-            when (item.itemId) {
-                R.id.nav_workouts -> {
-                    showFragment(WorkoutListFragment())
-                    true
-                }
-                R.id.nav_routines -> {
-                    showFragment(RoutineListFragment())
-                    true
-                }
-                R.id.nav_stats -> {
-                    showFragment(AnalyticsFragment())
-                    true
-                }
-                R.id.nav_profile -> {
-                    showFragment(ProfileFragment())
-                    true
-                }
-                else -> false
-            }
+            // Use navigation component for tab switching
+            // The item IDs in bottom_nav_menu.xml match the fragment IDs in nav_graph.xml
+            navController.navigate(item.itemId)
+            true
         }
-
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (binding.aiChatContainer.visibility == View.VISIBLE) {
-                    hideChat()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                    isEnabled = true
-                }
-            }
-        })
     }
 
-    private fun showFragment(fragment: Fragment) {
-        supportFragmentManager.commit {
-            replace(R.id.fragment_container, fragment)
-        }
+    private fun scheduleWorkoutReminders() {
+        val reminderRequest = PeriodicWorkRequestBuilder<WorkoutReminderWorker>(1, TimeUnit.DAYS)
+            .setInitialDelay(1, TimeUnit.HOURS)
+            .build()
+
+        val smartRequest = PeriodicWorkRequestBuilder<SmartReminderWorker>(12, TimeUnit.HOURS)
+            .build()
+
+        val workManager = WorkManager.getInstance(this)
+        
+        workManager.enqueueUniquePeriodicWork(
+            "workout_reminder",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            reminderRequest
+        )
+
+        workManager.enqueueUniquePeriodicWork(
+            "smart_streak_reminder",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            smartRequest
+        )
     }
 
     fun revealChat() {
         val chatView = binding.aiChatContainer
         
         // Add fragment to the container
-        supportFragmentManager.commit {
-            replace(R.id.ai_chat_container, AiChatFragment(), "AI_CHAT_TAG")
-        }
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.ai_chat_container, AiChatFragment(), "AI_CHAT_TAG")
+            .commit()
 
         val cx = chatView.width / 2
         val cy = chatView.height / 2
@@ -110,46 +104,10 @@ class MainActivity : AppCompatActivity() {
                 chatView.visibility = View.INVISIBLE
                 // Remove fragment to save resources
                 supportFragmentManager.findFragmentByTag("AI_CHAT_TAG")?.let {
-                    supportFragmentManager.commit { remove(it) }
+                    supportFragmentManager.beginTransaction().remove(it).commit()
                 }
             }
         })
         anim.start()
-    }
-
-//    fun configureFab(iconResId: Int?, contentDescription: String?, onClickListener: View.OnClickListener?) {
-//        if (iconResId == null) {
-//            binding.fab.hide()
-//        } else {
-//            binding.fab.apply {
-//                setImageResource(iconResId)
-//                this.contentDescription = contentDescription
-//                setOnClickListener(onClickListener)
-//                show()
-//            }
-//        }
-//    }
-
-    private fun scheduleWorkoutReminders() {
-        val reminderRequest = PeriodicWorkRequestBuilder<WorkoutReminderWorker>(1, TimeUnit.DAYS)
-            .setInitialDelay(1, TimeUnit.HOURS)
-            .build()
-
-        val smartRequest = PeriodicWorkRequestBuilder<SmartReminderWorker>(12, TimeUnit.HOURS)
-            .build()
-
-        val workManager = WorkManager.getInstance(this)
-        
-        workManager.enqueueUniquePeriodicWork(
-            "workout_reminder",
-            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-            reminderRequest
-        )
-
-        workManager.enqueueUniquePeriodicWork(
-            "smart_streak_reminder",
-            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-            smartRequest
-        )
     }
 }
