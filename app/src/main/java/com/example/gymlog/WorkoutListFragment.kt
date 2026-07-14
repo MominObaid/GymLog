@@ -7,7 +7,7 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,8 +26,8 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
     private var _binding: FragmentWorkoutListBinding? = null
     private val binding get() = _binding!!
 
-    private val workoutViewModel: WorkoutViewModel by viewModels()
-    private val routineViewModel: RoutineViewModel by viewModels()
+    private val workoutViewModel: WorkoutViewModel by activityViewModels()
+    private val routineViewModel: RoutineViewModel by activityViewModels()
     private lateinit var adapter: WorkoutAdapter
 
     override fun onCreateView(
@@ -52,7 +52,6 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         binding.rvRecentActivity.layoutManager = LinearLayoutManager(requireContext())
 
         // Observe manual workouts for recent activity
-        // We'll show the last 3 from workoutViewModel
         workoutViewModel.allWorkouts.observe(viewLifecycleOwner, Observer { workouts ->
             if (!workouts.isNullOrEmpty()) {
                 val recent = workouts.take(3)
@@ -82,7 +81,6 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                 val action = WorkoutListFragmentDirections.actionWorkoutsToSession(today.routineId, today.routineName)
                 findNavController().navigate(action)
             } ?: run {
-                // If no routine, go to routines tab
                 (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_routines
             }
         }
