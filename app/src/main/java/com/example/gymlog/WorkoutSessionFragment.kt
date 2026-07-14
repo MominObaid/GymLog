@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -23,7 +23,7 @@ class WorkoutSessionFragment : Fragment() {
 
     private var _binding: FragmentWorkoutSessionBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: RoutineViewModel by viewModels()
+    private val viewModel: RoutineViewModel by activityViewModels()
     private lateinit var adapter: SessionExerciseAdapter
     private val args: WorkoutSessionFragmentArgs by navArgs()
     private var routineId: Int = -1
@@ -92,6 +92,16 @@ class WorkoutSessionFragment : Fragment() {
                         dialog.dismiss()
                     }
                     .setCancelable(false)
+                    .show()
+            }
+        }
+
+        viewModel.workoutAnalysis.observe(viewLifecycleOwner) { analysis ->
+            analysis?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("AI Workout Analysis")
+                    .setMessage(it)
+                    .setPositiveButton("Got it!", null)
                     .show()
             }
         }
