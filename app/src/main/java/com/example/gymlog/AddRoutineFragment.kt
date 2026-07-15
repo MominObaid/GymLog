@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -23,7 +24,7 @@ class AddRoutineFragment : Fragment() {
 
     private var _binding: FragmentAddRoutineBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: RoutineViewModel by viewModels()
+    private val viewModel: RoutineViewModel by activityViewModels()
     private val workoutViewModel: WorkoutViewModel by viewModels()
     private lateinit var adapter: AddedExerciseAdapter
     private val args: AddRoutineFragmentArgs by navArgs()
