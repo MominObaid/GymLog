@@ -354,10 +354,10 @@ class RoutineViewModel @Inject constructor(
     }
 
     fun insertRoutine(name: String, goal: String, exercises: List<RoutineExerciseEntity>, restTimer: Int = 90) {
-        viewModelScope.launch {
-            val profile = repository.getProfile()
-            val profileId = profile?.id ?: 0
-
+        viewModelScope.launch(Dispatchers.IO) {
+            val profile = ensureProfileLoaded()
+            val profileId = profile?.id ?: return@launch
+            
             repository.insertRoutineWithExercises(
                 RoutineEntity(profileId = profileId, name = name, goal = goal, createdAt = System.currentTimeMillis(), restTimerSeconds = restTimer),
                 exercises
@@ -366,9 +366,9 @@ class RoutineViewModel @Inject constructor(
     }
 
     fun updateRoutine(id: Int, name: String, goal: String, exercises: List<RoutineExerciseEntity>, restTimer: Int = 90) {
-        viewModelScope.launch {
-            val profile = repository.getProfile()
-            val profileId = profile?.id ?: 0
+        viewModelScope.launch(Dispatchers.IO) {
+            val profile = ensureProfileLoaded()
+            val profileId = profile?.id ?: return@launch
 
             repository.updateRoutineWithExercises(
                 RoutineEntity(id = id, profileId = profileId, name = name, goal = goal, createdAt = System.currentTimeMillis(), restTimerSeconds = restTimer),
