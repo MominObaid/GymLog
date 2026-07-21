@@ -1,14 +1,25 @@
 package com.example.gymlog
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.gymlog.service.RestTimerService
+import com.example.gymlog.ui.session.SessionViewModel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,14 +34,34 @@ class WorkoutSessionFragment : Fragment() {
 
     private var _binding: FragmentWorkoutSessionBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: RoutineViewModel by activityViewModels()
+    private val routineViewModel: RoutineViewModel by activityViewModels()
+    private val sessionViewModel: SessionViewModel by activityViewModels()
     private lateinit var adapter: SessionExerciseAdapter
     private val args: WorkoutSessionFragmentArgs by navArgs()
     private var routineId: Int = -1
     private var routineName: String = ""
     private var restTimerSeconds: Int = 90
-    private var startTime: Long = 0
-    private var countDownTimer: CountDownTimer? = null
+
+    private val timerReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                RestTimerService.ACTION_TIMER_TICK -> {
+                    val millisLeft = intent.getLongExtra(RestTimerService.EXTRA_MILLIS_LEFT, 0L)
+                    updateTimerDisplay(millisLeft)
+                }
+                RestTimerService.ACTION_TIMER_FINISHED -> {
+                    binding.textViewTimer.text = getString(R.string.rest_over)
+                }
+            }
+        }
+    }
+
+    private fun updateTimerDisplay(millisLeft: Long) {
+        val seconds = millisLeft / 1000
+        val display = String.format(java.util.Locale.getDefault(), "Rest: %02d:%02d", seconds / 60, seconds % 60)
+        binding.textViewTimer.visibility = View.VISIBLE
+        binding.textViewTimer.text = display
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,9 +69,24 @@ class WorkoutSessionFragment : Fragment() {
         routineName = args.routineName
     }
 
+    override fun onStart() {
+        super.onStart()
+        val filter = IntentFilter().apply {
+            addAction(RestTimerService.ACTION_TIMER_TICK)
+            addAction(RestTimerService.ACTION_TIMER_FINISHED)
+        }
+        ContextCompat.registerReceiver(requireContext(), timerReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        requireContext().unregisterReceiver(timerReceiver)
+    }
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentWorkoutSessionBinding.inflate(inflater, container, false)
         return binding.root
@@ -55,12 +101,23 @@ class WorkoutSessionFragment : Fragment() {
             findNavController().popBackStack()
         }
         
-        binding.textViewSessionTitle.text = "Session: $routineName"
-        startTime = System.currentTimeMillis()
+        binding.textViewSessionTitle.text = getString(R.string.session_title_format, routineName)
+
+        // Check if there's already an active session, if not start one
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sessionViewModel.uiState.collect { state ->
+                    if ((state.session == null) && !state.isLoading) {
+                        val profileId = routineViewModel.userProfile.value?.id ?: 0
+                        sessionViewModel.startWorkout(profileId, routineId)
+                    }
+                }
+            }
+        }
 
         // Load routine for rest timer
         viewLifecycleOwner.lifecycleScope.launch {
-            val routine = viewModel.getRoutineById(routineId)
+            val routine = routineViewModel.getRoutineById(routineId)
             routine?.let {
                 restTimerSeconds = it.restTimerSeconds
             }
@@ -69,7 +126,7 @@ class WorkoutSessionFragment : Fragment() {
         setupRecyclerView()
 
         // Get exercises for this routine
-        viewModel.getExercisesForRoutine(routineId).observe(viewLifecycleOwner) { exercises ->
+        routineViewModel.getExercisesForRoutine(routineId).observe(viewLifecycleOwner) { exercises ->
             if (exercises == null) return@observe
 
             if (exercises.isEmpty()) {
@@ -82,13 +139,72 @@ class WorkoutSessionFragment : Fragment() {
             }
         }
 
-        viewModel.prEvent.observe(viewLifecycleOwner) { event ->
+        // Observe sets from sessionViewModel and update adapter
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sessionViewModel.uiState.map { it.sets }.collect { sets ->
+                    adapter.setSessionSets(sets)
+                }
+            }
+        }
+
+        // Observe session finished event
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sessionViewModel.sessionFinished.collect { prMessage ->
+                    // Show PR dialog if any
+                    prMessage?.let {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("🏆 NEW PR!")
+                            .setMessage(it)
+                            .setPositiveButton("Awesome!", null)
+                            .show()
+                    }
+
+                    // Trigger AI analysis if needed before closing
+                    val completedSets = adapter.getSessionExercises()
+                    if (completedSets.isNotEmpty()) {
+                        routineViewModel.analyzeLastWorkout(
+                            routineName,
+                            completedSets,
+                            0 // Duration can be calculated
+                        )
+                    }
+                    findNavController().popBackStack()
+                }
+            }
+        }
+
+        // Observe rest timer from sessionViewModel
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sessionViewModel.uiState.map { it.session?.restTimerEndMillis ?: 0L }
+                    .distinctUntilChanged()
+                    .collect { endMillis ->
+                        val now = System.currentTimeMillis()
+                        if (endMillis > now) {
+                            val duration = endMillis - now
+                            updateTimerDisplay(duration) // Initial UI update
+                            val intent = Intent(requireContext(), RestTimerService::class.java).apply {
+                                putExtra(RestTimerService.EXTRA_DURATION_MILLIS, duration)
+                            }
+                            requireContext().startService(intent)
+                        } else {
+                            // If endMillis is 0 or in the past, ensure service is stopped
+                            requireContext().stopService(Intent(requireContext(), RestTimerService::class.java))
+                            binding.textViewTimer.visibility = View.GONE
+                        }
+                    }
+            }
+        }
+
+        routineViewModel.prEvent.observe(viewLifecycleOwner) { event ->
             event?.let {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("🏆 NEW PR!")
                     .setMessage(it)
                     .setPositiveButton("Awesome!") { dialog, _ ->
-                        viewModel.resetPrEvent()
+                        routineViewModel.resetPrEvent()
                         dialog.dismiss()
                     }
                     .setCancelable(false)
@@ -96,7 +212,7 @@ class WorkoutSessionFragment : Fragment() {
             }
         }
 
-        viewModel.workoutAnalysis.observe(viewLifecycleOwner) { analysis ->
+        routineViewModel.workoutAnalysis.observe(viewLifecycleOwner) { analysis ->
             analysis?.let {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("AI Workout Analysis")
@@ -106,7 +222,7 @@ class WorkoutSessionFragment : Fragment() {
             }
         }
 
-        viewModel.exerciseSubstitutions.observe(viewLifecycleOwner) { subs ->
+        routineViewModel.exerciseSubstitutions.observe(viewLifecycleOwner) { subs ->
             if (subs.isNotEmpty()) {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle("AI Substitutions")
@@ -117,13 +233,13 @@ class WorkoutSessionFragment : Fragment() {
             }
         }
 
-        viewModel.sessionSaved.observe(viewLifecycleOwner) { saved ->
+        routineViewModel.sessionSaved.observe(viewLifecycleOwner) { saved ->
             if (saved) {
                 // Trigger AI analysis for the dashboard
                 val exercises = adapter.getSessionExercises()
-                viewModel.analyzeLastWorkout(routineName, exercises, ((System.currentTimeMillis() - startTime) / 60000).toInt())
+                routineViewModel.analyzeLastWorkout(routineName, exercises, ((System.currentTimeMillis() - 0 /* startTime managed by session */) / 60000).toInt())
                 
-                viewModel.resetSessionSaved()
+                routineViewModel.resetSessionSaved()
                 findNavController().popBackStack()
             }
         }
@@ -140,39 +256,22 @@ class WorkoutSessionFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = SessionExerciseAdapter(
             onSetDone = {
-                startRestTimer(restTimerSeconds * 1000L)
+                sessionViewModel.startRestTimer(restTimerSeconds * 1000L)
             },
             onSwapExercise = { exerciseName ->
-                viewModel.getSubstitutions(exerciseName)
+                routineViewModel.getSubstitutions(exerciseName)
+            },
+            onSetChanged = { set ->
+                sessionViewModel.updateSet(set)
+            },
+            onAddSet = { exerciseName, muscleGroup ->
+                sessionViewModel.addSet(exerciseName, muscleGroup, 0.0, 0)
             }
         )
         binding.recyclerViewSessionExercises.apply {
             adapter = this@WorkoutSessionFragment.adapter
             layoutManager = LinearLayoutManager(requireContext())
         }
-    }
-
-    private fun startRestTimer(millis: Long) {
-        countDownTimer?.cancel()
-        binding.textViewTimer.visibility = View.VISIBLE
-        countDownTimer = object : CountDownTimer(millis, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                val seconds = millisUntilFinished / 1000
-                val display = String.format("Rest: %02d:%02d", seconds / 60, seconds % 60)
-                binding.textViewTimer.text = display
-            }
-
-            override fun onFinish() {
-                binding.textViewTimer.text = "Rest Over!"
-                NotificationHelper.showNotification(
-                    requireContext(),
-                    NotificationHelper.REST_TIMER_CHANNEL_ID,
-                    "Rest Finished",
-                    "Time for your next set!",
-                    1001
-                )
-            }
-        }.start()
     }
 
     private fun showChangeTimerDialog() {
@@ -194,18 +293,15 @@ class WorkoutSessionFragment : Fragment() {
     private fun finishSession() {
         val sessionExercises = adapter.getSessionExercises()
         if (sessionExercises.isNotEmpty()) {
-            viewModel.saveWorkoutSession(
-                routineId = routineId,
-                startTime = startTime,
-                endTime = System.currentTimeMillis(),
-                notes = null,
-                sessionExercises = sessionExercises
-            )
+            sessionViewModel.finishWorkout()
         } else {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Discard Session?")
                 .setMessage("No sets were marked as done. Discard this session?")
-                .setPositiveButton("Discard") { _, _ -> findNavController().popBackStack() }
+                .setPositiveButton("Discard") { _, _ -> 
+                    // TODO: Logic to delete the empty session if it was created
+                    findNavController().popBackStack() 
+                }
                 .setNegativeButton("Keep Logging", null)
                 .show()
         }
@@ -213,7 +309,6 @@ class WorkoutSessionFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        countDownTimer?.cancel()
         _binding = null
     }
 }
