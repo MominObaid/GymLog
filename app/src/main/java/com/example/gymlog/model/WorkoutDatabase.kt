@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
@@ -13,15 +14,17 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         RoutineEntity::class,
         RoutineExerciseEntity::class,
         WorkoutSessionEntity::class,
-        SessionExerciseEntity::class,
+        WorkoutSetEntity::class,
         UserProfile::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class WorkoutDatabase : RoomDatabase() {
     abstract fun workoutDao() : WorkoutDao
     abstract fun routineDao() : RoutineDao
+    abstract fun sessionDao() : SessionDao
 
     companion object{
         @Volatile
