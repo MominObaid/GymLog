@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:name=".GymLogApplication"
@@ -45,6 +47,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/workout_widget_info" />
         </receiver>
+        <service
+            android:name=".service.RestTimerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Rest timer for workout session tracking" />
+        </service>
     </application>
 
 </manifest>
