@@ -8,15 +8,20 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.DialogAddWorkoutBinding
 import com.example.gymlog.databinding.FragmentWorkoutListBinding
 import com.example.gymlog.model.Workout
+import com.example.gymlog.ui.session.SessionViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,6 +33,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
 
     private val workoutViewModel: WorkoutViewModel by activityViewModels()
     private val routineViewModel: RoutineViewModel by activityViewModels()
+    private val sessionViewModel: SessionViewModel by activityViewModels()
     private lateinit var adapter: WorkoutAdapter
 
     override fun onCreateView(
@@ -44,6 +50,41 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         setupRecentActivityList()
         setupClickListeners()
         observeDashboardData()
+        observeActiveSession()
+    }
+
+    private fun observeActiveSession() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                sessionViewModel.uiState.collect { state ->
+                    val session = state.session
+                    if (session != null && session.status == com.example.gymlog.model.WorkoutStatus.ACTIVE) {
+                        // Update Today's Workout Card to Resume Active Session
+                        binding.cardTodayWorkout.visibility = View.VISIBLE
+                        binding.tvTodayRoutineName.text = getString(R.string.active_workout)
+                        binding.tvTodayRoutineDetails.text = getString(R.string.resume_session_desc)
+                        binding.btnStartTodayWorkout.text = getString(R.string.resume_session)
+                        
+                        binding.btnStartTodayWorkout.setOnClickListener {
+                            val action = WorkoutListFragmentDirections.actionWorkoutsToSession(session.routineId, "Active Session")
+                            findNavController().navigate(action)
+                        }
+                    } else {
+                        // Restore original listener and data will be handled by observeDashboardData
+                        binding.btnStartTodayWorkout.text = getString(R.string.start_workout)
+                        binding.btnStartTodayWorkout.setOnClickListener {
+                            routineViewModel.todayWorkout.value?.let { today ->
+                                val action = WorkoutListFragmentDirections.actionWorkoutsToSession(today.routineId, today.routineName)
+                                findNavController().navigate(action)
+                            } ?: run {
+                                (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_routines
+                            }
+                        }
+                        // Dashboard data observer will fill in the routine name/details
+                    }
+                }
+            }
+        }
     }
 
     private fun setupRecentActivityList() {
@@ -75,15 +116,6 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         binding.tvViewAllActivity.setOnClickListener {
             (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_stats
         }
-
-        binding.btnStartTodayWorkout.setOnClickListener {
-            routineViewModel.todayWorkout.value?.let { today ->
-                val action = WorkoutListFragmentDirections.actionWorkoutsToSession(today.routineId, today.routineName)
-                findNavController().navigate(action)
-            } ?: run {
-                (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_routines
-            }
-        }
     }
 
     private fun observeDashboardData() {
@@ -91,12 +123,12 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             binding.tvGreeting.text = "${data.greeting}, ${data.userName} 👋"
             
             val today = data.todayWorkout
-            if (today != null) {
+            if (today != null && (sessionViewModel.uiState.value.session?.status != com.example.gymlog.model.WorkoutStatus.ACTIVE)) {
                 binding.tvHeaderSub.text = "Ready to crush ${today.routineName}?"
                 binding.tvTodayRoutineName.text = today.routineName
                 binding.tvTodayRoutineDetails.text = "${today.exerciseCount} Exercises • ${today.durationMinutes} min"
                 binding.cardTodayWorkout.visibility = View.VISIBLE
-            } else {
+            } else if (today == null && (sessionViewModel.uiState.value.session?.status != com.example.gymlog.model.WorkoutStatus.ACTIVE)) {
                 binding.tvHeaderSub.text = "Start your fitness journey today!"
                 binding.cardTodayWorkout.visibility = View.GONE
             }
