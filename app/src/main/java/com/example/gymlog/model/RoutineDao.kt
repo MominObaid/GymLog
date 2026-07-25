@@ -34,6 +34,9 @@ interface RoutineDao {
     @Query("SELECT * FROM routine_exercises WHERE routineId = :routineId ORDER BY exerciseOrder ASC")
     fun getExercisesForRoutine(routineId: Int): Flow<List<RoutineExerciseEntity>>
 
+    @Query("SELECT * FROM routine_exercises WHERE routineId = :routineId ORDER BY exerciseOrder ASC")
+    suspend fun getExercisesForRoutineSync(routineId: Int): List<RoutineExerciseEntity>
+
     @Transaction
     suspend fun insertRoutineWithExercises(routine: RoutineEntity, exercises: List<RoutineExerciseEntity>) {
         val routineId = insertRoutine(routine).toInt()
@@ -61,7 +64,7 @@ interface RoutineDao {
     @Query("DELETE FROM workout_sessions WHERE id = :sessionId")
     suspend fun deleteSessionById(sessionId: Int)
 
-    @Query("DELETE FROM session_exercises WHERE sessionId = :sessionId")
+    @Query("DELETE FROM workout_sets WHERE sessionId = :sessionId")
     suspend fun deleteExercisesBySessionId(sessionId: Int)
 
     @Query("SELECT * FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC LIMIT 3")
@@ -69,7 +72,7 @@ interface RoutineDao {
 
     @Query("""
         SELECT se.exerciseName 
-        FROM session_exercises se
+        FROM workout_sets se
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId
         GROUP BY se.exerciseName 
@@ -80,15 +83,15 @@ interface RoutineDao {
 
     // Session Exercises
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSessionExercise(exercise: SessionExerciseEntity)
+    suspend fun insertSessionExercise(exercise: WorkoutSetEntity)
 
-    @Query("SELECT * FROM session_exercises WHERE sessionId = :sessionId")
-    fun getExercisesForSession(sessionId: Int): Flow<List<SessionExerciseEntity>>
+    @Query("SELECT * FROM workout_sets WHERE sessionId = :sessionId")
+    fun getExercisesForSession(sessionId: Int): Flow<List<WorkoutSetEntity>>
 
     // PR and Milestone Queries
     @Query("""
         SELECT MAX(se.weight) 
-        FROM session_exercises se
+        FROM workout_sets se
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName
     """)
@@ -96,7 +99,7 @@ interface RoutineDao {
 
     @Query("""
         SELECT MAX(se.reps) 
-        FROM session_exercises se
+        FROM workout_sets se
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName
     """)
@@ -112,12 +115,12 @@ interface RoutineDao {
     suspend fun getAllSessionTimes(profileId: Int): List<Long>
 
     // Volume Analytics
-    @Query("SELECT SUM(weight * reps) FROM session_exercises WHERE sessionId = :sessionId")
+    @Query("SELECT SUM(weight * reps) FROM workout_sets WHERE sessionId = :sessionId")
     suspend fun getSessionVolume(sessionId: Int): Float?
 
     @Query("""
         SELECT SUM(se.weight * se.reps) 
-        FROM session_exercises se 
+        FROM workout_sets se 
         JOIN workout_sessions ws ON se.sessionId = ws.id 
         WHERE ws.profileId = :profileId AND ws.startTime >= :since
     """)
@@ -125,7 +128,7 @@ interface RoutineDao {
 
     @Query("""
         SELECT se.exerciseName, COALESCE(MAX(se.weight), 0.0) as maxWeight 
-        FROM session_exercises se 
+        FROM workout_sets se 
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId
         GROUP BY se.exerciseName 
@@ -137,7 +140,7 @@ interface RoutineDao {
     @Query("""
         SELECT ws.startTime as date, COALESCE(SUM(se.weight * se.reps), 0.0) as volume
         FROM workout_sessions ws 
-        JOIN session_exercises se ON ws.id = se.sessionId 
+        JOIN workout_sets se ON ws.id = se.sessionId 
         WHERE ws.profileId = :profileId
         GROUP BY ws.id 
         ORDER BY ws.startTime ASC
@@ -146,7 +149,7 @@ interface RoutineDao {
 
     @Query("""
         SELECT se.weight 
-        FROM session_exercises se 
+        FROM workout_sets se 
         JOIN workout_sessions ws ON se.sessionId = ws.id 
         WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName 
         ORDER BY ws.startTime DESC
@@ -155,7 +158,7 @@ interface RoutineDao {
 
     @Query("""
         SELECT se.muscleGroup as label, COUNT(*) as value
-        FROM session_exercises se
+        FROM workout_sets se
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId AND ws.startTime >= :since
         GROUP BY se.muscleGroup
@@ -164,7 +167,7 @@ interface RoutineDao {
 
     @Query("""
         SELECT ws.startTime as date, MAX(se.weight * (1 + se.reps/30.0)) as oneRM
-        FROM session_exercises se
+        FROM workout_sets se
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName
         GROUP BY ws.id
