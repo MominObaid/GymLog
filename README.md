@@ -182,7 +182,6 @@ GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
 
 
 
-
 <img src="https://github.com/user-attachments/assets/016054eb-2fa5-4555-a02e-5b30f6e91a03" width="300"  hspace="30" vspace="30">
 
 
