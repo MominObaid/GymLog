@@ -271,6 +271,7 @@ class WorkoutSessionFragment : Fragment() {
         binding.recyclerViewSessionExercises.apply {
             adapter = this@WorkoutSessionFragment.adapter
             layoutManager = LinearLayoutManager(requireContext())
+            itemAnimator = null // Disable animations to prevent focus loss during surgical updates
         }
     }
 
