@@ -12,7 +12,7 @@ import com.example.gymlog.domain.usecase.*
 import com.example.gymlog.health.HealthConnectManager
 import com.example.gymlog.model.RoutineEntity
 import com.example.gymlog.model.RoutineExerciseEntity
-import com.example.gymlog.model.SessionExerciseEntity
+import com.example.gymlog.model.WorkoutSetEntity
 import com.example.gymlog.utils.StreakCalculator
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -133,7 +133,7 @@ class RoutineViewModel @Inject constructor(
         }
     }
 
-    fun analyzeLastWorkout(routineName: String, sessionExercises: List<SessionExerciseEntity>, duration: Int) {
+    fun analyzeLastWorkout(routineName: String, sessionExercises: List<WorkoutSetEntity>, duration: Int) {
         val profile = _userProfile.value ?: return
         viewModelScope.launch {
             val jsonResponse = analyzeWorkoutPerformanceUseCase(profile.id, routineName, sessionExercises, duration)
@@ -380,7 +380,7 @@ class RoutineViewModel @Inject constructor(
     private val _sessionSaved = MutableLiveData<Boolean>()
     val sessionSaved: LiveData<Boolean> = _sessionSaved
 
-    fun saveWorkoutSession(routineId: Int, startTime: Long, endTime: Long, notes: String?, sessionExercises: List<SessionExerciseEntity>) {
+    fun saveWorkoutSession(routineId: Int, startTime: Long, endTime: Long, notes: String?, sessionExercises: List<WorkoutSetEntity>) {
         val profileId = _userProfile.value?.id ?: 0
         viewModelScope.launch {
             val result = saveWorkoutSessionUseCase(
