@@ -42,11 +42,15 @@ class RoutineRepository @Inject constructor(
         return routineDao.getExercisesForRoutine(routineId)
     }
 
+    suspend fun getExercisesForRoutineSync(routineId: Int): List<RoutineExerciseEntity> {
+        return routineDao.getExercisesForRoutineSync(routineId)
+    }
+
     suspend fun insertSession(session: WorkoutSessionEntity): Long {
         return routineDao.insertSession(session)
     }
 
-    suspend fun insertSessionExercise(exercise: SessionExerciseEntity) {
+    suspend fun insertSessionExercise(exercise: WorkoutSetEntity) {
         routineDao.insertSessionExercise(exercise)
     }
 
@@ -81,6 +85,10 @@ class RoutineRepository @Inject constructor(
 
     suspend fun getWorkoutCountSince(profileId: Int, since: Long): Int {
         return routineDao.getWorkoutCountSince(profileId, since)
+    }
+
+    suspend fun getCompletedRoutineIdsSince(profileId: Int, since: Long): List<Int> {
+        return routineDao.getCompletedRoutineIdsSince(profileId, since)
     }
 
     suspend fun getAllSessionTimes(profileId: Int): List<Long> {
