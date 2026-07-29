@@ -36,4 +36,9 @@ object DatabaseModule {
     fun provideRoutineDao(database: WorkoutDatabase): com.example.gymlog.model.RoutineDao {
         return database.routineDao()
     }
+
+    @Provides
+    fun provideSessionDao(database: WorkoutDatabase): com.example.gymlog.model.SessionDao {
+        return database.sessionDao()
+    }
 }
