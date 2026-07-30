@@ -32,4 +32,10 @@
     <string name="cloud_sync">Cloud Sync</string>
     <string name="backup_desc">Backup your data to the cloud</string>
     <string name="sync_now">Sync Now</string>
+    <string name="session_title_format">Session: %1$s</string>
+    <string name="rest_over">Rest Over!</string>
+    <string name="active_workout">Active Workout</string>
+    <string name="resume_session_desc">Tap to resume your session</string>
+    <string name="resume_session">Resume Session</string>
+    <string name="start_workout">Start Workout</string>
 </resources>
