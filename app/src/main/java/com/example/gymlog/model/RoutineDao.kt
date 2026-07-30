@@ -70,6 +70,10 @@ interface RoutineDao {
     @Query("SELECT * FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC LIMIT 3")
     fun getRecentSessions(profileId: Int): Flow<List<WorkoutSessionEntity>>
 
+    @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC LIMIT 5")
+    fun getRecentSessionsWithRoutine(profileId: Int): Flow<List<WorkoutSessionWithRoutine>>
+
     @Query("""
         SELECT se.exerciseName 
         FROM workout_sets se
@@ -110,6 +114,9 @@ interface RoutineDao {
 
     @Query("SELECT COUNT(*) FROM workout_sessions WHERE profileId = :profileId AND startTime >= :since")
     suspend fun getWorkoutCountSince(profileId: Int, since: Long): Int
+
+    @Query("SELECT routineId FROM workout_sessions WHERE profileId = :profileId AND startTime >= :since")
+    suspend fun getCompletedRoutineIdsSince(profileId: Int, since: Long): List<Int>
 
     @Query("SELECT startTime FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC")
     suspend fun getAllSessionTimes(profileId: Int): List<Long>
@@ -205,3 +212,12 @@ data class ExerciseStat(val exerciseName: String, val maxWeight: Float)
 data class VolumePoint(val date: Long, val volume: Float)
 data class MuscleVolume(val label: String, val value: Int)
 data class OneRMPoint(val date: Long, val oneRM: Double)
+
+data class WorkoutSessionWithRoutine(
+    @Embedded val session: WorkoutSessionEntity,
+    @Relation(
+        parentColumn = "routineId",
+        entityColumn = "id"
+    )
+    val routine: RoutineEntity?
+)
