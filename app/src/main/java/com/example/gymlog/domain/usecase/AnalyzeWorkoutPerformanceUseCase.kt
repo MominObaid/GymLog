@@ -2,7 +2,7 @@ package com.example.gymlog.domain.usecase
 
 import com.example.gymlog.AiAssistantManager
 import com.example.gymlog.RoutineRepository
-import com.example.gymlog.model.SessionExerciseEntity
+import com.example.gymlog.model.WorkoutSetEntity
 import javax.inject.Inject
 
 class AnalyzeWorkoutPerformanceUseCase @Inject constructor(
@@ -12,7 +12,7 @@ class AnalyzeWorkoutPerformanceUseCase @Inject constructor(
     suspend operator fun invoke(
         profileId: Int,
         routineName: String,
-        sessionExercises: List<SessionExerciseEntity>,
+        sessionExercises: List<WorkoutSetEntity>,
         durationMinutes: Int
     ): String? {
         val strongest = repository.getStrongestExercises(profileId)
