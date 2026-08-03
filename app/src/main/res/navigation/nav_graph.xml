@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_workouts">
+
+    <fragment
+        android:id="@+id/nav_workouts"
+        android:name="com.example.gymlog.WorkoutListFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_workout_list">
+        <action
+            android:id="@+id/action_workouts_to_session"
+            app:destination="@id/workoutSessionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_routines"
+        android:name="com.example.gymlog.RoutineListFragment"
+        android:label="Routines"
+        tools:layout="@layout/fragment_routine_list">
+        <action
+            android:id="@+id/action_routines_to_addRoutine"
+            app:destination="@id/addRoutineFragment" />
+        <action
+            android:id="@+id/action_routines_to_session"
+            app:destination="@id/workoutSessionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_stats"
+        android:name="com.example.gymlog.AnalyticsFragment"
+        android:label="Analytics"
+        tools:layout="@layout/fragment_analytics" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.gymlog.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/addRoutineFragment"
+        android:name="com.example.gymlog.AddRoutineFragment"
+        android:label="Routine Editor"
+        tools:layout="@layout/fragment_add_routine">
+        <argument
+            android:name="routine_id"
+            android:defaultValue="-1"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/workoutSessionFragment"
+        android:name="com.example.gymlog.WorkoutSessionFragment"
+        android:label="Active Session"
+        tools:layout="@layout/fragment_workout_session">
+        <argument
+            android:name="routine_id"
+            app:argType="integer" />
+        <argument
+            android:name="routine_name"
+            app:argType="string" />
+    </fragment>
+
+</navigation>
