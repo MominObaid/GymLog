@@ -4,6 +4,7 @@ import com.example.gymlog.RoutineRepository
 import com.example.gymlog.model.RoutineEntity
 import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
+import java.util.Calendar
 
 class GetDashboardStatsUseCase @Inject constructor(
     private val repository: RoutineRepository
@@ -31,12 +32,27 @@ class GetDashboardStatsUseCase @Inject constructor(
     suspend operator fun invoke(profileId: Int, userName: String): DashboardData {
         val greeting = getGreeting()
         
-        val routines = repository.getAllRoutines(profileId).firstOrNull()
-        val todayWorkout = if (!routines.isNullOrEmpty()) {
-            val routine = routines.first()
-            TodayWorkout(routine.id, routine.name, 0, 45) // Simplification for now
-        } else {
-            null
+        val startOfToday = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        
+        val completedToday = repository.getCompletedRoutineIdsSince(profileId, startOfToday)
+        val routines = repository.getAllRoutines(profileId).firstOrNull() ?: emptyList()
+        
+        // Find the first routine not completed today
+        val routineToSuggest = routines.find { it.id !in completedToday }
+        
+        val todayWorkout = routineToSuggest?.let { routine ->
+            val exercises = repository.getExercisesForRoutineSync(routine.id)
+            TodayWorkout(
+                routineId = routine.id,
+                routineName = routine.name,
+                exerciseCount = exercises.size,
+                durationMinutes = exercises.size * 10 // Rough estimate: 10 mins per exercise
+            )
         }
 
         val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
@@ -53,7 +69,7 @@ class GetDashboardStatsUseCase @Inject constructor(
     }
 
     private fun getGreeting(): String {
-        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         return when {
             hour < 12 -> "Good Morning"
             hour < 17 -> "Good Afternoon"
