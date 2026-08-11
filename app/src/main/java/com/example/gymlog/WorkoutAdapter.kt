@@ -36,12 +36,17 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
     override fun onBindViewHolder(holder: WorkoutViewHolder, position: Int) {
         val current = workouts[position]
         holder.nameTextView.text = current.name
-        holder.detailTextView.text =
-            "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
+        
+        if (current.sets == 0 && current.reps == 0) {
+            // This is likely a session mapped to a Workout object
+            holder.detailTextView.text = String.format(Locale.getDefault(), "Total Volume: %.1f kg", current.weight)
+        } else {
+            holder.detailTextView.text =
+                "${current.sets} sets x ${current.reps} reps @ ${current.weight}kg"
+        }
 
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         holder.dateTextView.text = dateFormat.format(Date(current.date))
-
     }
     override fun getItemCount(): Int {
         return workouts.size
