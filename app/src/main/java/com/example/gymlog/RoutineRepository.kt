@@ -67,6 +67,10 @@ class RoutineRepository @Inject constructor(
         return routineDao.getRecentSessions(profileId)
     }
 
+    fun getRecentSessionsWithRoutine(profileId: Int): Flow<List<WorkoutSessionWithRoutine>> {
+        return routineDao.getRecentSessionsWithRoutine(profileId)
+    }
+
     suspend fun getFavoriteExercise(profileId: Int): String? {
         return routineDao.getFavoriteExercise(profileId)
     }
