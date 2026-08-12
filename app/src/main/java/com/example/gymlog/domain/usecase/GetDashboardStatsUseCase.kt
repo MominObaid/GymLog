@@ -13,7 +13,8 @@ class GetDashboardStatsUseCase @Inject constructor(
         val userName: String,
         val greeting: String,
         val todayWorkout: TodayWorkout?,
-        val stats: Stats
+        val stats: Stats,
+        val allRoutinesCompleted: Boolean = false
     )
 
     data class TodayWorkout(
@@ -44,6 +45,7 @@ class GetDashboardStatsUseCase @Inject constructor(
         
         // Find the first routine not completed today
         val routineToSuggest = routines.find { it.id !in completedToday }
+        val allCompleted = routines.isNotEmpty() && routines.all { it.id in completedToday }
         
         val todayWorkout = routineToSuggest?.let { routine ->
             val exercises = repository.getExercisesForRoutineSync(routine.id)
@@ -51,7 +53,7 @@ class GetDashboardStatsUseCase @Inject constructor(
                 routineId = routine.id,
                 routineName = routine.name,
                 exerciseCount = exercises.size,
-                durationMinutes = exercises.size * 10 // Rough estimate: 10 mins per exercise
+                durationMinutes = exercises.size * 10
             )
         }
 
@@ -64,7 +66,8 @@ class GetDashboardStatsUseCase @Inject constructor(
             userName = userName,
             greeting = greeting,
             todayWorkout = todayWorkout,
-            stats = Stats(volume, count, fav)
+            stats = Stats(volume, count, fav),
+            allRoutinesCompleted = allCompleted
         )
     }
 
