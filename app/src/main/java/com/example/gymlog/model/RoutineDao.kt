@@ -71,7 +71,7 @@ interface RoutineDao {
     fun getRecentSessions(profileId: Int): Flow<List<WorkoutSessionEntity>>
 
     @Transaction
-    @Query("SELECT * FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC LIMIT 5")
+    @Query("SELECT * FROM workout_sessions WHERE profileId = :profileId AND status = 'COMPLETED' ORDER BY startTime DESC LIMIT 5")
     fun getRecentSessionsWithRoutine(profileId: Int): Flow<List<WorkoutSessionWithRoutine>>
 
     @Query("""
@@ -115,7 +115,7 @@ interface RoutineDao {
     @Query("SELECT COUNT(*) FROM workout_sessions WHERE profileId = :profileId AND startTime >= :since")
     suspend fun getWorkoutCountSince(profileId: Int, since: Long): Int
 
-    @Query("SELECT routineId FROM workout_sessions WHERE profileId = :profileId AND startTime >= :since")
+    @Query("SELECT routineId FROM workout_sessions WHERE profileId = :profileId AND startTime >= :since AND status = 'COMPLETED'")
     suspend fun getCompletedRoutineIdsSince(profileId: Int, since: Long): List<Int>
 
     @Query("SELECT startTime FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC")
