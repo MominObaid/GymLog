@@ -1,6 +1,5 @@
 package com.example.gymlog.domain.usecase
 
-import java.util.Locale
 import javax.inject.Inject
 
 class CalculateBmiUseCase @Inject constructor() {
