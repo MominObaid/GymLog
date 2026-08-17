@@ -1,10 +1,9 @@
 package com.example.gymlog.domain.usecase
 
 import com.example.gymlog.RoutineRepository
-import com.example.gymlog.model.RoutineEntity
 import kotlinx.coroutines.flow.firstOrNull
-import javax.inject.Inject
 import java.util.Calendar
+import javax.inject.Inject
 
 class GetDashboardStatsUseCase @Inject constructor(
     private val repository: RoutineRepository
