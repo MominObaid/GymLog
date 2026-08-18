@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity() {
             smartRequest
         )
     }
-
     fun revealChat() {
         val chatView = binding.aiChatContainer
         
