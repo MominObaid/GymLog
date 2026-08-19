@@ -62,6 +62,11 @@ class RoutineViewModel @Inject constructor(
         else MutableLiveData(emptyList())
     }
 
+    val recentSessionsWithRoutine = _userProfile.switchMap { profile ->
+        if (profile != null) repository.getRecentSessionsWithRoutine(profile.id).asLiveData()
+        else MutableLiveData(emptyList())
+    }
+
     val volumeHistory = _userProfile.switchMap { profile ->
         if (profile != null) repository.getVolumeHistory(profile.id).asLiveData()
         else MutableLiveData(emptyList())
@@ -394,6 +399,7 @@ class RoutineViewModel @Inject constructor(
             
             _prEvent.postValue(result.prMessage)
             updateMilestones()
+            updateDashboardData() // Refresh dashboard stats
             _sessionSaved.postValue(true)
         }
     }
