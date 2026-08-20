@@ -92,16 +92,39 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         binding.rvRecentActivity.adapter = adapter
         binding.rvRecentActivity.layoutManager = LinearLayoutManager(requireContext())
 
-        // Observe manual workouts for recent activity
-        workoutViewModel.allWorkouts.observe(viewLifecycleOwner, Observer { workouts ->
-            if (!workouts.isNullOrEmpty()) {
-                val recent = workouts.take(3)
-                adapter.setData(recent)
-                binding.layoutEmptyState.visibility = View.GONE
-            } else {
-                binding.layoutEmptyState.visibility = View.VISIBLE
-            }
-        })
+        // Combine manual workouts and tracked sessions for a unified list
+        workoutViewModel.allWorkouts.observe(viewLifecycleOwner) { manualWorkouts ->
+            updateUnifiedRecentActivity(manualWorkouts, routineViewModel.recentSessionsWithRoutine.value)
+        }
+
+        routineViewModel.recentSessionsWithRoutine.observe(viewLifecycleOwner) { sessions ->
+            updateUnifiedRecentActivity(workoutViewModel.allWorkouts.value, sessions)
+        }
+    }
+
+    private fun updateUnifiedRecentActivity(manualWorkouts: List<Workout>?, sessions: List<com.example.gymlog.model.WorkoutSessionWithRoutine>?) {
+        val sessionWorkouts = sessions?.map { item ->
+            Workout(
+                id = item.session.id,
+                profileId = item.session.profileId,
+                name = item.routine?.name ?: "Workout Session",
+                sets = 0,
+                reps = 0,
+                weight = item.session.totalVolume,
+                date = item.session.startTime
+            )
+        } ?: emptyList()
+
+        val allWorkouts = (sessionWorkouts + (manualWorkouts ?: emptyList()))
+            .sortedByDescending { it.date }
+            .take(5)
+
+        if (allWorkouts.isNotEmpty()) {
+            adapter.setData(allWorkouts)
+            binding.layoutEmptyState.visibility = View.GONE
+        } else {
+            binding.layoutEmptyState.visibility = View.VISIBLE
+        }
     }
 
     private fun setupClickListeners() {
@@ -123,14 +146,22 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             binding.tvGreeting.text = "${data.greeting}, ${data.userName} 👋"
             
             val today = data.todayWorkout
-            if (today != null && (sessionViewModel.uiState.value.session?.status != com.example.gymlog.model.WorkoutStatus.ACTIVE)) {
-                binding.tvHeaderSub.text = "Ready to crush ${today.routineName}?"
-                binding.tvTodayRoutineName.text = today.routineName
-                binding.tvTodayRoutineDetails.text = "${today.exerciseCount} Exercises • ${today.durationMinutes} min"
-                binding.cardTodayWorkout.visibility = View.VISIBLE
-            } else if (today == null && (sessionViewModel.uiState.value.session?.status != com.example.gymlog.model.WorkoutStatus.ACTIVE)) {
-                binding.tvHeaderSub.text = "Start your fitness journey today!"
-                binding.cardTodayWorkout.visibility = View.GONE
+            val isActive = sessionViewModel.uiState.value.session?.status == com.example.gymlog.model.WorkoutStatus.ACTIVE
+            
+            if (!isActive) {
+                if (today != null) {
+                    binding.tvHeaderSub.text = "Ready to crush ${today.routineName}?"
+                    binding.tvTodayRoutineName.text = today.routineName
+                    binding.tvTodayRoutineDetails.text = "${today.exerciseCount} Exercises • ${today.durationMinutes} min"
+                    binding.cardTodayWorkout.visibility = View.VISIBLE
+                    binding.btnStartTodayWorkout.text = getString(R.string.start_workout)
+                } else if (data.allRoutinesCompleted) {
+                    binding.tvHeaderSub.text = "You've crushed all your routines for today! 🔥"
+                    binding.cardTodayWorkout.visibility = View.GONE
+                } else {
+                    binding.tvHeaderSub.text = "Start your fitness journey today!"
+                    binding.cardTodayWorkout.visibility = View.GONE
+                }
             }
 
             val stats = data.stats
