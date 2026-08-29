@@ -145,6 +145,7 @@ class AddRoutineFragment : Fragment() {
         }
     }
 
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
