@@ -27,7 +27,7 @@ interface RoutineDao {
     @Query("DELETE FROM routine_exercises WHERE routineId = :routineId")
     suspend fun deleteExercisesByRoutineId(routineId: Int)
 
-    // Routine Exercises
+    //Routine Exercises
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRoutineExercise(exercise: RoutineExerciseEntity)
 
@@ -121,7 +121,7 @@ interface RoutineDao {
     @Query("SELECT startTime FROM workout_sessions WHERE profileId = :profileId ORDER BY startTime DESC")
     suspend fun getAllSessionTimes(profileId: Int): List<Long>
 
-    // Volume Analytics
+    // Volume Analytics (Weights)
     @Query("SELECT SUM(weight * reps) FROM workout_sets WHERE sessionId = :sessionId")
     suspend fun getSessionVolume(sessionId: Int): Float?
 
