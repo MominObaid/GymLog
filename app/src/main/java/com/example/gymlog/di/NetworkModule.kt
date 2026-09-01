@@ -21,7 +21,7 @@ import javax.inject.Singleton
 object NetworkModule {
 
     private const val BASE_URL = "https://wger.de/api/v2/"
-    private const val AI_BACKEND_URL = "https://your-ai-backend-url.com/" // TODO: Replace with your actual backend API URL
+    private const val AI_BACKEND_URL = "https://your-ai-backend-url.com/" // TODO: Replace with actual backend API URL
 
     @Provides
     @Singleton
