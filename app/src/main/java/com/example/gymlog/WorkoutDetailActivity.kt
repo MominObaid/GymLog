@@ -33,9 +33,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
         supportActionBar?.setHomeAsUpIndicator(R.drawable.outline_arrow_back_24)
 
         // workoutViewModel is now injected via Hilt
-
-
-        // Get the workout ID from the intent
+        // Getting the workout ID from the intent
         workoutId = intent.getIntExtra("WORKOUT_ID", -1)
         if (workoutId == -1) {
             Toast.makeText(this, "Invalid Workout", Toast.LENGTH_SHORT).show()
