@@ -18,6 +18,8 @@ import androidx.room.migration.Migration
     ],
     version = 11,
     exportSchema = false
+//    version = 12,
+//    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class WorkoutDatabase : RoomDatabase() {
