@@ -61,7 +61,6 @@ class WorkoutRepository @Inject constructor(
         data class Error(val message: String) : ApiResult<Nothing>()
     }
 
-
     //This function contains the business logic for fetching exercises from the API.
      //It handles success, failure, and network exceptions, returning a sealed result.
 
