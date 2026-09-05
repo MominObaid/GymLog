@@ -6,7 +6,6 @@ GymLog helps users track workouts, monitor progress, manage training routines, a
 
 ---
 
-
 ## 📱 Features
 
 ### 🏠 Daily Hub (Dashboard)
