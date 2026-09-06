@@ -20,7 +20,10 @@ class AiAssistantManager @Inject constructor(
                 Log.e("AI_ERROR", "Backend Error: ${response.code()}")
                 "I'm sorry, I'm having trouble connecting to my coaching brain right now."
             }
-        } catch (e: Exception) {
+        }catch (_: java.net.UnknownHostException) {
+            "AI coaching isn't set up yet in this build."
+            }
+        catch (e: Exception) {
             Log.e("AI_ERROR", "Network Failed: ${e.message}")
             "Network error. Please check your connection."
         }
