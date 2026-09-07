@@ -9,8 +9,8 @@
 
     <!-- Dark Theme Palette -->
     <color name="primary_dark">#D0BCFF</color>
-    <color name="background_dark">#1C1B1F</color>
-    <color name="surface_dark">#2B2930</color>
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1B24</color>
     <color name="text_primary_dark">#E6E1E5</color>
     <color name="text_secondary_dark">#CAC4D0</color>
 
@@ -31,6 +31,11 @@
     <color name="health_purple_light">#F3E5F5</color>
     <color name="pr_gold">#FBC02D</color>
     <color name="pr_gold_light">#FFF9C4</color>
+
+    <!-- Plateau Card Colors -->
+    <color name="plateau_red_text">#B71C1C</color>
+    <color name="plateau_red_bg">#FFEBEE</color>
+    <color name="plateau_red_stroke">#FFCDD2</color>
 
     <!-- UI Elements -->
     <color name="divider_color">#1F000000</color>
