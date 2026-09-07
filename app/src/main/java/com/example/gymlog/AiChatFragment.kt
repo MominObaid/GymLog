@@ -64,7 +64,7 @@ class AiChatFragment : Fragment() {
     }
 
     private fun closeChat() {
-        activity?.onBackPressedDispatcher?.onBackPressed()
+        (activity as? MainActivity)?.hideChat()
     }
 
     override fun onDestroyView() {
