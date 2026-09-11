@@ -5,13 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurface">
+    android:background="?attr/android:windowBackground">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
+        android:background="?attr/android:windowBackground"
+        android:fitsSystemWindows="true"
         app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -20,7 +21,7 @@
             android:layout_height="?attr/actionBarSize"
             app:title="GymLog"
             app:titleCentered="false"
-            app:titleTextAppearance="@style/TextAppearance.Material3.HeadlineMedium" />
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -258,6 +259,8 @@
                     android:layout_marginEnd="4dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/card_stroke_color"
                     app:cardBackgroundColor="@color/workout_blue_light">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -288,6 +291,8 @@
                     android:layout_marginStart="4dp"
                     app:cardCornerRadius="20dp"
                     app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/card_stroke_color"
                     app:cardBackgroundColor="@color/health_green_light">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -320,6 +325,8 @@
                 android:layout_marginBottom="100dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/card_stroke_color"
                 app:cardBackgroundColor="@color/health_purple_light">
                 <LinearLayout
                     android:layout_width="match_parent"
