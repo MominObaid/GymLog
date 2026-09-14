@@ -1,10 +1,25 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-        <style name="Theme.GymLog" parent="Theme.Material3.DayNight.NoActionBar">
-            <item name="colorPrimary">@color/primary_light</item>
-            <item name="android:windowBackground">@color/background_light</item>
-            <item name="colorSurface">@color/surface_light</item>
-            <item name="colorOnSurface">@color/text_primary_light</item>
-            <item name="colorOnSurfaceVariant">@color/text_secondary_light</item>
-        </style>
+    <style name="Theme.GymLog" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary_light</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#E8DEF8</item>
+        <item name="colorOnPrimaryContainer">#1D192B</item>
+
+        <item name="colorSecondary">#625B71</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#E8DEF8</item>
+        <item name="colorOnSecondaryContainer">#1D192B</item>
+
+        <item name="colorTertiary">#7D5260</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+
+        <item name="android:windowBackground">@color/background_light</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorSurfaceVariant">#F3EFFA</item>
+        <item name="colorOnSurface">@color/text_primary_light</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary_light</item>
+        <item name="colorOutline">@color/card_stroke_color</item>
+        <item name="colorOutlineVariant">@color/divider_color</item>
+    </style>
 </resources>
