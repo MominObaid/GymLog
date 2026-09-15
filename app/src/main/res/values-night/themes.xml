@@ -1,9 +1,24 @@
 <resources>
     <style name="Theme.GymLog" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorOnPrimary">#381E72</item>
+        <item name="colorPrimaryContainer">#4F378B</item>
+        <item name="colorOnPrimaryContainer">#EADDFF</item>
+
+        <item name="colorSecondary">#CCC2DC</item>
+        <item name="colorOnSecondary">#332D41</item>
+        <item name="colorSecondaryContainer">#4A4458</item>
+        <item name="colorOnSecondaryContainer">#E8DEF8</item>
+
+        <item name="colorTertiary">#EFB8C8</item>
+        <item name="colorOnTertiary">#492532</item>
+
         <item name="android:windowBackground">@color/background_dark</item>
         <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorSurfaceVariant">#2D2838</item>
         <item name="colorOnSurface">@color/text_primary_dark</item>
         <item name="colorOnSurfaceVariant">@color/text_secondary_dark</item>
+        <item name="colorOutline">@color/card_stroke_color</item>
+        <item name="colorOutlineVariant">@color/divider_color</item>
     </style>
 </resources>
