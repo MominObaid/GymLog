@@ -51,6 +51,13 @@ class RoutineListFragment : Fragment() {
                 viewModel.resetAiPlanFlag()
             }
         }
+
+        viewModel.aiPlanError.observe(viewLifecycleOwner) { error ->
+            error?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                viewModel.resetAiPlanError()
+            }
+        }
     }
 
     private fun showAiGenerateDialog() {
