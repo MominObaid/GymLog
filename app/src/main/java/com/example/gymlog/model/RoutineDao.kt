@@ -183,8 +183,11 @@ interface RoutineDao {
     fun getOneRMHistory(profileId: Int, exerciseName: String): Flow<List<OneRMPoint>>
 
     // User Profile
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert
     suspend fun insertProfile(profile: UserProfile): Long
+
+    @Update
+    suspend fun updateProfile(profile: UserProfile)
 
     @Query("SELECT * FROM user_profile WHERE isActive = 1 LIMIT 1")
     suspend fun getActiveProfile(): UserProfile?
