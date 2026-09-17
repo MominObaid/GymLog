@@ -127,8 +127,12 @@ class RoutineRepository @Inject constructor(
         return routineDao.getOneRMHistory(profileId, exerciseName)
     }
 
-    suspend fun insertProfile(profile: UserProfile) {
-        routineDao.insertProfile(profile)
+    suspend fun insertProfile(profile: UserProfile): Long {
+        return routineDao.insertProfile(profile)
+    }
+
+    suspend fun updateProfile(profile: UserProfile) {
+        routineDao.updateProfile(profile)
     }
 
     suspend fun getProfile(): UserProfile? {
