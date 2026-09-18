@@ -94,13 +94,9 @@ class ProfileFragment : Fragment() {
 
     private fun createNewProfile() {
         val colors = listOf(0xFF1976D2.toInt(), 0xFF388E3C.toInt(), 0xFF7B1FA2.toInt(), 0xFFFF8F00.toInt())
-        val profile = UserProfile(
-            id = 0,
-            name = "Athlete ${profileAdapter.itemCount + 1}",
-            isActive = false,
-            avatarColor = colors.random()
-        )
-        viewModel.updateProfile(profile)
+        val name = "Athlete ${profileAdapter.itemCount + 1}"
+        val color = colors.random()
+        viewModel.createProfile(name, color)
         Toast.makeText(requireContext(), "New profile added! Tap to switch.", Toast.LENGTH_SHORT).show()
     }
 
@@ -192,7 +188,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun saveProfile() {
-        val currentProfile = viewModel.userProfile.value
+        val currentProfile = viewModel.userProfile.value ?: return
         val name = binding.etName.text.toString().trim()
         val age = binding.etAge.text.toString().toIntOrNull() ?: 0
         val height = binding.etHeight.text.toString().toFloatOrNull() ?: 0f
@@ -208,8 +204,7 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val profile = UserProfile(
-            id = currentProfile?.id ?: 0,
+        val profile = currentProfile.copy(
             name = name,
             age = age,
             height = height,
@@ -218,9 +213,7 @@ class ProfileFragment : Fragment() {
             goal = goal,
             experienceLevel = level,
             workoutDaysPerWeek = days,
-            availableEquipment = equipment,
-            isActive = currentProfile?.isActive ?: true,
-            avatarColor = currentProfile?.avatarColor ?: 0xFF1976D2.toInt()
+            availableEquipment = equipment
         )
 
         viewModel.updateProfile(profile)
