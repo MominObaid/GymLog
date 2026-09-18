@@ -137,12 +137,21 @@ class RoutineViewModel @Inject constructor(
         }
     }
 
+    private val _aiPlanError = MutableLiveData<String?>()
+    val aiPlanError: LiveData<String?> = _aiPlanError
+
+    fun resetAiPlanError() {
+        _aiPlanError.value = null
+    }
+
     fun generateAiPlan(request: String) {
         val profile = _userProfile.value ?: return
         viewModelScope.launch {
             val success = generateWorkoutPlanUseCase(profile.id, request)
             if (success) {
                 _aiPlanGenerated.value = true
+            } else {
+                _aiPlanError.value = "Unable to generate AI plan. Please check your connection or try again."
             }
         }
     }
@@ -232,8 +241,20 @@ class RoutineViewModel @Inject constructor(
 
     fun updateProfile(profile: com.example.gymlog.model.UserProfile) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.insertProfile(profile)
+            repository.updateProfile(profile)
             loadProfile()
+        }
+    }
+
+    fun createProfile(name: String, avatarColor: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val newProfile = com.example.gymlog.model.UserProfile(
+                id = 0,
+                name = name,
+                isActive = false,
+                avatarColor = avatarColor
+            )
+            repository.insertProfile(newProfile)
         }
     }
 
@@ -246,11 +267,13 @@ class RoutineViewModel @Inject constructor(
                 active = repository.getProfile()
             } else {
                 val defaultProfile = com.example.gymlog.model.UserProfile(
+                    id = 0,
                     name = "Athlete",
                     isActive = true,
                     avatarColor = 0xFF1976D2.toInt()
                 )
-                repository.insertProfile(defaultProfile)
+                val generatedId = repository.insertProfile(defaultProfile).toInt()
+                repository.setActiveProfile(generatedId)
                 active = repository.getProfile()
             }
         }
