@@ -159,7 +159,13 @@ class AnalyticsFragment : Fragment() {
         updateStrengthChart("Bench Press")
     }
 
+    private fun getChartTextColor(): Int {
+        val isNightMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        return if (isNightMode) Color.parseColor("#E6E1E5") else Color.parseColor("#1C1B1F")
+    }
+
     private fun setupMuscleChart(data: List<MuscleVolume>) {
+        val textColor = getChartTextColor()
         val entries = data.mapIndexed { index, item ->
             BarEntry(index.toFloat(), item.value.toFloat())
         }
@@ -167,14 +173,18 @@ class AnalyticsFragment : Fragment() {
         val dataSet = BarDataSet(entries, "Sets per Muscle Group").apply {
             color = ContextCompat.getColor(requireContext(), R.color.workout_blue)
             valueTextSize = 10f
+            valueTextColor = textColor
         }
 
         binding.chartMuscleVolume.apply {
             this.data = BarData(dataSet)
             description.isEnabled = false
+            legend.textColor = textColor
+            xAxis.textColor = textColor
             xAxis.valueFormatter = IndexAxisValueFormatter(data.map { it.label })
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setDrawGridLines(false)
+            axisLeft.textColor = textColor
             axisLeft.setDrawGridLines(false)
             axisRight.isEnabled = false
             animateY(1000)
@@ -183,6 +193,7 @@ class AnalyticsFragment : Fragment() {
     }
 
     private fun setupOneRMChart(history: List<OneRMPoint>) {
+        val textColor = getChartTextColor()
         val entries = history.mapIndexed { index, point ->
             Entry(index.toFloat(), point.oneRM.toFloat())
         }
@@ -198,8 +209,11 @@ class AnalyticsFragment : Fragment() {
         binding.chartStrengthTrend.apply {
             data = LineData(dataSet)
             description.isEnabled = false
+            legend.textColor = textColor
+            xAxis.textColor = textColor
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setDrawGridLines(false)
+            axisLeft.textColor = textColor
             axisRight.isEnabled = false
             animateX(1000)
             invalidate()
@@ -240,27 +254,32 @@ class AnalyticsFragment : Fragment() {
 
     private fun setupVolumeChart(history: List<VolumePoint>) {
         try {
+            val textColor = getChartTextColor()
             val entries = history.mapIndexed { index, point ->
                 Entry(index.toFloat(), point.volume)
             }
 
             val dataSet = LineDataSet(entries, "Total Volume").apply {
-                color = Color.parseColor("#7B1FA2")
+                color = ContextCompat.getColor(requireContext(), R.color.health_purple)
                 setDrawCircles(true)
                 setDrawValues(false)
                 lineWidth = 2f
                 mode = LineDataSet.Mode.CUBIC_BEZIER
                 setDrawFilled(true)
-                fillColor = Color.parseColor("#7B1FA2")
+                fillColor = ContextCompat.getColor(requireContext(), R.color.health_purple)
                 fillAlpha = 50
             }
 
             binding.chartVolumeHistory.apply {
                 data = LineData(dataSet)
                 description.isEnabled = false
+                legend.textColor = textColor
+                xAxis.textColor = textColor
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
                 xAxis.granularity = 1f
                 xAxis.setDrawLabels(false)
+                axisLeft.textColor = textColor
+                axisRight.isEnabled = false
                 animateY(1000)
                 invalidate()
             }
@@ -268,6 +287,7 @@ class AnalyticsFragment : Fragment() {
             e.printStackTrace()
         }
     }
+
 
     override fun onResume() {
         super.onResume()
