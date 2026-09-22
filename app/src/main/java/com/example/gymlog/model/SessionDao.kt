@@ -17,6 +17,9 @@ interface SessionDao {
     @Query("SELECT * FROM workout_sessions WHERE status = 'ACTIVE' LIMIT 1")
     fun getActiveSession(): Flow<WorkoutSessionEntity?>
 
+    @Query("SELECT * FROM workout_sessions WHERE status = 'ACTIVE' LIMIT 1")
+    suspend fun getActiveSessionSync(): WorkoutSessionEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSet(set: WorkoutSetEntity)
 
