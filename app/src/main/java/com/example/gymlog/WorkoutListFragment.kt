@@ -240,15 +240,42 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                 if (name.isBlank() || setsText.isBlank() || repsText.isBlank() || weightText.isBlank()) {
                     Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
                 } else {
+                    val setsCount = setsText.toIntOrNull() ?: 1
+                    val repsCount = repsText.toIntOrNull() ?: 10
+                    val weightVal = weightText.toDoubleOrNull() ?: 0.0
+
                     val workout = Workout(
                         name = name,
-                        sets = setsText.toInt(),
-                        reps = repsText.toInt(),
-                        weight = weightText.toDouble(),
+                        sets = setsCount,
+                        reps = repsCount,
+                        weight = weightVal,
                         date = selectedDateMillis
                     )
                     workoutViewModel.insert(workout)
-                    Toast.makeText(requireContext(), "Exercise Logged!", Toast.LENGTH_SHORT).show()
+
+                    // Also save as a completed WorkoutSession for unified streaks, volume, and 1RM analytics
+                    val setsList = (1..setsCount).map { setNum ->
+                        com.example.gymlog.model.WorkoutSetEntity(
+                            sessionId = 0,
+                            exerciseName = name,
+                            muscleGroup = "Other",
+                            setNumber = setNum,
+                            weight = weightVal,
+                            reps = repsCount,
+                            isCompleted = true,
+                            timestamp = selectedDateMillis
+                        )
+                    }
+
+                    routineViewModel.saveWorkoutSession(
+                        routineId = -1,
+                        startTime = selectedDateMillis,
+                        endTime = selectedDateMillis + 600000L,
+                        notes = "Quick Log: $name",
+                        sessionExercises = setsList
+                    )
+
+                    Toast.makeText(requireContext(), "Exercise Logged & Streaks Updated! 🔥", Toast.LENGTH_SHORT).show()
                 }
             }
             .show()
