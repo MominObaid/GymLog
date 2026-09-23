@@ -27,6 +27,10 @@ class SessionRepository @Inject constructor(
         return sessionDao.getActiveSession()
     }
 
+    suspend fun getActiveSessionSync(): WorkoutSessionEntity? {
+        return sessionDao.getActiveSessionSync()
+    }
+
     suspend fun getSessionById(sessionId: Int): WorkoutSessionEntity? {
         return sessionDao.getSessionById(sessionId)
     }
