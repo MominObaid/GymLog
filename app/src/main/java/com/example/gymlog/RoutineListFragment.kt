@@ -82,11 +82,8 @@ class RoutineListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = RoutineAdapter(
             onStartSessionClick = { routine ->
-                val bundle = Bundle().apply {
-                    putInt("routine_id", routine.id)
-                    putString("routine_name", routine.name)
-                }
-                findNavController().navigate(R.id.workoutSessionFragment, bundle)
+                val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
+                findNavController().navigate(action)
             },
             onDeleteClick = { routine ->
                 MaterialAlertDialogBuilder(requireContext())
@@ -99,10 +96,8 @@ class RoutineListFragment : Fragment() {
                     .show()
             },
             onItemClick = { routine ->
-                val bundle = Bundle().apply {
-                    putInt("routine_id", routine.id)
-                }
-                findNavController().navigate(R.id.addRoutineFragment, bundle)
+                val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
+                findNavController().navigate(action)
             }
         )
         binding.recyclerViewRoutines.apply {
