@@ -50,7 +50,12 @@ class SessionViewModel @Inject constructor(
     }
 
     fun startWorkout(profileId: Int, routineId: Int) {
-        if (uiState.value.session != null || uiState.value.isLoading) return
+        val currentSession = uiState.value.session
+        if (currentSession != null && currentSession.routineId == routineId) {
+            return
+        }
+        if (uiState.value.isLoading) return
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
