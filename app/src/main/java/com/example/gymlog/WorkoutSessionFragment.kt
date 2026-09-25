@@ -101,13 +101,16 @@ class WorkoutSessionFragment : Fragment() {
         
         binding.textViewSessionTitle.text = getString(R.string.session_title_format, routineName)
 
-        // Check if there's already an active session, if not start one
+        // Check if there's already an active session for this routine, if not start one
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sessionViewModel.uiState.collect { state ->
-                    if ((state.session == null) && !state.isLoading) {
-                        val profileId = routineViewModel.userProfile.value?.id ?: 0
-                        sessionViewModel.startWorkout(profileId, routineId)
+                    val session = state.session
+                    if (!state.isLoading) {
+                        if (session == null || session.routineId != routineId) {
+                            val profileId = routineViewModel.userProfile.value?.id ?: 0
+                            sessionViewModel.startWorkout(profileId, routineId)
+                        }
                     }
                 }
             }
