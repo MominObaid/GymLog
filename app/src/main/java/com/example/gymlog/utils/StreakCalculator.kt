@@ -1,45 +1,33 @@
 package com.example.gymlog.utils
 
-import java.util.*
-import java.util.concurrent.TimeUnit
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 object StreakCalculator {
 
-    fun calculateStreak(sessionTimes: List<Long>): Int {
+    fun calculateStreak(sessionTimes: List<Long>, zoneId: ZoneId = ZoneId.systemDefault()): Int {
         if (sessionTimes.isEmpty()) return 0
 
-        val uniqueDates = sessionTimes.map { 
-            val cal = Calendar.getInstance()
-            cal.timeInMillis = it
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            cal.timeInMillis
+        val uniqueDates = sessionTimes.map { millis ->
+            Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate()
         }.distinct().sortedDescending()
 
-        var streak = 0
-        val today = Calendar.getInstance()
-        today.set(Calendar.HOUR_OF_DAY, 0)
-        today.set(Calendar.MINUTE, 0)
-        today.set(Calendar.SECOND, 0)
-        today.set(Calendar.MILLISECOND, 0)
-        val todayMillis = today.timeInMillis
+        val today = LocalDate.now(zoneId)
+        val mostRecent = uniqueDates.first()
 
-        var currentCheckDate = todayMillis
-        
-        // If the most recent workout was not today or yesterday, streak is 0
-        if (uniqueDates.first() < todayMillis - TimeUnit.DAYS.toMillis(1)) {
+        // If the most recent workout was before yesterday, streak is broken (0)
+        if (mostRecent.isBefore(today.minusDays(1))) {
             return 0
         }
 
-        // Adjust starting check date if the most recent workout was today or yesterday
-        currentCheckDate = uniqueDates.first()
+        var streak = 0
+        var expectedDate = mostRecent
 
         for (date in uniqueDates) {
-            if (date == currentCheckDate) {
+            if (date == expectedDate) {
                 streak++
-                currentCheckDate -= TimeUnit.DAYS.toMillis(1)
+                expectedDate = expectedDate.minusDays(1)
             } else {
                 break
             }
@@ -48,31 +36,26 @@ object StreakCalculator {
         return streak
     }
 
-    fun calculateLongestStreak(sessionTimes: List<Long>): Int {
+    fun calculateLongestStreak(sessionTimes: List<Long>, zoneId: ZoneId = ZoneId.systemDefault()): Int {
         if (sessionTimes.isEmpty()) return 0
 
-        val uniqueDates = sessionTimes.map { 
-            val cal = Calendar.getInstance()
-            cal.timeInMillis = it
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-            cal.timeInMillis
+        val uniqueDates = sessionTimes.map { millis ->
+            Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate()
         }.distinct().sortedDescending()
 
         var maxStreak = 0
         var currentStreak = 0
-        var lastDate: Long? = null
+        var expectedDate: LocalDate? = null
 
         for (date in uniqueDates) {
-            if (lastDate == null || lastDate - date == TimeUnit.DAYS.toMillis(1)) {
+            if (expectedDate == null || date == expectedDate) {
                 currentStreak++
+                expectedDate = date.minusDays(1)
             } else {
                 maxStreak = maxOf(maxStreak, currentStreak)
                 currentStreak = 1
+                expectedDate = date.minusDays(1)
             }
-            lastDate = date
         }
         return maxOf(maxStreak, currentStreak)
     }
