@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewAnimationUtils
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
         
         binding.bottomNavigation.setupWithNavController(navController)
 
+        setupBackPressedHandler()
+
         if (savedInstanceState == null) {
             scheduleWorkoutReminders()
         }
@@ -46,6 +49,19 @@ class MainActivity : AppCompatActivity() {
             navController.navigate(item.itemId)
             true
         }
+    }
+
+    private fun setupBackPressedHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (binding.aiChatContainer.visibility == View.VISIBLE) {
+                    hideChat()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun scheduleWorkoutReminders() {
