@@ -2,6 +2,7 @@ package com.example.gymlog
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +12,7 @@ import com.example.gymlog.model.RoutineEntity
 class RoutineAdapter(
     private val onStartSessionClick: (RoutineEntity) -> Unit,
     private val onDeleteClick: (RoutineEntity) -> Unit,
+    private val onEditClick: ((RoutineEntity) -> Unit)? = null,
     private val onItemClick: (RoutineEntity) -> Unit
 ) : RecyclerView.Adapter<RoutineAdapter.RoutineViewHolder>() {
 
@@ -43,8 +45,24 @@ class RoutineAdapter(
                 onStartSessionClick(routine)
             }
             
-            binding.buttonDeleteRoutine.setOnClickListener {
-                onDeleteClick(routine)
+            binding.buttonMenu.setOnClickListener { view ->
+                val popup = PopupMenu(view.context, view)
+                popup.menu.add(0, 1, 0, "Edit Routine")
+                popup.menu.add(0, 2, 1, "Delete Routine")
+                popup.setOnMenuItemClickListener { menuItem ->
+                    when (menuItem.itemId) {
+                        1 -> {
+                            onEditClick?.invoke(routine) ?: onItemClick(routine)
+                            true
+                        }
+                        2 -> {
+                            onDeleteClick(routine)
+                            true
+                        }
+                        else -> false
+                    }
+                }
+                popup.show()
             }
         }
     }
