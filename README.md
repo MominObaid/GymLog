@@ -75,7 +75,7 @@ GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
 
 ---
 
-## 🚀 Roadmap
+##  Roadmap
 
 ### Phase 1 & 2 (Completed)
 - [x] Workout & Manual Logging
