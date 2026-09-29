@@ -95,6 +95,12 @@ class RoutineListFragment : Fragment() {
                     .setNegativeButton("Cancel", null)
                     .show()
             },
+            onEditClick = { routine ->
+                val bundle = Bundle().apply {
+                    putInt("routine_id", routine.id)
+                }
+                findNavController().navigate(R.id.addRoutineFragment, bundle)
+            },
             onItemClick = { routine ->
                 val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
                 findNavController().navigate(action)
