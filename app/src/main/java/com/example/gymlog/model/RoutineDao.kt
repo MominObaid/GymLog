@@ -102,12 +102,28 @@ interface RoutineDao {
     suspend fun getMaxWeightForExercise(profileId: Int, exerciseName: String): Float?
 
     @Query("""
+        SELECT MAX(se.weight) 
+        FROM workout_sets se
+        JOIN workout_sessions ws ON se.sessionId = ws.id
+        WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName AND ws.id != :currentSessionId
+    """)
+    suspend fun getPreviousMaxWeightForExercise(profileId: Int, exerciseName: String, currentSessionId: Int): Float?
+
+    @Query("""
         SELECT MAX(se.reps) 
         FROM workout_sets se
         JOIN workout_sessions ws ON se.sessionId = ws.id
         WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName
     """)
     suspend fun getMaxRepsForExercise(profileId: Int, exerciseName: String): Int?
+
+    @Query("""
+        SELECT MAX(se.reps) 
+        FROM workout_sets se
+        JOIN workout_sessions ws ON se.sessionId = ws.id
+        WHERE ws.profileId = :profileId AND se.exerciseName = :exerciseName AND ws.id != :currentSessionId
+    """)
+    suspend fun getPreviousMaxRepsForExercise(profileId: Int, exerciseName: String, currentSessionId: Int): Int?
 
     @Query("SELECT COUNT(*) FROM workout_sessions WHERE profileId = :profileId")
     suspend fun getWorkoutCount(profileId: Int): Int
