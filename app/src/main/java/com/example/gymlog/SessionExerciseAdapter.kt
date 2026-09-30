@@ -17,7 +17,8 @@ class SessionExerciseAdapter(
     private val onSetDone: () -> Unit,
     private val onSwapExercise: (String) -> Unit,
     private val onSetChanged: (WorkoutSetEntity) -> Unit,
-    private val onAddSet: (String, String) -> Unit
+    private val onAddSet: (String, String) -> Unit,
+    private val onDeleteSet: (WorkoutSetEntity) -> Unit = {}
 ) : RecyclerView.Adapter<SessionExerciseAdapter.ViewHolder>() {
 
     private var exercises = emptyList<RoutineExerciseEntity>()
@@ -52,8 +53,8 @@ class SessionExerciseAdapter(
         }
 
         fun updateSets() {
-            val exerciseName = binding.textViewExerciseName.text.toString()
-            val sets = sessionSets.filter { it.exerciseName == exerciseName }
+            val exerciseName = binding.textViewExerciseName.text.toString().trim()
+            val sets = sessionSets.filter { it.exerciseName.trim().equals(exerciseName, ignoreCase = true) }
             val layout = binding.layoutSets
             
             // Reconcile views
@@ -79,6 +80,7 @@ class SessionExerciseAdapter(
         }
 
         private fun bindSet(setBinding: ItemSessionSetBinding, setData: WorkoutSetEntity) {
+            setBinding.root.tag = setData
             setBinding.textViewSetNumber.text = setData.setNumber.toString()
             
             // Sync content only if NOT focused
@@ -114,59 +116,77 @@ class SessionExerciseAdapter(
         }
 
         private fun setupListeners(setBinding: ItemSessionSetBinding, setData: WorkoutSetEntity) {
-            // Helper to get current live weight from view or setData
+            fun getLatestSetData(): WorkoutSetEntity =
+                setBinding.root.tag as? WorkoutSetEntity ?: setData
+
+            // Helper to get current live weight from view or latest setData
             fun getCurrentWeight(): Double {
                 val text = setBinding.editTextWeight.text.toString().trim()
-                return text.toDoubleOrNull() ?: setData.weight
+                return text.toDoubleOrNull() ?: getLatestSetData().weight
             }
 
-            // Helper to get current live reps from view or setData
+            // Helper to get current live reps from view or latest setData
             fun getCurrentReps(): Int {
                 val text = setBinding.editTextReps.text.toString().trim()
-                return text.toIntOrNull() ?: setData.reps
+                return text.toIntOrNull() ?: getLatestSetData().reps
             }
+
+            // Clear old focus change listeners before attaching new ones
+//            setBinding.editTextWeight.onFocusChangeListener = null
+//            setBinding.editTextReps.onFocusChangeListener = null
 
             // Quick +/- Weight buttons (+2.5kg / -2.5kg)
             setBinding.btnMinusWeight.setOnClickListener {
+                val currentSet = getLatestSetData()
                 val currentWeight = getCurrentWeight()
                 val currentReps = getCurrentReps()
                 val newWeight = maxOf(0.0, currentWeight - 2.5)
                 setBinding.editTextWeight.setText(if (newWeight > 0) newWeight.toString() else "")
-                onSetChanged(setData.copy(weight = newWeight, reps = currentReps))
+                onSetChanged(currentSet.copy(weight = newWeight, reps = currentReps))
             }
 
             setBinding.btnPlusWeight.setOnClickListener {
+                val currentSet = getLatestSetData()
                 val currentWeight = getCurrentWeight()
                 val currentReps = getCurrentReps()
                 val newWeight = currentWeight + 2.5
                 setBinding.editTextWeight.setText(newWeight.toString())
-                onSetChanged(setData.copy(weight = newWeight, reps = currentReps))
+                onSetChanged(currentSet.copy(weight = newWeight, reps = currentReps))
             }
 
             // Quick +/- Reps buttons (+1 / -1)
             setBinding.btnMinusReps.setOnClickListener {
+                val currentSet = getLatestSetData()
                 val currentWeight = getCurrentWeight()
                 val currentReps = getCurrentReps()
                 val newReps = maxOf(0, currentReps - 1)
                 setBinding.editTextReps.setText(if (newReps > 0) newReps.toString() else "")
-                onSetChanged(setData.copy(weight = currentWeight, reps = newReps))
+                onSetChanged(currentSet.copy(weight = currentWeight, reps = newReps))
             }
 
             setBinding.btnPlusReps.setOnClickListener {
+                val currentSet = getLatestSetData()
                 val currentWeight = getCurrentWeight()
                 val currentReps = getCurrentReps()
                 val newReps = currentReps + 1
                 setBinding.editTextReps.setText(newReps.toString())
-                onSetChanged(setData.copy(weight = currentWeight, reps = newReps))
+                onSetChanged(currentSet.copy(weight = currentWeight, reps = newReps))
             }
 
             // Quick DONE Toggle Button
             setBinding.btnSetDone.setOnClickListener {
+                val currentSet = getLatestSetData()
                 val currentWeight = getCurrentWeight()
                 val currentReps = getCurrentReps()
-                val newCompleted = !setData.isCompleted
-                onSetChanged(setData.copy(weight = currentWeight, reps = currentReps, isCompleted = newCompleted))
+                val newCompleted = !currentSet.isCompleted
+                onSetChanged(currentSet.copy(weight = currentWeight, reps = currentReps, isCompleted = newCompleted))
                 if (newCompleted) onSetDone()
+            }
+
+            // Delete Set Button
+            setBinding.btnDeleteSet.setOnClickListener {
+                val currentSet = getLatestSetData()
+                onDeleteSet(currentSet)
             }
 
             // Remove old text watchers
@@ -180,18 +200,20 @@ class SessionExerciseAdapter(
             }
 
             val weightWatcher = DebouncedTextWatcher(setBinding.editTextWeight) { newText ->
+                val currentSet = getLatestSetData()
                 val newWeight = newText.toDoubleOrNull() ?: 0.0
                 val currentReps = getCurrentReps()
-                if (newWeight != setData.weight) {
-                    onSetChanged(setData.copy(weight = newWeight, reps = currentReps))
+                if (newWeight != currentSet.weight) {
+                    onSetChanged(currentSet.copy(weight = newWeight, reps = currentReps))
                 }
             }
             
             val repsWatcher = DebouncedTextWatcher(setBinding.editTextReps) { newText ->
+                val currentSet = getLatestSetData()
                 val newReps = newText.toIntOrNull() ?: 0
                 val currentWeight = getCurrentWeight()
-                if (newReps != setData.reps) {
-                    onSetChanged(setData.copy(weight = currentWeight, reps = newReps))
+                if (newReps != currentSet.reps) {
+                    onSetChanged(currentSet.copy(weight = currentWeight, reps = newReps))
                 }
             }
 
@@ -200,6 +222,29 @@ class SessionExerciseAdapter(
 
             setBinding.editTextReps.addTextChangedListener(repsWatcher)
             setBinding.editTextReps.tag = repsWatcher
+
+            // Commit immediately on Focus Lost
+            setBinding.editTextWeight.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    val currentSet = getLatestSetData()
+                    val newWeight = getCurrentWeight()
+                    val currentReps = getCurrentReps()
+                    if (newWeight != currentSet.weight) {
+                        onSetChanged(currentSet.copy(weight = newWeight, reps = currentReps))
+                    }
+                }
+            }
+
+            setBinding.editTextReps.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    val currentSet = getLatestSetData()
+                    val currentWeight = getCurrentWeight()
+                    val newReps = getCurrentReps()
+                    if (newReps != currentSet.reps) {
+                        onSetChanged(currentSet.copy(weight = currentWeight, reps = newReps))
+                    }
+                }
+            }
         }
     }
 
@@ -221,7 +266,7 @@ class SessionExerciseAdapter(
                     lastProcessedText = newText
                     onDebouncedChange(newText) 
                 }
-                view.postDelayed(updateRunnable, 1000)
+                view.postDelayed(updateRunnable, 300)
             }
         }
     }
