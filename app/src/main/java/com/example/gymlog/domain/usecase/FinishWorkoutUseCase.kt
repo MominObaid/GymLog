@@ -16,9 +16,21 @@ class FinishWorkoutUseCase @Inject constructor(
         val session = sessionRepository.getSessionById(sessionId) ?: return null
         val sets = sessionRepository.getSetsForSessionSync(sessionId)
         
+        // Auto-complete any set that has valid weight or reps entered
+        sets.forEach { set ->
+            if (!set.isCompleted && (set.weight > 0 || set.reps > 0)) {
+                val completedSet = set.copy(isCompleted = true)
+                sessionRepository.updateSet(completedSet)
+            }
+        }
+
+        // Fetch refreshed sets after auto-completion
+        val updatedSets = sessionRepository.getSetsForSessionSync(sessionId)
+        val completedSets = updatedSets.filter { it.isCompleted || it.weight > 0 || it.reps > 0 }
+        
         val endTime = System.currentTimeMillis()
-        val durationMillis = endTime - session.startTime
-        val totalVolume = sets.filter { it.isCompleted }.sumOf { it.weight * it.reps }
+        val durationMillis = maxOf(0L, endTime - session.startTime)
+        val totalVolume = completedSets.sumOf { it.weight * it.reps }
         
         val updatedSession = session.copy(
             endTime = endTime,
@@ -29,18 +41,18 @@ class FinishWorkoutUseCase @Inject constructor(
         )
         sessionRepository.updateSession(updatedSession)
 
-        // PR Detection
+        // PR Detection (compared against previous completed sessions)
         val prsDetected = mutableListOf<String>()
-        sets.filter { it.isCompleted }.groupBy { it.exerciseName }.forEach { (exerciseName, exerciseSets) ->
-            val maxWeightThisSession = exerciseSets.maxOf { it.weight }
-            val maxRepsAtMaxWeight = exerciseSets.filter { it.weight == maxWeightThisSession }.maxOf { it.reps }
+        completedSets.groupBy { it.exerciseName }.forEach { (exerciseName, exerciseSets) ->
+            val maxWeightThisSession = exerciseSets.maxOfOrNull { it.weight } ?: 0.0
+            val maxRepsAtMaxWeight = exerciseSets.filter { it.weight == maxWeightThisSession }.maxOfOrNull { it.reps } ?: 0
             
-            val prevMaxWeight = routineRepository.getMaxWeightForExercise(session.profileId, exerciseName)
-            val prevMaxReps = routineRepository.getMaxRepsForExercise(session.profileId, exerciseName)
+            val prevMaxWeight = routineRepository.getPreviousMaxWeightForExercise(session.profileId, exerciseName, sessionId)
+            val prevMaxReps = routineRepository.getPreviousMaxRepsForExercise(session.profileId, exerciseName, sessionId)
 
-            if (prevMaxWeight == null || maxWeightThisSession > prevMaxWeight.toDouble()) {
+            if (maxWeightThisSession > 0 && (prevMaxWeight == null || maxWeightThisSession > prevMaxWeight.toDouble())) {
                 prsDetected.add("New Max Weight for $exerciseName: ${maxWeightThisSession}kg!")
-            } else if (prevMaxReps == null || (maxWeightThisSession == prevMaxWeight.toDouble() && maxRepsAtMaxWeight > prevMaxReps)) {
+            } else if (maxRepsAtMaxWeight > 0 && (prevMaxReps == null || (prevMaxWeight != null && maxWeightThisSession == prevMaxWeight.toDouble() && maxRepsAtMaxWeight > prevMaxReps))) {
                 prsDetected.add("New Rep Record for $exerciseName: $maxRepsAtMaxWeight reps at ${maxWeightThisSession}kg!")
             }
         }
