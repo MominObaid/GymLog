@@ -13,10 +13,6 @@ class RoutineRepository @Inject constructor(
         return routineDao.getAllRoutines(profileId)
     }
 
-    suspend fun insertRoutine(routine: RoutineEntity): Long {
-        return routineDao.insertRoutine(routine)
-    }
-
     suspend fun insertRoutineWithExercises(routine: RoutineEntity, exercises: List<RoutineExerciseEntity>) {
         routineDao.insertRoutineWithExercises(routine, exercises)
     }
@@ -27,10 +23,6 @@ class RoutineRepository @Inject constructor(
 
     suspend fun getRoutineById(id: Int): RoutineEntity? {
         return routineDao.getRoutineById(id)
-    }
-
-    suspend fun insertRoutineExercise(exercise: RoutineExerciseEntity) {
-        routineDao.insertRoutineExercise(exercise)
     }
 
     suspend fun deleteRoutine(routineId: Int) {
@@ -79,8 +71,16 @@ class RoutineRepository @Inject constructor(
         return routineDao.getMaxWeightForExercise(profileId, exerciseName)
     }
 
+    suspend fun getPreviousMaxWeightForExercise(profileId: Int, exerciseName: String, currentSessionId: Int): Float? {
+        return routineDao.getPreviousMaxWeightForExercise(profileId, exerciseName, currentSessionId)
+    }
+
     suspend fun getMaxRepsForExercise(profileId: Int, exerciseName: String): Int? {
         return routineDao.getMaxRepsForExercise(profileId, exerciseName)
+    }
+
+    suspend fun getPreviousMaxRepsForExercise(profileId: Int, exerciseName: String, currentSessionId: Int): Int? {
+        return routineDao.getPreviousMaxRepsForExercise(profileId, exerciseName, currentSessionId)
     }
 
     suspend fun getWorkoutCount(profileId: Int): Int {
