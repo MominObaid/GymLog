@@ -19,7 +19,6 @@ class SessionViewModel @Inject constructor(
     private val finishWorkoutUseCase: FinishWorkoutUseCase,
     private val saveSetUseCase: SaveSetUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(SessionUiState())
     val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
@@ -48,7 +47,6 @@ class SessionViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
     }
-
     fun startWorkout(profileId: Int, routineId: Int) {
         val currentSession = uiState.value.session
         if (currentSession != null && currentSession.routineId == routineId) {
