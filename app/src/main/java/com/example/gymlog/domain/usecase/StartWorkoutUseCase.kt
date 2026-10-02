@@ -41,7 +41,6 @@ class StartWorkoutUseCase @Inject constructor(
                 )
             }
         }
-        
         return sessionId
     }
 }
