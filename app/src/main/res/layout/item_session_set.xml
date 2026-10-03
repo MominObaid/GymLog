@@ -151,7 +151,7 @@
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="44dp"
             android:layout_height="44dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="6dp"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -163,6 +163,17 @@
             app:iconPadding="0dp"
             app:iconSize="22dp"
             app:strokeWidth="1.5dp" />
+
+        <!-- Delete Set Button -->
+        <ImageButton
+            android:id="@+id/btnDeleteSet"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete set"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="@color/error_red" />
 
         <!-- Hidden checkbox for backwards compatibility / binding logic -->
         <CheckBox
