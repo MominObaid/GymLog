@@ -8,7 +8,7 @@ GymLog helps users track workouts, monitor progress, manage training routines, a
 
 ## 📱 Features
 
-### 🏠 Daily Hub (Dashboard)
+### Daily Hub (Dashboard)
 - Personalized greetings and dynamic date display
 - Glanceable widgets for current workout streak and total sessions
 - Health Integration: Sync daily steps and weight directly from **Health Connect**
