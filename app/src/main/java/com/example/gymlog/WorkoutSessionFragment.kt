@@ -246,7 +246,21 @@ class WorkoutSessionFragment : Fragment() {
         }
 
         binding.textViewTimer.setOnClickListener {
-            showChangeTimerDialog()
+            val endMillis = sessionViewModel.uiState.value.session?.restTimerEndMillis ?: 0L
+            if (endMillis > System.currentTimeMillis()) {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Rest Timer")
+                    .setPositiveButton("Skip Rest") { _, _ ->
+                        sessionViewModel.stopRestTimer()
+                    }
+                    .setNeutralButton("Adjust Timer") { _, _ ->
+                        showChangeTimerDialog()
+                    }
+                    .setNegativeButton("Keep Resting", null)
+                    .show()
+            } else {
+                showChangeTimerDialog()
+            }
         }
 
         binding.buttonFinishSession.setOnClickListener {
@@ -267,6 +281,9 @@ class WorkoutSessionFragment : Fragment() {
             },
             onAddSet = { exerciseName, muscleGroup ->
                 sessionViewModel.addSet(exerciseName, muscleGroup, 0.0, 0)
+            },
+            onDeleteSet = { set ->
+                sessionViewModel.deleteSet(set)
             }
         )
         binding.recyclerViewSessionExercises.apply {
@@ -293,15 +310,17 @@ class WorkoutSessionFragment : Fragment() {
     }
 
     private fun finishSession() {
-        val sessionExercises = adapter.getSessionExercises()
-        if (sessionExercises.isNotEmpty()) {
+        sessionViewModel.stopRestTimer()
+        val allSets = sessionViewModel.uiState.value.sets
+        val hasLoggedSets = allSets.any { it.isCompleted || it.weight > 0 || it.reps > 0 }
+
+        if (hasLoggedSets) {
             sessionViewModel.finishWorkout()
         } else {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Discard Session?")
-                .setMessage("No sets were marked as done. Discard this session?")
+                .setMessage("No sets were logged. Discard this session?")
                 .setPositiveButton("Discard") { _, _ -> 
-                    // TODO: Logic to delete the empty session if it was created
                     findNavController().popBackStack() 
                 }
                 .setNegativeButton("Keep Logging", null)
