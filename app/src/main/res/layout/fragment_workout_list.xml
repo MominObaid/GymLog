@@ -268,7 +268,7 @@
                         android:orientation="vertical"
                         android:padding="16dp">
                         <TextView
-                            android:id="@+id/tvWeeklyVolume"
+                            android:id="@+id/tvRecordWeight"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0 kg"
@@ -276,9 +276,10 @@
                             android:textColor="@color/workout_blue"
                             android:textSize="18sp" />
                         <TextView
+                            android:id="@+id/tvRecordWeightLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Weekly Volume"
+                            android:text="Top Record"
                             android:textSize="11sp"
                             android:textColor="@color/workout_blue" />
                     </LinearLayout>
