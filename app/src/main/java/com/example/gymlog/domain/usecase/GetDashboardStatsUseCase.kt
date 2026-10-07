@@ -24,7 +24,8 @@ class GetDashboardStatsUseCase @Inject constructor(
     )
 
     data class Stats(
-        val weeklyVolume: Float,
+        val topWeight: Float,
+        val topExerciseName: String,
         val workoutCount: Int,
         val favoriteExercise: String
     )
@@ -57,7 +58,11 @@ class GetDashboardStatsUseCase @Inject constructor(
         }
 
         val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
-        val volume = repository.getTotalVolumeSince(profileId, oneWeekAgo) ?: 0f
+        val strongest = repository.getStrongestExercises(profileId)
+        val topExercise = strongest.firstOrNull()
+        val topWeight = topExercise?.maxWeight ?: 0f
+        val topExerciseName = topExercise?.exerciseName ?: "None"
+
         val count = repository.getWorkoutCountSince(profileId, oneWeekAgo)
         val fav = repository.getFavoriteExercise(profileId) ?: "None"
 
@@ -65,7 +70,7 @@ class GetDashboardStatsUseCase @Inject constructor(
             userName = userName,
             greeting = greeting,
             todayWorkout = todayWorkout,
-            stats = Stats(volume, count, fav),
+            stats = Stats(topWeight, topExerciseName, count, fav),
             allRoutinesCompleted = allCompleted
         )
     }
