@@ -37,6 +37,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RoutineViewModel @Inject constructor(
     private val repository: RoutineRepository,
+    private val sessionRepository: SessionRepository,
     private val healthConnectManager: HealthConnectManager,
     private val authManager: com.example.gymlog.auth.AuthManager,
     private val syncManager: com.example.gymlog.sync.CloudSyncManager,
@@ -375,6 +376,20 @@ class RoutineViewModel @Inject constructor(
 
     suspend fun getRoutineById(routineId: Int): RoutineEntity? {
         return repository.getRoutineById(routineId)
+    }
+
+    fun getCompletedSessionDetails(
+        sessionId: Int,
+        onResult: (com.example.gymlog.model.WorkoutSessionEntity?, RoutineEntity?, List<WorkoutSetEntity>) -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val session = sessionRepository.getSessionById(sessionId)
+            val routine = session?.let { repository.getRoutineById(it.routineId) }
+            val sets = if (session != null) sessionRepository.getSetsForSessionSync(sessionId) else emptyList()
+            viewModelScope.launch(Dispatchers.Main) {
+                onResult(session, routine, sets)
+            }
+        }
     }
 
     fun deleteRoutine(routineId: Int) {
