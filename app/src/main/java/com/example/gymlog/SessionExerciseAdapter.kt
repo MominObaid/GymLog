@@ -1,8 +1,6 @@
 package com.example.gymlog
 
 import android.graphics.Color
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -119,21 +117,25 @@ class SessionExerciseAdapter(
             fun getLatestSetData(): WorkoutSetEntity =
                 setBinding.root.tag as? WorkoutSetEntity ?: setData
 
-            // Helper to get current live weight from view or latest setData
             fun getCurrentWeight(): Double {
                 val text = setBinding.editTextWeight.text.toString().trim()
                 return text.toDoubleOrNull() ?: getLatestSetData().weight
             }
 
-            // Helper to get current live reps from view or latest setData
             fun getCurrentReps(): Int {
                 val text = setBinding.editTextReps.text.toString().trim()
                 return text.toIntOrNull() ?: getLatestSetData().reps
             }
 
-            // Clear old focus change listeners before attaching new ones
-//            setBinding.editTextWeight.onFocusChangeListener = null
-//            setBinding.editTextReps.onFocusChangeListener = null
+            // Clear old listeners before attaching new ones
+            setBinding.btnMinusWeight.setOnClickListener(null)
+            setBinding.btnPlusWeight.setOnClickListener(null)
+            setBinding.btnMinusReps.setOnClickListener(null)
+            setBinding.btnPlusReps.setOnClickListener(null)
+            setBinding.btnSetDone.setOnClickListener(null)
+            setBinding.btnDeleteSet.setOnClickListener(null)
+            setBinding.editTextWeight.onFocusChangeListener = null
+            setBinding.editTextReps.onFocusChangeListener = null
 
             // Quick +/- Weight buttons (+2.5kg / -2.5kg)
             setBinding.btnMinusWeight.setOnClickListener {
@@ -189,40 +191,6 @@ class SessionExerciseAdapter(
                 onDeleteSet(currentSet)
             }
 
-            // Remove old text watchers
-            (setBinding.editTextWeight.tag as? DebouncedTextWatcher)?.let { 
-                setBinding.editTextWeight.removeTextChangedListener(it)
-                setBinding.editTextWeight.removeCallbacks(it.updateRunnable)
-            }
-            (setBinding.editTextReps.tag as? DebouncedTextWatcher)?.let { 
-                setBinding.editTextReps.removeTextChangedListener(it)
-                setBinding.editTextReps.removeCallbacks(it.updateRunnable)
-            }
-
-            val weightWatcher = DebouncedTextWatcher(setBinding.editTextWeight) { newText ->
-                val currentSet = getLatestSetData()
-                val newWeight = newText.toDoubleOrNull() ?: 0.0
-                val currentReps = getCurrentReps()
-                if (newWeight != currentSet.weight) {
-                    onSetChanged(currentSet.copy(weight = newWeight, reps = currentReps))
-                }
-            }
-            
-            val repsWatcher = DebouncedTextWatcher(setBinding.editTextReps) { newText ->
-                val currentSet = getLatestSetData()
-                val newReps = newText.toIntOrNull() ?: 0
-                val currentWeight = getCurrentWeight()
-                if (newReps != currentSet.reps) {
-                    onSetChanged(currentSet.copy(weight = currentWeight, reps = newReps))
-                }
-            }
-
-            setBinding.editTextWeight.addTextChangedListener(weightWatcher)
-            setBinding.editTextWeight.tag = weightWatcher
-
-            setBinding.editTextReps.addTextChangedListener(repsWatcher)
-            setBinding.editTextReps.tag = repsWatcher
-
             // Commit immediately on Focus Lost
             setBinding.editTextWeight.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
@@ -244,29 +212,6 @@ class SessionExerciseAdapter(
                         onSetChanged(currentSet.copy(weight = currentWeight, reps = newReps))
                     }
                 }
-            }
-        }
-    }
-
-    private class DebouncedTextWatcher(
-        private val view: android.view.View,
-        private val onDebouncedChange: (String) -> Unit
-    ) : TextWatcher {
-        var updateRunnable: Runnable? = null
-        private var lastProcessedText: String? = null
-
-        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-        override fun afterTextChanged(s: Editable?) {
-            val newText = s.toString()
-            if (view.isFocused && newText != lastProcessedText) {
-                view.removeCallbacks(updateRunnable)
-                updateRunnable = Runnable { 
-                    lastProcessedText = newText
-                    onDebouncedChange(newText) 
-                }
-                view.postDelayed(updateRunnable, 300)
             }
         }
     }
