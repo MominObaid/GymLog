@@ -29,19 +29,25 @@ class SessionViewModel @Inject constructor(
         observeActiveSession()
     }
 
+    private var setsJob: kotlinx.coroutines.Job? = null
+
     private fun observeActiveSession() {
         sessionRepository.getActiveSession()
             .onEach { session ->
                 _uiState.update { it.copy(session = session) }
                 if (session != null) {
                     observeSets(session.id)
+                } else {
+                    setsJob?.cancel()
+                    _uiState.update { it.copy(sets = emptyList()) }
                 }
             }
             .launchIn(viewModelScope)
     }
 
     private fun observeSets(sessionId: Int) {
-        sessionRepository.getSetsForSession(sessionId)
+        setsJob?.cancel()
+        setsJob = sessionRepository.getSetsForSession(sessionId)
             .onEach { sets ->
                 _uiState.update { it.copy(sets = sets) }
             }
