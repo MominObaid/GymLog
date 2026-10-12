@@ -143,7 +143,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
 
     private fun observeDashboardData() {
         routineViewModel.dashboardHeader.observe(viewLifecycleOwner) { data ->
-            binding.tvGreeting.text = "${data.greeting}, ${data.userName} 👋"
+            binding.tvGreeting.text = "${data.greeting}, ${data.userName}"
             
             val today = data.todayWorkout
             val isActive = sessionViewModel.uiState.value.session?.status == com.example.gymlog.model.WorkoutStatus.ACTIVE
@@ -156,7 +156,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                     binding.cardTodayWorkout.visibility = View.VISIBLE
                     binding.btnStartTodayWorkout.text = getString(R.string.start_workout)
                 } else if (data.allRoutinesCompleted) {
-                    binding.tvHeaderSub.text = "You've crushed all your routines for today! 🔥"
+                    binding.tvHeaderSub.text = "You've crushed all your routines for today! "
                     binding.cardTodayWorkout.visibility = View.GONE
                 } else {
                     binding.tvHeaderSub.text = "Start your fitness journey today!"
@@ -165,7 +165,13 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
 
             val stats = data.stats
-            binding.tvWeeklyVolume.text = String.format(Locale.getDefault(), "%.1f kg", stats.weeklyVolume)
+            if (stats.topWeight > 0) {
+                binding.tvRecordWeight.text = String.format(Locale.getDefault(), "%.1f kg", stats.topWeight)
+                binding.tvRecordWeightLabel.text = stats.topExerciseName
+            } else {
+                binding.tvRecordWeight.text = "0 kg"
+                binding.tvRecordWeightLabel.text = "Top Record"
+            }
             binding.tvWeeklyCount.text = stats.workoutCount.toString()
             binding.tvFavExercise.text = stats.favoriteExercise
         }
@@ -188,10 +194,66 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
     }
 
     override fun onItemClick(workout: Workout) {
-        val intent = Intent(requireContext(), WorkoutDetailActivity::class.java)
-        intent.putExtra("WORKOUT_ID", workout.id)
-        intent.putExtra("EXERCISE_NAME", workout.name)
-        startActivity(intent)
+        routineViewModel.getCompletedSessionDetails(workout.id) { session, routine, sets ->
+            if (session != null && sets.isNotEmpty()) {
+                val name = routine?.name ?: workout.name ?: "Workout Session"
+                showCompletedSessionDialog(
+                    routineName = name,
+                    startTime = session.startTime,
+                    endTime = session.endTime,
+                    totalVolume = session.totalVolume,
+                    notes = session.notes,
+                    sets = sets
+                )
+            } else {
+                val intent = Intent(requireContext(), WorkoutDetailActivity::class.java)
+                intent.putExtra("WORKOUT_ID", workout.id)
+                intent.putExtra("EXERCISE_NAME", workout.name)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun showCompletedSessionDialog(
+        routineName: String,
+        startTime: Long,
+        endTime: Long,
+        totalVolume: Double,
+        notes: String?,
+        sets: List<com.example.gymlog.model.WorkoutSetEntity>
+    ) {
+        val dateFormat = SimpleDateFormat("EEEE, MMM d, yyyy • HH:mm", Locale.getDefault())
+        val durationMins = if (endTime > startTime) ((endTime - startTime) / 60000).toInt() else 0
+        
+        val messageBuilder = StringBuilder()
+        messageBuilder.append(" Date: ").append(dateFormat.format(Date(startTime))).append("\n")
+        if (durationMins > 0) {
+            messageBuilder.append("️ Duration: ").append(durationMins).append(" mins\n")
+        }
+        messageBuilder.append("️ Total Volume: ").append(String.format(Locale.getDefault(), "%.1f kg", totalVolume)).append("\n\n")
+
+        if (!notes.isNullOrBlank()) {
+            messageBuilder.append(" Notes: ").append(notes).append("\n\n")
+        }
+
+        val grouped = sets.groupBy { it.exerciseName }
+        if (grouped.isNotEmpty()) {
+            messageBuilder.append("Exercises Completed:\n")
+            grouped.forEach { (exName, exSets) ->
+                messageBuilder.append("\n• ").append(exName).append(":\n")
+                exSets.forEach { s ->
+                    val status = if (s.isCompleted) "✓" else "-"
+                    messageBuilder.append("   Set ").append(s.setNumber).append(": ")
+                        .append(s.weight).append("kg x ").append(s.reps).append(" reps [").append(status).append("]\n")
+                }
+            }
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(routineName)
+            .setMessage(messageBuilder.toString())
+            .setPositiveButton("Close", null)
+            .show()
     }
 
     private fun showAddWorkoutDialog() {
