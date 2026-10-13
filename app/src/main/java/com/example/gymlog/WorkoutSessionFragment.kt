@@ -19,6 +19,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gymlog.databinding.FragmentWorkoutSessionBinding
+import com.example.gymlog.model.RoutineExerciseEntity
+import com.example.gymlog.model.WorkoutSetEntity
 import com.example.gymlog.service.RestTimerService
 import com.example.gymlog.ui.session.SessionViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -126,25 +128,49 @@ class WorkoutSessionFragment : Fragment() {
 
         setupRecyclerView()
 
-        // Get exercises for this routine
-        routineViewModel.getExercisesForRoutine(routineId).observe(viewLifecycleOwner) { exercises ->
-            if (exercises == null) return@observe
+        var currentRoutineExercises: List<RoutineExerciseEntity>? = null
 
-            if (exercises.isEmpty()) {
+        fun updateDisplay(routineExercises: List<RoutineExerciseEntity>?, sessionSets: List<WorkoutSetEntity>) {
+            val list = if (!routineExercises.isNullOrEmpty()) {
+                routineExercises
+            } else if (sessionSets.isNotEmpty()) {
+                sessionSets.groupBy { it.exerciseName }.entries.mapIndexed { index, entry ->
+                    RoutineExerciseEntity(
+                        id = index + 1,
+                        routineId = routineId,
+                        exerciseName = entry.key,
+                        muscleGroup = entry.value.firstOrNull()?.muscleGroup ?: "Other",
+                        targetSets = entry.value.size,
+                        targetReps = entry.value.firstOrNull()?.reps ?: 10,
+                        exerciseOrder = index
+                    )
+                }
+            } else {
+                emptyList()
+            }
+
+            if (list.isEmpty()) {
                 binding.recyclerViewSessionExercises.visibility = View.GONE
                 binding.textViewEmptySession.visibility = View.VISIBLE
             } else {
                 binding.recyclerViewSessionExercises.visibility = View.VISIBLE
                 binding.textViewEmptySession.visibility = View.GONE
-                adapter.setData(exercises)
+                adapter.setData(list)
+                adapter.setSessionSets(sessionSets)
             }
+        }
+
+        // Get exercises for this routine
+        routineViewModel.getExercisesForRoutine(routineId).observe(viewLifecycleOwner) { exercises ->
+            currentRoutineExercises = exercises
+            updateDisplay(currentRoutineExercises, sessionViewModel.uiState.value.sets)
         }
 
         // Observe sets from sessionViewModel and update adapter
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sessionViewModel.uiState.map { it.sets }.collect { sets ->
-                    adapter.setSessionSets(sets)
+                    updateDisplay(currentRoutineExercises, sets)
                 }
             }
         }
