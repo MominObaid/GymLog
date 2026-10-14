@@ -9,6 +9,10 @@
         android:icon="@drawable/baseline_calendar_today_24"
         android:title="@string/routines" />
     <item
+        android:id="@+id/nav_guide"
+        android:icon="@drawable/outline_find_in_page_24"
+        android:title="@string/exercise_guide" />
+    <item
         android:id="@+id/nav_stats"
         android:icon="@drawable/progress_activity_24"
         android:title="@string/progress" />
