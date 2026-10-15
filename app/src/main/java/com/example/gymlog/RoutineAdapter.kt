@@ -89,7 +89,7 @@ class RoutineAdapter(
         return routines[position]
     }
 
-    
+
     class RoutineDiffCallback(
         private val oldList: List<RoutineEntity>,
         private val newList: List<RoutineEntity>
