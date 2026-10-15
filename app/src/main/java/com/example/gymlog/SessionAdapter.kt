@@ -48,6 +48,5 @@ class SessionAdapter(
         this.sessions = newSessions
         notifyDataSetChanged()
     }
-    
     fun getSessionAt(position: Int): WorkoutSessionEntity = sessions[position]
 }
