@@ -18,7 +18,7 @@ class AiAssistantManager @Inject constructor(
                 response.body()?.advice
             } else {
                 Log.e("AI_ERROR", "Backend Error: ${response.code()}")
-                "I'm sorry, I'm having trouble connecting to my coaching brain right now."
+                "I'm sorry, I'm having trouble connecting to my coaching brain right now... Please try again later."
             }
         }catch (_: java.net.UnknownHostException) {
             "AI coaching isn't set up yet in this build."
