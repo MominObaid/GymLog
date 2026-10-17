@@ -47,7 +47,7 @@ _Simple Android Workout Logger_
 GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
 
 
-•**Language** : Kotlin - The officially recommended language for Android development.
+•**Language** : **Kotlin** - The officially recommended language for Android development.
 
 ### Architecture Components
 
