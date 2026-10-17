@@ -1,4 +1,4 @@
-# 💪 GymLog
+#  GymLog
 
 A modern Android fitness tracking application built with **Kotlin**, **MVVM**, **Room**, **Hilt**, **Health Connect**, **WorkManager**, and **AI-powered coaching features**.
 
