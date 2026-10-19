@@ -348,6 +348,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         routineViewModel.updateDashboardData()
         routineViewModel.updateMilestones()
     }
+    
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
