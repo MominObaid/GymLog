@@ -155,7 +155,7 @@ class AnalyticsFragment : Fragment() {
             }
         }
 
-        // Initial load of strength chart
+        // Initial load of strength chart.
         updateStrengthChart("Bench Press")
     }
 
