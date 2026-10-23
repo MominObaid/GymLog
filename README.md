@@ -1,194 +1,119 @@
-# 💪 GymLog
+# 💪 GymLog — Modern Android Workout & Exercise Companion
 
-A modern Android fitness tracking application built with **Kotlin**, **MVVM**, **Room**, **Hilt**, **Health Connect**, **WorkManager**, and **AI-powered coaching features**.
+GymLog is a feature-packed, modern native Android application built with **Kotlin**, **Material Design 3**, **MVVM Architecture**, **Hilt**, **Room Database**, **Health Connect**, **WorkManager**, and **AI Fitness Coaching**.
 
-GymLog helps users track workouts, monitor progress, manage training routines, analyze performance trends, and receive intelligent fitness insights—all within a clean and scalable Android architecture.
-
----
-
-## 📱 Features
-
-### 🏠 Daily Hub (Dashboard)
-- Personalized greetings and dynamic date display
-- Glanceable widgets for current workout streak and total sessions
-- Health Integration: Sync daily steps and weight directly from **Health Connect**
-- Quick Actions: One-tap access to routines or manual logging
-
-
-
-_Simple Android Workout Logger_
-
-### 🏋️ Active Session Tracking
-- Real-time logging of sets, reps, and weight
-- Interactive visual rest timer with notifications
-- **PR Alerts**: Automatic detection and celebration of new Personal Records
-- Safety First: Confirmation dialogs to prevent accidental session discards
-
-### 📈 Progress Analytics
-- Visual volume trends with interactive line charts
-- Top Strengths: Identification of strongest exercises by max weight
-- Plateau Detection: Smart alerts when progress on specific exercises stalls
-- Complete session history with swipe-to-delete management
-
-### 🤖 AI Fitness Assistant
-- Built-in AI coach that understands your profile and recent stats
-- Data-driven recommendations to improve form or break plateaus
-- Fitness-related Q&A support
-
-### 👤 User Profile
-- Comprehensive storage for age, height, weight, and target weight
-- Preferences for experience level, frequency, and available equipment
-
-
-**_🛠️ Tech Stack & Architecture_**
-
-## 🏗️ Architecture
-
-GymLog follows the **MVVM (Model-View-ViewModel)** architecture pattern.
-
-
-•Language: Kotlin - The officially recommended language for Android development.
-
-### Architecture Components
-
-- MVVM
-- Repository Pattern
-- Dependency Injection (Hilt)
-- Kotlin Coroutines & Flow
-- ViewBinding
-- Navigation Component
-- Room Database
-- WorkManager
-- Health Connect
+Designed specifically for real-world gym environments, GymLog provides **large, high-contrast, gym-friendly controls** for fatigued hands, automatic **Personal Record (PR) detection**, **Exercise Technique Guides with Video Demonstrations**, **Streak Tracking**, and **Data-Driven Progress Analytics**.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Key Features & Capabilities
 
-- **Language**: [Kotlin](https://kotlinlang.org/)
-- **Dependency Injection**: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
-- **Local Database**: [Room](https://developer.android.com/training/data-storage/room)
-- **Networking**: [Retrofit](https://square.github.io/retrofit/) & [Moshi](https://github.com/square/moshi) (Gemini AI API)
-- **Background Tasks**: [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager)
-- **Charts**: [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
-- **Health**: [Health Connect](https://developer.android.com/health-and-fitness/guides/health-connect)
+### 📱 1. Gym-Friendly Active Session Logging
+- **Frictionless Controls**: Large `+2.5kg` / `-2.5kg` and `+1` / `-1 rep` quick-adjust buttons so athletes don't need to type on small software keyboards while fatigued.
+- **One-Tap DONE Toggle**: High-contrast, tactile set completion button with visual green feedback.
+- **Set Removal**: One-tap delete button on individual set rows.
+- **Rest Timer**: Integrated rest timer with background notifications and a 1-tap "Skip Rest" action.
+
+### 📚 2. Exercise & Technique Guide Library (5th Navigation Tab)
+- **Comprehensive Technique Database**: Searchable, muscle-categorized library covering Chest, Back, Legs, Shoulders, Arms, and Core.
+- **Form Guides**: Detailed Setup Instructions, Right Technique Execution, Pro Tips, and Common Mistakes to Avoid.
+- **Video Tutorials**: Instant video demonstration launcher opening native YouTube/web video tutorials.
+
+### 🏠 3. Smart Dashboard & Quick Log
+- **Today's Workout Suggestion**: Recommends the next uncompleted routine or lets you resume active sessions with 1 tap.
+- **Streak & PR Tracking**: Live streak counter and Record Weight / Top Lift display.
+- **Unified Quick Log**: Single-exercise logging that automatically syncs into streaks, weekly volume, and analytics.
+
+### 📊 4. Progress Analytics & Milestones
+- **Visual Progress Charts**: Interactive strength trends, 1RM estimations, and volume history using `MPAndroidChart`.
+- **Plateau Detection**: Smart warnings when progress on specific lifts stalls across multiple sessions.
+- **Exercise Breakdown**: Max weight tracking and most frequent exercise statistics.
+
+### 🤖 5. AI Workout Generator & Coach
+- **AI Routine Generator**: Generates custom, multi-day workout routines based on user goals, equipment, and experience.
+- **Post-Workout Analysis**: AI-powered review evaluating fatigue, volume, and recovery after completed workouts.
+- **Exercise Substitutions**: Recommends equipment-matched alternatives for busy gym equipment.
+
+### 🌙 6. 100% Night Mode (Dark Theme) Compatible
+- Full **Material 3 Dark Theme** palette (`res/values-night/colors.xml` & `themes.xml`).
+- High-contrast, elevated dark surface containers, visible card outlines (`#3D374A`), and crisp `#F4F0F8` typography.
 
 ---
 
-## 🚀 Roadmap
+## 🏗️ Architecture & Technology Stack
 
-### Phase 1 & 2 (Completed)
-- [x] Workout & Manual Logging
-- [x] Routine Editor & Management
-- [x] **Home Dashboard Hub**
-- [x] **Active Workout Session Mode**
-- [x] **AI Routine Generator & Assistant**
-- [x] **Personal Records (PR) Tracking**
-- [x] **Milestone & Streak System**
-- [x] Health Connect integration
-- [x] Progress Analytics & Charts
+GymLog adheres strictly to **Android Recommended Architecture Guidelines** (MVVM, Clean Architecture, Repository Pattern).
 
-### Phase 3
-- [ ] Advanced Analytics (Volume per Muscle Group)
-- [ ] AI-Powered Smart Progression Engine
-- [ ] Exercise Video Library Integration
-- [ ] Recovery & Fatigue Recommendations
+| Layer / Domain | Technology Used |
+| :--- | :--- |
+| **Language** | [Kotlin 1.9+](https://kotlinlang.org/) |
+| **UI Framework** | Material Design 3, ViewBinding, CoordinatorLayout, ConstraintLayout |
+| **Navigation** | Jetpack Navigation Component (SafeArgs, BottomNavigationView, 5 Tabs) |
+| **Architecture** | MVVM, Clean Architecture (Domain Use-Cases, Repository Pattern) |
+| **Dependency Injection** | [Hilt / Dagger 2](https://developer.android.com/training/dependency-injection/hilt-android) |
+| **Local Database** | [Room Database](https://developer.android.com/training/data-storage/room) (SQLite, Flow, DAOs, Transactions) |
+| **Asynchronous Programming** | Kotlin Coroutines, StateFlow, SharedFlow, LiveData |
+| **Networking & AI** | Retrofit 2, Moshi, Gemini AI API integration |
+| **Health Integration** | [Health Connect SDK](https://developer.android.com/health-and-fitness/guides/health-connect) (Steps, Weight, Exercise Sessions) |
+| **Background Scheduling** | [WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) (Periodic Reminders, Smart Streak Alerts) |
+| **Data Visualization** | [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart) |
 
 ---
 
-•LiveData: To build data objects that notify views of any database changes, ensuring the UI is always up-to-date.
-
-•Coroutines: For managing background threads and performing database operations asynchronously without blocking the main UI thread.
-
-
-
-
-
-**🚀 Features**
-
-•View All Workouts: A clear, scrollable list of all past workout entries.
-
-•Add New Workouts: A simple form to quickly add a new exercise with its name, sets, reps, and weight.
-
-•Edit Existing Workouts: Click on any workout in the list to open a detail screen where you can modify its details.
-
-•Delete Workouts: Swipe to delete individual workouts or use the menu to delete all entries at once.
-
-•Persistent Storage: All workout data is saved locally on the device using a Room database, so your data is safe even when the app is closed.
-
-•Sort: User can sort workout by chiping on this week's workout, so that only that week's workout will be listed.
-
-•AI: AI chatbot that help user about workouts or form or anything related to workout 
-
-
-
-
-<img width="350"  hspace="250" alt="Screenshot_20260518_150535" src="https://github.com/user-attachments/assets/a38c4cc6-b218-4ec6-96d3-ab49067e0fc7" />
-
-
-
-
-
-
-<img src = "https://github.com/user-attachments/assets/65610aff-2b0a-487e-880e-9df499f18bc8" width="350" hspace ="30" vspace="30">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<img src ="https://github.com/user-attachments/assets/a4ed7dc5-e7f8-4921-b168-de0e8583c4ee" width="300" hspace="30" vspace="30">
-
-
-
-
-
-
-
-<img src= "https://github.com/user-attachments/assets/8f2f2fed-df32-412a-9d99-76b1732c2765" width="300"  hspace="30" vspace="30">
-
-
-
-
-
-
-
-
-<img src = "https://github.com/user-attachments/assets/832e6a9c-9c56-4be7-b6f7-3bc977a85ed4" width = "300"  hspace="30" vspace="30">
-
-
-
-
-
-
-
-
-
-<img src= "https://github.com/user-attachments/assets/52d728ba-a645-488e-91e1-c65cd87059dc" width = "300"  hspace="30" vspace="30">
-
-
-
-
-
-
-
-
-
-<img src="https://github.com/user-attachments/assets/016054eb-2fa5-4555-a02e-5b30f6e91a03" width="300"  hspace="30" vspace="30">
-
-
-
-
-
-
-
-
-<img src = "https://github.com/user-attachments/assets/1a687514-20ad-441a-b9da-45008991f60f" width="300"  hspace="30" vspace="30">
+## 📁 Project Structure
+
+```
+com.example.gymlog
+├── api                  # Retrofit API interfaces & Gemini AI models
+├── auth                 # Authentication Manager
+├── di                   # Hilt Dependency Injection Modules (Database, Network)
+├── domain
+│   └── usecase          # Clean Architecture Use Cases (FinishWorkout, StartWorkout, etc.)
+├── health               # Health Connect Manager & Permissions
+├── model                # Room Entities, DAOs, and Data Classes
+├── notifications        # WorkManager Workers (SmartReminderWorker, WorkoutReminderWorker)
+├── service              # RestTimerService (Foreground Service)
+├── sync                 # Cloud Sync Manager (Firestore integration)
+├── utils                # NotificationHelper, StreakCalculator
+├── widget               # Workout Home Screen Widget Provider
+└── ui                   # Activity & Fragment UI Screens
+    ├── ExerciseGuideFragment.kt
+    ├── WorkoutListFragment.kt (Dashboard)
+    ├── RoutineListFragment.kt
+    ├── WorkoutSessionFragment.kt
+    ├── AnalyticsFragment.kt
+    ├── ProfileFragment.kt
+    └── AiChatFragment.kt
+```
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-username/GymLog.git
+   cd GymLog
+   ```
+
+2. **Open in Android Studio**:
+   - Open Android Studio (Ladybug / Jellyfish or newer).
+   - Sync Gradle dependencies (`Sync Project with Gradle Files`).
+
+3. **Build and Run**:
+   - Select the `:app` configuration.
+   - Run on an Android Emulator or physical device running Android 7.0 (API 24) or higher.
+
+---
+
+## 📄 License
+
+```
+Copyright 2026 GymLog
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+```
