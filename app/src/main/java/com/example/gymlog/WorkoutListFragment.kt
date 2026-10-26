@@ -288,7 +288,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                 exerciseNameAdapter.notifyDataSetChanged()
             }
         })
-        
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Quick Log Workout")
             .setView(dialogBinding.root)
