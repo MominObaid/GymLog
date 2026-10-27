@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
     fun revealChat() {
         val chatView = binding.aiChatContainer
         
-        // Add fragment to the container
+        // Add fragment to the container and tag it for later removal
         supportFragmentManager.beginTransaction()
             .replace(R.id.ai_chat_container, AiChatFragment(), "AI_CHAT_TAG")
             .commit()
