@@ -52,7 +52,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
         observeDashboardData()
         observeActiveSession()
     }
-
+// this observeActiveSession function checks if there's an active workout session and updates the UI accordingly. If there's an active session, it shows the "Resume Session" button and sets its click listener to navigate to the active session. If there's no active session, it restores the original "Start Workout" button functionality and relies on the dashboard data observer to fill in the routine name and details.
     private fun observeActiveSession() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
