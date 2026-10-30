@@ -88,7 +88,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         }
     }
-
+    
     private fun setupRecentActivityList() {
         adapter = WorkoutAdapter(this)
         binding.rvRecentActivity.adapter = adapter
