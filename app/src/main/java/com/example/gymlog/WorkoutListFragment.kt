@@ -194,7 +194,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         }
     }
-
+//
     override fun onItemClick(workout: Workout) {
         routineViewModel.getCompletedSessionDetails(workout.id) { session, routine, sets ->
             if (session != null && sets.isNotEmpty()) {
