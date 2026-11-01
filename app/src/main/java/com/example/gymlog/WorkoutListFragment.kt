@@ -194,7 +194,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         }
     }
-//
+// This function handles the click event for a workout item in the recent activity list. It checks if the clicked workout corresponds to a completed session. If it does, it retrieves the session details and displays them in a dialog. If not, it navigates to the WorkoutDetailActivity to show more information about the selected workout.
     override fun onItemClick(workout: Workout) {
         routineViewModel.getCompletedSessionDetails(workout.id) { session, routine, sets ->
             if (session != null && sets.isNotEmpty()) {
@@ -215,7 +215,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         }
     }
-
+//
     private fun showCompletedSessionDialog(
         routineName: String,
         startTime: Long,
