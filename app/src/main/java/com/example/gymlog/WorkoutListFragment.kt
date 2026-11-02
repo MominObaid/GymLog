@@ -215,7 +215,6 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         }
     }
-// This function displays a dialog with detailed information about a completed workout session. It formats the session's start time, duration, total volume, notes, and exercises performed. The exercises are grouped by name, and each set's details (weight, reps, completion status) are listed. The dialog is created using MaterialAlertDialogBuilder and includes a "Close" button to dismiss it.
     private fun showCompletedSessionDialog(
         routineName: String,
         startTime: Long,
