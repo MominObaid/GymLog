@@ -38,7 +38,9 @@ class RoutineListFragment : Fragment() {
         }
 
         binding.fabAddRoutine.setOnClickListener {
-            findNavController().navigate(R.id.addRoutineFragment)
+            if (findNavController().currentDestination?.id == R.id.nav_routines) {
+                findNavController().navigate(R.id.addRoutineFragment)
+            }
         }
 
         binding.fabAiGenerate.setOnClickListener {
@@ -82,8 +84,10 @@ class RoutineListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = RoutineAdapter(
             onStartSessionClick = { routine ->
-                val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.nav_routines) {
+                    val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
+                    findNavController().navigate(action)
+                }
             },
             onDeleteClick = { routine ->
                 MaterialAlertDialogBuilder(requireContext())
@@ -96,14 +100,18 @@ class RoutineListFragment : Fragment() {
                     .show()
             },
             onEditClick = { routine ->
-                val bundle = Bundle().apply {
-                    putInt("routine_id", routine.id)
+                if (findNavController().currentDestination?.id == R.id.nav_routines) {
+                    val bundle = Bundle().apply {
+                        putInt("routine_id", routine.id)
+                    }
+                    findNavController().navigate(R.id.addRoutineFragment, bundle)
                 }
-                findNavController().navigate(R.id.addRoutineFragment, bundle)
             },
             onItemClick = { routine ->
-                val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
-                findNavController().navigate(action)
+                if (findNavController().currentDestination?.id == R.id.nav_routines) {
+                    val action = RoutineListFragmentDirections.actionRoutinesToSession(routine.id, routine.name)
+                    findNavController().navigate(action)
+                }
             }
         )
         binding.recyclerViewRoutines.apply {
