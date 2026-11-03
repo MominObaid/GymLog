@@ -44,10 +44,7 @@ class MainActivity : AppCompatActivity() {
             if (binding.aiChatContainer.visibility == View.VISIBLE) {
                 hideChat()
             }
-            // Use navigation component for tab switching
-            // The item IDs in bottom_nav_menu.xml match the fragment IDs in nav_graph.xml
-            navController.navigate(item.itemId)
-            true
+            androidx.navigation.ui.NavigationUI.onNavDestinationSelected(item, navController)
         }
     }
 
