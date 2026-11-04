@@ -131,8 +131,9 @@ class RoutineViewModel @Inject constructor(
     }
 
     fun updateDashboardData() {
-        val profile = _userProfile.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
+            val profile = repository.getProfile() ?: return@launch
+            _userProfile.postValue(profile)
             val data = getDashboardStatsUseCase(profile.id, profile.name)
             _dashboardHeader.postValue(data)
         }
@@ -255,7 +256,67 @@ class RoutineViewModel @Inject constructor(
                 isActive = false,
                 avatarColor = avatarColor
             )
-            repository.insertProfile(newProfile)
+            val generatedId = repository.insertProfile(newProfile).toInt()
+            repository.setActiveProfile(generatedId)
+            ensureDefaultRoutinesForProfile(generatedId)
+            loadProfile()
+            updateMilestones()
+        }
+    }
+
+    private suspend fun ensureDefaultRoutinesForProfile(profileId: Int) {
+        val existingRoutines = repository.getAllRoutines(profileId).first()
+        if (existingRoutines.isEmpty()) {
+            // Populate Push Day
+            repository.insertRoutineWithExercises(
+                RoutineEntity(
+                    profileId = profileId,
+                    name = "Push Day",
+                    goal = "Hypertrophy",
+                    createdAt = System.currentTimeMillis(),
+                    restTimerSeconds = 90
+                ),
+                listOf(
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Barbell Bench Press", muscleGroup = "Chest", targetSets = 3, targetReps = 10, exerciseOrder = 0),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Overhead Barbell Press", muscleGroup = "Shoulders", targetSets = 3, targetReps = 10, exerciseOrder = 1),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Incline Dumbbell Press", muscleGroup = "Chest", targetSets = 3, targetReps = 12, exerciseOrder = 2),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Dumbbell Lateral Raise", muscleGroup = "Shoulders", targetSets = 3, targetReps = 15, exerciseOrder = 3),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Tricep Rope Pushdown", muscleGroup = "Arms", targetSets = 3, targetReps = 12, exerciseOrder = 4)
+                )
+            )
+
+            // Populate Pull Day
+            repository.insertRoutineWithExercises(
+                RoutineEntity(
+                    profileId = profileId,
+                    name = "Pull Day",
+                    goal = "Strength & Width",
+                    createdAt = System.currentTimeMillis() + 10,
+                    restTimerSeconds = 90
+                ),
+                listOf(
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Conventional Deadlift", muscleGroup = "Back", targetSets = 3, targetReps = 6, exerciseOrder = 0),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Lat Pulldown", muscleGroup = "Back", targetSets = 3, targetReps = 10, exerciseOrder = 1),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Dumbbell Bicep Curl", muscleGroup = "Arms", targetSets = 3, targetReps = 12, exerciseOrder = 2),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Face Pull", muscleGroup = "Shoulders", targetSets = 3, targetReps = 15, exerciseOrder = 3)
+                )
+            )
+
+            // Populate Leg Day & Core
+            repository.insertRoutineWithExercises(
+                RoutineEntity(
+                    profileId = profileId,
+                    name = "Leg Day & Core",
+                    goal = "Leg Power",
+                    createdAt = System.currentTimeMillis() + 20,
+                    restTimerSeconds = 90
+                ),
+                listOf(
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Barbell Back Squat", muscleGroup = "Legs", targetSets = 3, targetReps = 8, exerciseOrder = 0),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Bulgarian Split Squat", muscleGroup = "Legs", targetSets = 3, targetReps = 10, exerciseOrder = 1),
+                    RoutineExerciseEntity(id = 0, routineId = 0, exerciseName = "Hanging Leg Raise", muscleGroup = "Core", targetSets = 3, targetReps = 15, exerciseOrder = 2)
+                )
+            )
         }
     }
 
@@ -278,6 +339,9 @@ class RoutineViewModel @Inject constructor(
                 active = repository.getProfile()
             }
         }
+        active?.let {
+            ensureDefaultRoutinesForProfile(it.id)
+        }
         return active
     }
 
@@ -285,13 +349,17 @@ class RoutineViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val active = ensureProfileLoaded()
             _userProfile.postValue(active)
-            updateDashboardData()
+            if (active != null) {
+                val data = getDashboardStatsUseCase(active.id, active.name)
+                _dashboardHeader.postValue(data)
+            }
         }
     }
 
     fun switchProfile(profileId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.setActiveProfile(profileId)
+            ensureDefaultRoutinesForProfile(profileId)
             loadProfile()
             updateMilestones()
         }
