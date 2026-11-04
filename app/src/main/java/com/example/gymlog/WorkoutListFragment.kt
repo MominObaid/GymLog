@@ -68,16 +68,20 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
                         binding.btnStartTodayWorkout.text = getString(R.string.resume_session)
                         
                         binding.btnStartTodayWorkout.setOnClickListener {
-                            val action = WorkoutListFragmentDirections.actionWorkoutsToSession(session.routineId, "Active Session")
-                            findNavController().navigate(action)
+                            if (findNavController().currentDestination?.id == R.id.nav_workouts) {
+                                val action = WorkoutListFragmentDirections.actionWorkoutsToSession(session.routineId, "Active Session")
+                                findNavController().navigate(action)
+                            }
                         }
                     } else {
                         // Restore original listener and data will be handled by observeDashboardData
                         binding.btnStartTodayWorkout.text = getString(R.string.start_workout)
                         binding.btnStartTodayWorkout.setOnClickListener {
                             routineViewModel.todayWorkout.value?.let { today ->
-                                val action = WorkoutListFragmentDirections.actionWorkoutsToSession(today.routineId, today.routineName)
-                                findNavController().navigate(action)
+                                if (findNavController().currentDestination?.id == R.id.nav_workouts) {
+                                    val action = WorkoutListFragmentDirections.actionWorkoutsToSession(today.routineId, today.routineName)
+                                    findNavController().navigate(action)
+                                }
                             } ?: run {
                                 (activity as? MainActivity)?.findViewById<BottomNavigationView>(R.id.bottomNavigation)?.selectedItemId = R.id.nav_routines
                             }
@@ -215,6 +219,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             }
         }
     }
+// This function displays a dialog with detailed information about a completed workout session. It formats the session's start time, duration, total volume, notes, and exercises performed. The exercises are grouped by name, and each set's details (weight, reps, completion status) are listed. The dialog is created using MaterialAlertDialogBuilder and includes a "Close" button to dismiss it.
     private fun showCompletedSessionDialog(
         routineName: String,
         startTime: Long,
