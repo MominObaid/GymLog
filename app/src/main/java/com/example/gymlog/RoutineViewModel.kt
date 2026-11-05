@@ -99,7 +99,7 @@ class RoutineViewModel @Inject constructor(
 
     private val _exerciseSubstitutions = MutableLiveData<List<String>>()
     val exerciseSubstitutions: LiveData<List<String>> = _exerciseSubstitutions
-
+    // AI Predictions Data
     private val _progressPredictions = MutableLiveData<String?>()
     val progressPredictions: LiveData<String?> = _progressPredictions
 
@@ -412,7 +412,6 @@ class RoutineViewModel @Inject constructor(
             updateAdvancedAnalytics()
         }
     }
-
     fun loadHealthData() {
         if (healthConnectManager.isHealthConnectAvailable()) {
             viewModelScope.launch {
