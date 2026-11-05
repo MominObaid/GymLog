@@ -80,7 +80,6 @@ class RoutineListFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-
     private fun setupRecyclerView() {
         adapter = RoutineAdapter(
             onStartSessionClick = { routine ->
