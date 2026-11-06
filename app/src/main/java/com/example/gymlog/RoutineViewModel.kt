@@ -96,7 +96,7 @@ class RoutineViewModel @Inject constructor(
     // AI Features Data
     private val _workoutAnalysis = MutableLiveData<String?>()
     val workoutAnalysis: LiveData<String?> = _workoutAnalysis
-
+    // exercise substitutions for AI suggestions
     private val _exerciseSubstitutions = MutableLiveData<List<String>>()
     val exerciseSubstitutions: LiveData<List<String>> = _exerciseSubstitutions
     // AI Predictions Data
