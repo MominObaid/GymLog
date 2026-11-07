@@ -261,7 +261,7 @@ class WorkoutListFragment : Fragment(), WorkoutAdapter.OnItemClickListener {
             .setPositiveButton("Close", null)
             .show()
     }
-
+    // This function shows a dialog that allows the user to quickly log a workout. It includes fields for exercise name, sets, reps, weight, and date. The exercise name field is an AutoCompleteTextView populated with exercises from the API. When the user clicks "Add", it validates the input and creates a new Workout entry, as well as a corresponding WorkoutSession for analytics purposes. A toast message confirms the logging of the exercise.
     private fun showAddWorkoutDialog() {
         val dialogBinding = DialogAddWorkoutBinding.inflate(LayoutInflater.from(requireContext()))
         val exerciseNameAdapter = ArrayAdapter<String>(requireContext(), android.R.layout.simple_list_item_1, mutableListOf())
