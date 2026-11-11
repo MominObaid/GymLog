@@ -80,7 +80,7 @@ class RoutineListFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
     }
-    // Additional methods for handling AI suggestions and substitutions can be added here
+    // Additional methods for handling AI suggestions and substitutions can be added here.
     private fun setupRecyclerView() {
         adapter = RoutineAdapter(
             onStartSessionClick = { routine ->
