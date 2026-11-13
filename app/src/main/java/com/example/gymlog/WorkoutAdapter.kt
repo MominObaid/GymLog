@@ -38,7 +38,7 @@ class WorkoutAdapter(private val listener: OnItemClickListener) : RecyclerView.A
         holder.nameTextView.text = current.name
         
         if (current.sets == 0 && current.reps == 0) {
-            // This is likely a session mapped to a Workout object
+            // This is likely a session mapped to a Workout object that doesn't have sets and reps, so we display total volume instead
             holder.detailTextView.text = String.format(Locale.getDefault(), "Total Volume: %.1f kg", current.weight)
         } else {
             holder.detailTextView.text =
