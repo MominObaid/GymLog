@@ -41,7 +41,7 @@ class WorkoutDetailActivity : AppCompatActivity() {
             return
         }
 
-        // Observe the workout data from the ViewModel
+        // Observe the workout data from the ViewModel for the given ID and populate the UI when it changes
         workoutViewModel.getWorkoutById(workoutId).observe(this, Observer { workout ->
             workout?.let {
                 currentWorkout = it
